@@ -1,6 +1,11 @@
 import {
+    createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+import {
     collection,
     addDoc,
+    updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
@@ -11,17 +16,28 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
 
 import {
+    auth,
     db,
     storage
 } from "./firebase.js";
 
 
 const form = document.getElementById("formEscola");
-const btnCadastrar = document.getElementById("btnCadastrar");
-const mensagem = document.getElementById("mensagem");
 
-const logoInput = document.getElementById("logo");
-const logoPreview = document.getElementById("logoPreview");
+const btnCadastrar =
+    document.getElementById("btnCadastrar");
+
+const mensagem =
+    document.getElementById("mensagem");
+
+const logoInput =
+    document.getElementById("logo");
+
+const logoPreview =
+    document.getElementById("logoPreview");
+
+const resultadoCadastro =
+    document.getElementById("resultadoCadastro");
 
 
 // =====================================================
@@ -33,24 +49,30 @@ logoInput.addEventListener("change", () => {
     const arquivo = logoInput.files[0];
 
     if (!arquivo) {
-        logoPreview.innerHTML = "Logotipo";
+
+        logoPreview.textContent = "Logotipo";
+
         return;
     }
 
     if (!arquivo.type.startsWith("image/")) {
-        logoPreview.innerHTML = "Arquivo inválido";
+
         logoInput.value = "";
+
+        logoPreview.textContent =
+            "Arquivo inválido";
+
         return;
     }
 
     const leitor = new FileReader();
 
-    leitor.onload = (evento) => {
+    leitor.onload = evento => {
 
         logoPreview.innerHTML = `
             <img
                 src="${evento.target.result}"
-                alt="Pré-visualização do logotipo"
+                alt="Logotipo"
             >
         `;
     };
@@ -72,21 +94,22 @@ function mostrarMensagem(texto, tipo) {
 
 
 // =====================================================
-// CADASTRAR ESCOLA
+// CADASTRO
 // =====================================================
 
-form.addEventListener("submit", async (evento) => {
+form.addEventListener("submit", async evento => {
 
     evento.preventDefault();
 
     btnCadastrar.disabled = true;
 
-    mostrarMensagem(
-        "A cadastrar escola, aguarde...",
-        "sucesso"
-    );
+    resultadoCadastro.style.display = "none";
 
     try {
+
+        // =================================================
+        // DADOS DA ESCOLA
+        // =================================================
 
         const nome =
             document.getElementById("nome").value.trim();
@@ -100,14 +123,32 @@ form.addEventListener("submit", async (evento) => {
         const telefone =
             document.getElementById("telefone").value.trim();
 
-        const email =
-            document.getElementById("email").value.trim();
+        const emailEscola =
+            document.getElementById("emailEscola").value.trim();
 
         const anoLetivo =
             document.getElementById("anoLetivo").value.trim();
 
-        const logoArquivo =
-            logoInput.files[0];
+
+        // =================================================
+        // DADOS DO GESTOR
+        // =================================================
+
+        const nomeGestor =
+            document.getElementById("nomeGestor").value.trim();
+
+        const emailGestor =
+            document.getElementById("emailGestor")
+            .value
+            .trim();
+
+        const senhaGestor =
+            document.getElementById("senhaGestor")
+            .value;
+
+        const confirmarSenha =
+            document.getElementById("confirmarSenha")
+            .value;
 
 
         // =================================================
@@ -138,37 +179,109 @@ form.addEventListener("submit", async (evento) => {
             );
         }
 
+        if (!nomeGestor) {
+            throw new Error(
+                "Informe o nome do gestor."
+            );
+        }
 
-        // =================================================
-        // CRIAR DOCUMENTO DA ESCOLA
-        // =================================================
+        if (!emailGestor) {
+            throw new Error(
+                "Informe o e-mail do gestor."
+            );
+        }
 
-        const escolaRef = await addDoc(
-            collection(db, "escolas"),
-            {
-                nome,
-                provincia,
-                municipio,
-                telefone,
-                email,
-                anoLetivoAtual: anoLetivo,
-                logoUrl: "",
-                ativo: true,
-                criadoEm: serverTimestamp()
-            }
+        if (senhaGestor.length < 6) {
+            throw new Error(
+                "A senha deve ter pelo menos 6 caracteres."
+            );
+        }
+
+        if (senhaGestor !== confirmarSenha) {
+            throw new Error(
+                "As senhas não coincidem."
+            );
+        }
+
+
+        mostrarMensagem(
+            "A criar a conta do gestor...",
+            "sucesso"
         );
 
 
         // =================================================
-        // UPLOAD DO LOGOTIPO
+        // CRIAR CONTA FIREBASE AUTH
         // =================================================
 
-        let logoUrl = "";
+        const credencial =
+            await createUserWithEmailAndPassword(
+                auth,
+                emailGestor,
+                senhaGestor
+            );
 
 
-        if (logoArquivo) {
+        const uidGestor =
+            credencial.user.uid;
 
-            if (!logoArquivo.type.startsWith("image/")) {
+
+        // =================================================
+        // CRIAR ESCOLA
+        // =================================================
+
+        const escolaRef =
+            await addDoc(
+                collection(db, "escolas"),
+                {
+
+                    nome,
+
+                    provincia,
+
+                    municipio,
+
+                    telefone,
+
+                    email:
+                        emailEscola,
+
+                    anoLetivoAtual:
+                        anoLetivo,
+
+                    gestorUid:
+                        uidGestor,
+
+                    nomeGestor,
+
+                    emailGestor,
+
+                    logoUrl:
+                        "",
+
+                    ativo:
+                        true,
+
+                    criadoEm:
+                        serverTimestamp()
+                }
+            );
+
+
+        // =================================================
+        // LOGOTIPO
+        // =================================================
+
+        const arquivoLogo =
+            logoInput.files[0];
+
+
+        if (arquivoLogo) {
+
+            if (
+                !arquivoLogo.type
+                    .startsWith("image/")
+            ) {
 
                 throw new Error(
                     "O logotipo precisa ser uma imagem."
@@ -176,9 +289,10 @@ form.addEventListener("submit", async (evento) => {
             }
 
 
-            // Limite de 5 MB
-
-            if (logoArquivo.size > 5 * 1024 * 1024) {
+            if (
+                arquivoLogo.size >
+                5 * 1024 * 1024
+            ) {
 
                 throw new Error(
                     "O logotipo não pode ultrapassar 5 MB."
@@ -186,32 +300,28 @@ form.addEventListener("submit", async (evento) => {
             }
 
 
-            const caminhoLogo =
-                `escolas/${escolaRef.id}/logo/${logoArquivo.name}`;
+            mostrarMensagem(
+                "A enviar o logotipo...",
+                "sucesso"
+            );
+
+
+            const caminho =
+                `escolas/${escolaRef.id}/logo/${arquivoLogo.name}`;
 
 
             const logoRef =
-                ref(storage, caminhoLogo);
+                ref(storage, caminho);
 
 
             await uploadBytes(
                 logoRef,
-                logoArquivo
+                arquivoLogo
             );
 
 
-            logoUrl =
+            const logoUrl =
                 await getDownloadURL(logoRef);
-
-
-            // =================================================
-            // ATUALIZAR DOCUMENTO COM O LOGOTIPO
-            // =================================================
-
-            const { updateDoc } =
-                await import(
-                    "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"
-                );
 
 
             await updateDoc(
@@ -233,28 +343,81 @@ form.addEventListener("submit", async (evento) => {
         );
 
 
+        document.getElementById(
+            "resultadoEmail"
+        ).textContent =
+            emailGestor;
+
+
+        document.getElementById(
+            "resultadoEscola"
+        ).textContent =
+            nome;
+
+
+        resultadoCadastro.style.display =
+            "block";
+
+
         form.reset();
 
-        logoPreview.innerHTML = "Logotipo";
-
-
-        console.log(
-            "Escola cadastrada:",
-            escolaRef.id
-        );
+        logoPreview.textContent =
+            "Logotipo";
 
 
     } catch (erro) {
 
         console.error(
-            "Erro ao cadastrar escola:",
+            "ERRO NO CADASTRO:",
             erro
         );
 
 
+        let mensagemErro =
+            "Não foi possível concluir o cadastro.";
+
+
+        if (
+            erro.code ===
+            "auth/email-already-in-use"
+        ) {
+
+            mensagemErro =
+                "Este e-mail já está cadastrado.";
+
+        } else if (
+            erro.code ===
+            "auth/invalid-email"
+        ) {
+
+            mensagemErro =
+                "O e-mail informado é inválido.";
+
+        } else if (
+            erro.code ===
+            "auth/weak-password"
+        ) {
+
+            mensagemErro =
+                "A senha é muito fraca.";
+
+        } else if (
+            erro.code ===
+            "permission-denied"
+        ) {
+
+            mensagemErro =
+                "Sem permissão para gravar no Firebase.";
+
+        } else if (erro.message) {
+
+            mensagemErro =
+                erro.message;
+        }
+
+
         mostrarMensagem(
-            erro.message ||
-            "Não foi possível cadastrar a escola.",
+            mensagemErro,
             "erro"
         );
 
