@@ -3,6 +3,8 @@
 // Cadastro completo da escola
 // =====================================================
 
+alert("df");
+
 import {
     createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
