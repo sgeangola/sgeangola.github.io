@@ -2,6 +2,8 @@
 // LOGIN DO GESTOR — SGE
 // =====================================================
 
+alert("GESTOR-LOGIN.JS CARREGADO");
+
 import { login } from "./auth.js";
 
 import {
