@@ -1,267 +1,457 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Cadastrar Escola — SGE Angola</title>
+<meta charset="UTF-8">
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f9fc;
-            color: #17324d;
-            min-height: 100vh;
-        }
+<title>Cadastrar Escola — SGE Angola</title>
 
-        header {
-            background: #ffffff;
-            border-bottom: 1px solid #dceaf2;
-            padding: 18px 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+<style>
 
-        .logo {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: #0b78b5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-        header h1 {
-            font-size: 20px;
-        }
+body{
 
-        header p {
-            font-size: 13px;
-            color: #688196;
-            margin-top: 3px;
-        }
+    font-family:Arial,sans-serif;
 
-        main {
-            width: 100%;
-            max-width: 900px;
-            margin: 35px auto;
-            padding: 0 18px;
-        }
+    background:#f4f9fc;
 
-        .card {
-            background: white;
-            border-radius: 18px;
-            padding: 30px;
-            box-shadow: 0 8px 30px rgba(30, 80, 110, 0.08);
-        }
+    color:#17324d;
 
-        .title {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+    min-height:100vh;
+}
 
-        .title h2 {
-            font-size: 26px;
-            margin-bottom: 8px;
-        }
+header{
 
-        .title p {
-            color: #70879a;
-            font-size: 14px;
-        }
+    background:white;
 
-        .secao {
-            margin-top: 30px;
-            margin-bottom: 18px;
-            padding-bottom: 9px;
-            border-bottom: 1px solid #dceaf2;
-        }
+    border-bottom:1px solid #dceaf2;
 
-        .secao h3 {
-            font-size: 18px;
-            color: #087bb8;
-        }
+    padding:18px 25px;
 
-        .logo-area {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+    display:flex;
 
-        .logo-preview {
-            width: 110px;
-            height: 110px;
-            border: 2px dashed #b8d4e4;
-            border-radius: 18px;
-            margin: 0 auto 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: #f7fbfd;
-            color: #7893a5;
-            font-size: 13px;
-        }
+    align-items:center;
 
-        .logo-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+    gap:12px;
+}
 
-        .logo-area input {
-            max-width: 280px;
-        }
+.logo{
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
+    width:48px;
+    height:48px;
 
-        .campo {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-        }
+    border-radius:12px;
 
-        .campo.full {
-            grid-column: 1 / -1;
-        }
+    background:#0b78b5;
 
-        label {
-            font-weight: bold;
-            font-size: 14px;
-        }
+    display:flex;
 
-        input {
-            width: 100%;
-            padding: 13px 14px;
-            border: 1px solid #cbdde8;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            background: white;
-        }
+    align-items:center;
+    justify-content:center;
 
-        input:focus {
-            border-color: #1687c4;
-            box-shadow: 0 0 0 3px rgba(22, 135, 196, 0.10);
-        }
+    color:white;
 
-        .senha-info {
-            background: #eef8fd;
-            border: 1px solid #cce7f4;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #4c6c80;
-            margin-bottom: 18px;
-        }
+    font-weight:bold;
 
-        .acoes {
-            margin-top: 30px;
-        }
+    font-size:18px;
 
-        button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 11px;
-            background: #087bb8;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    overflow:hidden;
+}
 
-        button:hover {
-            background: #066b9f;
-        }
+.logo img{
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+    width:100%;
+    height:100%;
 
-        #mensagem {
-            margin-top: 18px;
-            padding: 13px;
-            border-radius: 10px;
-            display: none;
-            text-align: center;
-            font-size: 14px;
-        }
+    object-fit:cover;
+}
 
-        #mensagem.sucesso {
-            display: block;
-            background: #e8f7ed;
-            color: #18743a;
-        }
+header h1{
 
-        #mensagem.erro {
-            display: block;
-            background: #fdecec;
-            color: #a52626;
-        }
+    font-size:20px;
+}
 
-        #resultadoCadastro {
-            display: none;
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 14px;
-            background: #eef8fd;
-            border: 1px solid #cce7f4;
-        }
+header p{
 
-        #resultadoCadastro h3 {
-            margin-bottom: 15px;
-            color: #087bb8;
-        }
+    font-size:13px;
 
-        .credencial {
-            background: white;
-            padding: 12px;
-            border-radius: 9px;
-            margin-bottom: 10px;
-        }
+    color:#688196;
 
-        .credencial strong {
-            display: block;
-            font-size: 12px;
-            color: #718797;
-            margin-bottom: 4px;
-        }
+    margin-top:3px;
+}
 
-        @media (max-width: 650px) {
+main{
 
-            .grid {
-                grid-template-columns: 1fr;
-            }
+    width:100%;
 
-            .campo.full {
-                grid-column: auto;
-            }
+    max-width:900px;
 
-            .card {
-                padding: 22px 17px;
-            }
+    margin:35px auto;
 
-            .title h2 {
-                font-size: 22px;
-            }
-        }
-    </style>
+    padding:0 18px;
+}
+
+.card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    box-shadow:
+        0 8px 30px
+        rgba(30,80,110,.08);
+}
+
+.title{
+
+    text-align:center;
+
+    margin-bottom:28px;
+}
+
+.title h2{
+
+    font-size:26px;
+
+    margin-bottom:8px;
+}
+
+.title p{
+
+    color:#70879a;
+
+    font-size:14px;
+}
+
+.logo-area{
+
+    text-align:center;
+
+    margin-bottom:28px;
+}
+
+.logo-preview{
+
+    width:110px;
+    height:110px;
+
+    border:2px dashed #b8d4e4;
+
+    border-radius:18px;
+
+    margin:0 auto 12px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    background:#f7fbfd;
+
+    color:#7893a5;
+
+    font-size:13px;
+}
+
+.logo-preview img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:contain;
+}
+
+.grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:18px;
+}
+
+.campo{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:7px;
+}
+
+.full{
+
+    grid-column:1/-1;
+}
+
+label{
+
+    font-weight:bold;
+
+    font-size:14px;
+}
+
+input,
+select{
+
+    width:100%;
+
+    padding:13px 14px;
+
+    border:1px solid #cbdde8;
+
+    border-radius:10px;
+
+    font-size:15px;
+
+    outline:none;
+
+    background:white;
+}
+
+input:focus,
+select:focus{
+
+    border-color:#1687c4;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,135,196,.10);
+}
+
+.bloco{
+
+    margin-top:25px;
+
+    padding:20px;
+
+    border:1px solid #dceaf2;
+
+    border-radius:14px;
+
+    background:#fafdff;
+}
+
+.bloco h3{
+
+    margin-bottom:15px;
+
+    color:#0b6f9f;
+}
+
+.opcoes{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:12px;
+}
+
+.opcao{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:13px;
+
+    border:1px solid #d5e4ec;
+
+    border-radius:10px;
+
+    background:white;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.opcao:hover{
+
+    border-color:#1687c4;
+
+    background:#f5fbff;
+}
+
+.opcao input{
+
+    width:auto;
+}
+
+.subtitulo{
+
+    margin-top:20px;
+
+    margin-bottom:10px;
+
+    font-size:14px;
+
+    color:#50697b;
+}
+
+.acoes{
+
+    margin-top:28px;
+}
+
+button{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:11px;
+
+    background:#087bb8;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+button:hover{
+
+    background:#066b9f;
+}
+
+button:disabled{
+
+    opacity:.6;
+
+    cursor:not-allowed;
+}
+
+#mensagem{
+
+    margin-top:18px;
+
+    padding:13px;
+
+    border-radius:10px;
+
+    display:none;
+
+    text-align:center;
+
+    font-size:14px;
+}
+
+#mensagem.sucesso{
+
+    display:block;
+
+    background:#e8f7ed;
+
+    color:#18743a;
+}
+
+#mensagem.erro{
+
+    display:block;
+
+    background:#fdecec;
+
+    color:#a52626;
+}
+
+#resultadoCadastro{
+
+    display:none;
+
+    margin-top:20px;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    background:#eef8ff;
+
+    border:1px solid #b9dff2;
+}
+
+#resultadoCadastro h3{
+
+    color:#087bb8;
+
+    margin-bottom:12px;
+}
+
+.resultado-linha{
+
+    margin:7px 0;
+
+}
+
+.resultado-linha strong{
+
+    color:#17324d;
+}
+
+.aviso{
+
+    margin-top:10px;
+
+    font-size:13px;
+
+    color:#63798a;
+}
+
+@media(max-width:650px){
+
+    .grid{
+
+        grid-template-columns:1fr;
+    }
+
+    .full{
+
+        grid-column:auto;
+    }
+
+    .opcoes{
+
+        grid-template-columns:1fr;
+    }
+
+    .card{
+
+        padding:22px 17px;
+    }
+
+    .title h2{
+
+        font-size:22px;
+    }
+}
+
+</style>
+
 </head>
 
 <body>
@@ -269,304 +459,584 @@
 <header>
 
     <div class="logo">
+
         SGE
+
     </div>
 
     <div>
+
         <h1>SGE Angola</h1>
+
         <p>Sistema de Gestão Escolar</p>
+
     </div>
 
 </header>
+
 
 <main>
 
 <section class="card">
 
-    <div class="title">
+<div class="title">
 
-        <h2>Cadastro da Escola</h2>
+    <h2>Cadastro da Escola</h2>
 
-        <p>
-            Registe a escola e crie a conta do gestor.
-        </p>
+    <p>
+        Registe a escola e defina a estrutura que ela irá utilizar.
+    </p>
+
+</div>
+
+
+<form id="formEscola">
+
+
+<!-- =====================================================
+     LOGOTIPO
+===================================================== -->
+
+<div class="logo-area">
+
+    <div
+        class="logo-preview"
+        id="logoPreview"
+    >
+        Logotipo
+    </div>
+
+    <label for="logo">
+        Logotipo da escola
+    </label>
+
+    <br><br>
+
+    <input
+        type="file"
+        id="logo"
+        accept="image/png,image/jpeg,image/webp"
+    >
+
+    <div class="aviso">
+        Opcional.
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DADOS DA ESCOLA
+===================================================== -->
+
+<div class="grid">
+
+    <div class="campo full">
+
+        <label for="nome">
+            Nome da escola *
+        </label>
+
+        <input
+            type="text"
+            id="nome"
+            placeholder="Ex.: Complexo Escolar Nº 29M Dário Franco"
+            required
+        >
 
     </div>
 
-    <form id="formEscola">
 
-        <!-- ================================================= -->
-        <!-- DADOS DA ESCOLA -->
-        <!-- ================================================= -->
+    <div class="campo">
 
-        <div class="secao">
-            <h3>Dados da Escola</h3>
-        </div>
+        <label for="provincia">
+            Província *
+        </label>
 
-        <div class="logo-area">
+        <input
+            type="text"
+            id="provincia"
+            placeholder="Ex.: Namibe"
+            required
+        >
 
-            <div
-                class="logo-preview"
-                id="logoPreview"
-            >
-                Logotipo
-            </div>
+    </div>
 
-            <label for="logo">
-                Logotipo da escola
-            </label>
 
-            <br><br>
+    <div class="campo">
+
+        <label for="municipio">
+            Município *
+        </label>
+
+        <input
+            type="text"
+            id="municipio"
+            placeholder="Ex.: Moçâmedes"
+            required
+        >
+
+    </div>
+
+
+    <div class="campo">
+
+        <label for="telefone">
+            Telefone
+        </label>
+
+        <input
+            type="tel"
+            id="telefone"
+            placeholder="923 000 000"
+        >
+
+    </div>
+
+
+    <div class="campo">
+
+        <label for="emailEscola">
+            E-mail da escola
+        </label>
+
+        <input
+            type="email"
+            id="emailEscola"
+            placeholder="escola@email.com"
+        >
+
+    </div>
+
+
+    <div class="campo">
+
+        <label for="anoLetivo">
+            Ano letivo *
+        </label>
+
+        <input
+            type="text"
+            id="anoLetivo"
+            value="2026"
+            required
+        >
+
+    </div>
+
+
+    <!-- =================================================
+         TIPO
+    ================================================= -->
+
+    <div class="campo">
+
+        <label for="tipoEscola">
+            Tipo de escola *
+        </label>
+
+        <select id="tipoEscola" required>
+
+            <option value="">
+                Selecione
+            </option>
+
+            <option value="publica">
+                Pública
+            </option>
+
+            <option value="privada">
+                Privada
+            </option>
+
+        </select>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ENSINO
+===================================================== -->
+
+<div class="bloco">
+
+    <h3>
+        Ensino que a escola utiliza *
+    </h3>
+
+    <div class="opcoes">
+
+        <label class="opcao">
 
             <input
-                type="file"
-                id="logo"
-                accept="image/png,image/jpeg,image/webp"
+                type="checkbox"
+                name="ensino"
+                value="ensinoPrimario"
+            >
+
+            <span>
+                Ensino Primário
+            </span>
+
+        </label>
+
+
+        <label class="opcao">
+
+            <input
+                type="checkbox"
+                name="ensino"
+                value="primeiroCiclo"
+            >
+
+            <span>
+                Primeiro Ciclo
+            </span>
+
+        </label>
+
+    </div>
+
+
+    <!-- =================================================
+         PRIMÁRIO
+    ================================================= -->
+
+    <div
+        id="opcoesPrimario"
+        style="display:none;"
+    >
+
+        <div class="subtitulo">
+            Estrutura do Ensino Primário
+        </div>
+
+        <div class="opcoes">
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="1classe"
+                >
+                1ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="2classe"
+                >
+                2ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="3classe"
+                >
+                3ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="4classe"
+                >
+                4ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="5classe"
+                >
+                5ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="6classe"
+                >
+                6ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="1etapa"
+                >
+                1ª Etapa
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="2etapa"
+                >
+                2ª Etapa
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimario"
+                    value="3etapa"
+                >
+                3ª Etapa
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PRIMEIRO CICLO
+    ================================================= -->
+
+    <div
+        id="opcoesPrimeiroCiclo"
+        style="display:none;"
+    >
+
+        <div class="subtitulo">
+            Estrutura do Primeiro Ciclo
+        </div>
+
+        <div class="opcoes">
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimeiroCiclo"
+                    value="7classe"
+                >
+                7ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimeiroCiclo"
+                    value="8classe"
+                >
+                8ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimeiroCiclo"
+                    value="9classe"
+                >
+                9ª classe
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimeiroCiclo"
+                    value="eja1"
+                >
+                EJA 1
+            </label>
+
+            <label class="opcao">
+                <input
+                    type="checkbox"
+                    name="estruturaPrimeiroCiclo"
+                    value="eja2"
+                >
+                EJA 2
+            </label>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     GESTOR
+===================================================== -->
+
+<div class="bloco">
+
+    <h3>
+        Conta do Gestor
+    </h3>
+
+    <div class="grid">
+
+        <div class="campo full">
+
+            <label for="nomeGestor">
+                Nome do gestor *
+            </label>
+
+            <input
+                type="text"
+                id="nomeGestor"
+                placeholder="Nome completo"
+                required
             >
 
         </div>
 
-        <div class="grid">
 
-            <div class="campo full">
+        <div class="campo">
 
-                <label for="nome">
-                    Nome da escola *
-                </label>
+            <label for="emailGestor">
+                E-mail do gestor *
+            </label>
 
-                <input
-                    type="text"
-                    id="nome"
-                    required
-                    placeholder="Nome completo da escola"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="provincia">
-                    Província *
-                </label>
-
-                <input
-                    type="text"
-                    id="provincia"
-                    required
-                    placeholder="Província"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="municipio">
-                    Município *
-                </label>
-
-                <input
-                    type="text"
-                    id="municipio"
-                    required
-                    placeholder="Município"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="telefone">
-                    Telefone
-                </label>
-
-                <input
-                    type="tel"
-                    id="telefone"
-                    placeholder="Telefone"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="emailEscola">
-                    E-mail da escola
-                </label>
-
-                <input
-                    type="email"
-                    id="emailEscola"
-                    placeholder="E-mail da escola"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="anoLetivo">
-                    Ano letivo *
-                </label>
-
-                <input
-                    type="text"
-                    id="anoLetivo"
-                    value="2026"
-                    required
-                >
-
-            </div>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- DADOS DO GESTOR -->
-        <!-- ================================================= -->
-
-        <div class="secao">
-            <h3>Conta do Gestor</h3>
-        </div>
-
-        <div class="senha-info">
-
-            O gestor utilizará o seu
-            <strong>e-mail e senha</strong>
-            para entrar no sistema.
-
-        </div>
-
-        <div class="grid">
-
-            <div class="campo full">
-
-                <label for="nomeGestor">
-                    Nome completo do gestor *
-                </label>
-
-                <input
-                    type="text"
-                    id="nomeGestor"
-                    required
-                    placeholder="Nome completo"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="emailGestor">
-                    E-mail do gestor *
-                </label>
-
-                <input
-                    type="email"
-                    id="emailGestor"
-                    required
-                    placeholder="gestor@email.com"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label for="senhaGestor">
-                    Senha *
-                </label>
-
-                <input
-                    type="password"
-                    id="senhaGestor"
-                    required
-                    minlength="6"
-                    placeholder="Mínimo 6 caracteres"
-                >
-
-            </div>
-
-            <div class="campo full">
-
-                <label for="confirmarSenha">
-                    Confirmar senha *
-                </label>
-
-                <input
-                    type="password"
-                    id="confirmarSenha"
-                    required
-                    minlength="6"
-                    placeholder="Digite novamente a senha"
-                >
-
-            </div>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- BOTÃO -->
-        <!-- ================================================= -->
-
-        <div class="acoes">
-
-            <button
-                type="submit"
-                id="btnCadastrar"
+            <input
+                type="email"
+                id="emailGestor"
+                placeholder="gestor@email.com"
+                required
             >
-                Cadastrar Escola
-            </button>
 
         </div>
 
-        <div id="mensagem"></div>
 
+        <div class="campo">
 
-        <!-- ================================================= -->
-        <!-- RESULTADO -->
-        <!-- ================================================= -->
+            <label for="senhaGestor">
+                Senha *
+            </label>
 
-        <div id="resultadoCadastro">
-
-            <h3>
-                Escola cadastrada com sucesso!
-            </h3>
-
-            <div class="credencial">
-
-                <strong>
-                    E-mail do gestor
-                </strong>
-
-                <span id="resultadoEmail"></span>
-
-            </div>
-
-            <div class="credencial">
-
-                <strong>
-                    Escola
-                </strong>
-
-                <span id="resultadoEscola"></span>
-
-            </div>
-
-            <p style="font-size:13px;color:#5d7180;margin-top:12px;">
-                Utilize o e-mail e a senha cadastrados para entrar
-                na área do gestor.
-            </p>
+            <input
+                type="password"
+                id="senhaGestor"
+                placeholder="Mínimo 6 caracteres"
+                minlength="6"
+                required
+            >
 
         </div>
 
-    </form>
+
+        <div class="campo full">
+
+            <label for="confirmarSenha">
+                Confirmar senha *
+            </label>
+
+            <input
+                type="password"
+                id="confirmarSenha"
+                placeholder="Repita a senha"
+                minlength="6"
+                required
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="acoes">
+
+    <button
+        type="submit"
+        id="btnCadastrar"
+    >
+        Cadastrar Escola
+    </button>
+
+</div>
+
+
+<div id="mensagem"></div>
+
+
+<!-- =====================================================
+     RESULTADO
+===================================================== -->
+
+<div id="resultadoCadastro">
+
+    <h3>
+        ✅ Escola cadastrada com sucesso!
+    </h3>
+
+    <div class="resultado-linha">
+
+        <strong>Escola:</strong>
+
+        <span id="resultadoEscola"></span>
+
+    </div>
+
+    <div class="resultado-linha">
+
+        <strong>Gestor:</strong>
+
+        <span id="resultadoNomeGestor"></span>
+
+    </div>
+
+    <div class="resultado-linha">
+
+        <strong>E-mail de acesso:</strong>
+
+        <span id="resultadoEmail"></span>
+
+    </div>
+
+    <div class="resultado-linha">
+
+        <strong>Tipo:</strong>
+
+        <span id="resultadoTipo"></span>
+
+    </div>
+
+    <div class="resultado-linha">
+
+        <strong>Ensinos:</strong>
+
+        <span id="resultadoEnsinos"></span>
+
+    </div>
+
+    <div class="aviso">
+
+        O gestor deve entrar no sistema usando
+        o e-mail e a senha definidos acima.
+
+    </div>
+
+</div>
+
+
+</form>
 
 </section>
 
 </main>
 
+
 <script
     type="module"
-    src="../services/registerSchool.js">
-</script>
+    src="../services/registerSchool.js?v=3"
+></script>
 
 </body>
+
     </html>
