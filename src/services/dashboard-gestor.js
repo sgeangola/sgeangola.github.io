@@ -2,13 +2,12 @@
 // DASHBOARD GESTOR - SIGEA
 // =====================================================
 
-alert("DASHBOARD-GESTOR.JS fARREGADO ✅");
+alert("DASHBOARD-GESTOR.JS CARREGADO ✅");
 
 
 // =====================================================
 // FIREBASE
 // =====================================================
-
 import { db, auth } from "./firebase.js";
 
 import {
@@ -19,6 +18,10 @@ import {
     orderBy,
     limit
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";";
 
 
 // =====================================================
@@ -923,13 +926,30 @@ if (logoutBtn) {
 // INICIAR
 // =====================================================
 
-iniciarDashboard();
+onAuthStateChanged(auth, async (usuario) => {
 
+    console.log("ESTADO DO LOGIN:", usuario);
 
-// =====================================================
-// FIM
-// =====================================================
+    if (!usuario) {
 
-alert(
-    "DASHBOARD-GESTOR.JS CARREGADO COMPLETAMENTE ✅"
-);
+        console.log("Nenhum gestor autenticado.");
+
+        window.location.href =
+            "../pages/login-gestor.html";
+
+        return;
+    }
+
+    console.log(
+        "GESTOR AUTENTICADO:",
+        usuario.email
+    );
+
+    console.log(
+        "UID:",
+        usuario.uid
+    );
+
+    await iniciarDashboard();
+
+});
