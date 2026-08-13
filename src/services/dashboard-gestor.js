@@ -2,14 +2,17 @@
 // DASHBOARD GESTOR - SIGEA
 // =====================================================
 
-alert("DASHBOARD-GESTOR.JS CARREGADO ✅");
+console.log("DASHBOARD-GESTOR.JS CARREGADO ✅");
 
 
 // =====================================================
 // FIREBASE
 // =====================================================
 
-import { db, auth } from "./firebase.js";
+import {
+    db,
+    auth
+} from "./firebase.js";
 
 import {
     collection,
@@ -63,42 +66,32 @@ let escolaAtual = null;
 
 let escolaIdAtual = null;
 
-let turmasDaEscola = [];
+let usuarioAtual = null;
 
 
 // =====================================================
 // CARREGAR DASHBOARD
 // =====================================================
 
-async function iniciarDashboard(usuario) {
+async function iniciarDashboard() {
 
     console.log(
         "Iniciando Dashboard do Gestor..."
     );
 
-    console.log(
-        "UID do gestor:",
-        usuario.uid
-    );
 
-    console.log(
-        "E-mail:",
-        usuario.email
-    );
+    // -----------------------------------------------
+    // PRIMEIRO: ENCONTRAR A ESCOLA
+    // -----------------------------------------------
+
+    const encontrouEscola =
+        await carregarInformacoesUsuario();
 
 
-    // ================================================
-    // 1. ENCONTRAR A ESCOLA DO GESTOR
-    // ================================================
-
-    const encontrou =
-        await carregarInformacoesUsuario(usuario);
-
-
-    if (!encontrou) {
+    if (!encontrouEscola) {
 
         console.error(
-            "Não foi possível encontrar a escola deste gestor."
+            "Não foi possível identificar a escola do gestor."
         );
 
         return;
@@ -106,23 +99,16 @@ async function iniciarDashboard(usuario) {
     }
 
 
-    // ================================================
-    // 2. CARREGAR TURMAS DA ESCOLA
-    // ================================================
-
-    await carregarTurmasDaEscola();
-
-
-    // ================================================
-    // 3. CARREGAR ESTATÍSTICAS
-    // ================================================
+    // -----------------------------------------------
+    // DEPOIS: ESTATÍSTICAS DA ESCOLA
+    // -----------------------------------------------
 
     await carregarEstatisticas();
 
 
-    // ================================================
-    // 4. ATIVIDADES
-    // ================================================
+    // -----------------------------------------------
+    // ATIVIDADES DA ESCOLA
+    // -----------------------------------------------
 
     await carregarAtividadesRecentes();
 
@@ -130,21 +116,54 @@ async function iniciarDashboard(usuario) {
 
 
 // =====================================================
-// INFORMAÇÕES DO UTILIZADOR / ESCOLA
+// INFORMAÇÕES DO GESTOR + ESCOLA
 // =====================================================
 
-async function carregarInformacoesUsuario(usuario) {
+async function carregarInformacoesUsuario() {
 
     try {
 
+        const usuario =
+            auth.currentUser;
+
+
+        if (!usuario) {
+
+            console.warn(
+                "Nenhum gestor autenticado."
+            );
+
+            return false;
+
+        }
+
+
+        usuarioAtual =
+            usuario;
+
+
         console.log(
-            "Procurando escola pelo gestorUid..."
+            "GESTOR AUTENTICADO:",
+            usuario.email
         );
 
 
+        console.log(
+            "UID DO GESTOR:",
+            usuario.uid
+        );
+
+
+        // =================================================
+        // PROCURAR A ESCOLA PELO gestorUid
+        // =================================================
+
         const consulta =
             query(
-                collection(db, "escolas"),
+                collection(
+                    db,
+                    "escolas"
+                ),
                 where(
                     "gestorUid",
                     "==",
@@ -155,20 +174,27 @@ async function carregarInformacoesUsuario(usuario) {
 
 
         const resultado =
-            await getDocs(consulta);
+            await getDocs(
+                consulta
+            );
 
+
+        // =================================================
+        // ESCOLA NÃO ENCONTRADA
+        // =================================================
 
         if (resultado.empty) {
 
-            console.warn(
-                "Nenhuma escola encontrada para este gestor."
+            console.error(
+                "Nenhuma escola pertence ao gestor:",
+                usuario.uid
             );
 
 
             if (schoolName) {
 
                 schoolName.textContent =
-                    "🏫 Escola";
+                    "🏫 Escola não encontrada";
 
             }
 
@@ -186,20 +212,20 @@ async function carregarInformacoesUsuario(usuario) {
         }
 
 
-        // ============================================
-        // ESCOLA ENCONTRADA
-        // ============================================
+        // =================================================
+        // DOCUMENTO DA ESCOLA
+        // =================================================
 
         const escolaDoc =
             resultado.docs[0];
 
 
-        escolaAtual =
-            escolaDoc.data();
-
-
         escolaIdAtual =
             escolaDoc.id;
+
+
+        escolaAtual =
+            escolaDoc.data();
 
 
         console.log(
@@ -207,7 +233,7 @@ async function carregarInformacoesUsuario(usuario) {
         );
 
         console.log(
-            "ESCOLA ENCONTRADA"
+            "ESCOLA ATUAL"
         );
 
         console.log(
@@ -221,8 +247,18 @@ async function carregarInformacoesUsuario(usuario) {
         );
 
         console.log(
-            "LOGO:",
-            escolaAtual.logoUrl
+            "TIPO:",
+            escolaAtual.tipoEscola
+        );
+
+        console.log(
+            "ENSINOS:",
+            escolaAtual.ensinos
+        );
+
+        console.log(
+            "GESTOR UID:",
+            escolaAtual.gestorUid
         );
 
         console.log(
@@ -230,9 +266,9 @@ async function carregarInformacoesUsuario(usuario) {
         );
 
 
-        // ============================================
+        // =================================================
         // NOME + LOGOTIPO
-        // ============================================
+        // =================================================
 
         if (schoolName) {
 
@@ -250,11 +286,13 @@ async function carregarInformacoesUsuario(usuario) {
 
                 schoolName.innerHTML = `
 
-                    <span style="
-                        display:flex;
-                        align-items:center;
-                        gap:10px;
-                    ">
+                    <span
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                        "
+                    >
 
                         <img
                             src="${logo}"
@@ -264,15 +302,12 @@ async function carregarInformacoesUsuario(usuario) {
                                 height:42px;
                                 object-fit:contain;
                                 border-radius:8px;
-                                background:white;
-                                flex-shrink:0;
+                                background:#fff;
                             "
                         >
 
-                        <span style="
-                            line-height:1.2;
-                        ">
-                            ${nome}
+                        <span>
+                            ${escaparHTML(nome)}
                         </span>
 
                     </span>
@@ -280,24 +315,29 @@ async function carregarInformacoesUsuario(usuario) {
                 `;
 
             }
+
             else {
 
                 schoolName.innerHTML = `
 
-                    <span style="
-                        display:flex;
-                        align-items:center;
-                        gap:10px;
-                    ">
+                    <span
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                        "
+                    >
 
-                        <span style="
-                            font-size:32px;
-                        ">
+                        <span
+                            style="
+                                font-size:32px;
+                            "
+                        >
                             🏫
                         </span>
 
                         <span>
-                            ${nome}
+                            ${escaparHTML(nome)}
                         </span>
 
                     </span>
@@ -309,60 +349,83 @@ async function carregarInformacoesUsuario(usuario) {
         }
 
 
-        // ============================================
-        // GESTOR
-        // ============================================
+        // =================================================
+        // INFORMAÇÃO DO GESTOR
+        // =================================================
 
         if (userInfo) {
 
+            const nomeGestor =
+                escolaAtual.nomeGestor ||
+                usuario.email ||
+                "Gestor";
+
+
             userInfo.textContent =
-                `Administrador: ${
-                    escolaAtual.nomeGestor ||
-                    usuario.email ||
-                    "Gestor"
-                }`;
+                `Administrador: ${nomeGestor}`;
 
         }
 
 
-        // ============================================
-        // GUARDAR ESCOLA
-        // ============================================
+        // =================================================
+        // GUARDAR DADOS DA ESCOLA
+        // =================================================
 
         sessionStorage.setItem(
             "escolaId",
             escolaIdAtual
         );
 
+
         sessionStorage.setItem(
             "nomeEscola",
             escolaAtual.nome || ""
         );
+
 
         sessionStorage.setItem(
             "logoEscola",
             escolaAtual.logoUrl || ""
         );
 
+
         sessionStorage.setItem(
             "provinciaEscola",
             escolaAtual.provincia || ""
         );
+
 
         sessionStorage.setItem(
             "municipioEscola",
             escolaAtual.municipio || ""
         );
 
+
         sessionStorage.setItem(
             "anoLetivo",
             escolaAtual.anoLetivoAtual || ""
         );
 
+
+        sessionStorage.setItem(
+            "tipoEscola",
+            escolaAtual.tipoEscola || ""
+        );
+
+
+        sessionStorage.setItem(
+            "ensinos",
+            JSON.stringify(
+                escolaAtual.ensinos || []
+            )
+        );
+
+
         sessionStorage.setItem(
             "nomeGestor",
             escolaAtual.nomeGestor || ""
         );
+
 
         sessionStorage.setItem(
             "emailGestor",
@@ -370,14 +433,20 @@ async function carregarInformacoesUsuario(usuario) {
         );
 
 
-        return true;
+        // =================================================
+        // CONFIGURAR MENU
+        // =================================================
 
+        configurarMenu();
+
+
+        return true;
 
     }
     catch (erro) {
 
         console.error(
-            "Erro ao carregar escola:",
+            "ERRO AO CARREGAR ESCOLA:",
             erro
         );
 
@@ -406,81 +475,106 @@ async function carregarInformacoesUsuario(usuario) {
 
 
 // =====================================================
-// CARREGAR TURMAS DA ESCOLA
+// CONFIGURAR MENU DA ESCOLA
 // =====================================================
 
-async function carregarTurmasDaEscola() {
+function configurarMenu() {
 
-    try {
+    if (!escolaAtual) {
 
-        if (!escolaIdAtual) {
+        return;
 
-            console.warn(
-                "escolaIdAtual não encontrado."
-            );
-
-            turmasDaEscola = [];
-
-            return;
-
-        }
+    }
 
 
-        console.log(
-            "Carregando turmas da escola:",
-            escolaIdAtual
+    const tipoEscola =
+        escolaAtual.tipoEscola ||
+        "";
+
+
+    const ensinos =
+        Array.isArray(
+            escolaAtual.ensinos
+        )
+        ? escolaAtual.ensinos
+        : [];
+
+
+    console.log(
+        "CONFIGURAÇÃO DO MENU:"
+    );
+
+
+    console.log(
+        "Tipo:",
+        tipoEscola
+    );
+
+
+    console.log(
+        "Ensinos:",
+        ensinos
+    );
+
+
+    // =================================================
+    // FINANCEIRO
+    // =================================================
+
+    const links =
+        document.querySelectorAll(
+            ".sidebar a"
         );
 
 
-        const consulta =
-            query(
-                collection(db, "turmas"),
-                where(
-                    "escolaId",
-                    "==",
-                    escolaIdAtual
+    links.forEach(
+        link => {
+
+            const texto =
+                link.textContent
+                .trim()
+                .toLowerCase();
+
+
+            if (
+                texto.includes(
+                    "financeiro"
                 )
-            );
+            ) {
 
+                if (
+                    tipoEscola ===
+                    "publica"
+                ) {
 
-        const resultado =
-            await getDocs(consulta);
+                    link.style.display =
+                        "none";
 
+                }
 
-        turmasDaEscola =
-            resultado.docs;
+                else {
 
+                    link.style.display =
+                        "flex";
 
-        console.log(
-            "Turmas encontradas:",
-            turmasDaEscola.length
-        );
-
-
-        turmasDaEscola.forEach(
-            documento => {
-
-                console.log(
-                    "Turma:",
-                    documento.id,
-                    documento.data().nome
-                );
+                }
 
             }
-        );
+
+        }
+    );
 
 
-    }
-    catch (erro) {
+    // =================================================
+    // GUARDAR CONFIGURAÇÃO
+    // =================================================
 
-        console.error(
-            "Erro ao carregar turmas da escola:",
-            erro
-        );
+    document.body.dataset.tipoEscola =
+        tipoEscola;
 
-        turmasDaEscola = [];
 
-    }
+    document.body.dataset.ensinos =
+        ensinos.join(",");
 
 }
 
@@ -491,28 +585,21 @@ async function carregarTurmasDaEscola() {
 
 async function carregarEstatisticas() {
 
-    // =================================================
-    // TURMAS
-    // =================================================
+    if (!escolaIdAtual) {
 
-    try {
-
-        if (totalClasses) {
-
-            totalClasses.textContent =
-                turmasDaEscola.length;
-
-        }
-
-    }
-    catch (erro) {
-
-        console.error(
-            "Erro ao contar turmas:",
-            erro
+        console.warn(
+            "escolaIdAtual não definido."
         );
 
+        return;
+
     }
+
+
+    console.log(
+        "Carregando estatísticas da escola:",
+        escolaIdAtual
+    );
 
 
     // =================================================
@@ -521,56 +608,111 @@ async function carregarEstatisticas() {
 
     try {
 
-        let totalAlunos = 0;
+        let total =
+            0;
 
 
-        for (
-            const turmaDoc
-            of turmasDaEscola
-        ) {
+        // ---------------------------------------------
+        // PRIMEIRO TENTAR ALUNOS COM escolaId
+        // ---------------------------------------------
 
-            const alunosRef =
+        const consultaAlunos =
+            query(
                 collection(
                     db,
-                    "turmas",
-                    turmaDoc.id,
                     "alunos"
+                ),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaIdAtual
+                )
+            );
+
+
+        const alunosSnapshot =
+            await getDocs(
+                consultaAlunos
+            );
+
+
+        total =
+            alunosSnapshot.size;
+
+
+        // ---------------------------------------------
+        // SE EXISTIR ESTRUTURA ANTIGA
+        // turmas/{turma}/alunos
+        // ---------------------------------------------
+
+        if (
+            total === 0
+        ) {
+
+            const turmasSnapshot =
+                await getDocs(
+                    query(
+                        collection(
+                            db,
+                            "turmas"
+                        ),
+                        where(
+                            "escolaId",
+                            "==",
+                            escolaIdAtual
+                        )
+                    )
                 );
 
 
-            const alunosSnapshot =
-                await getDocs(alunosRef);
+            for (
+                const turmaDoc
+                of turmasSnapshot.docs
+            ) {
+
+                try {
+
+                    const alunosSub =
+                        await getDocs(
+                            collection(
+                                db,
+                                "turmas",
+                                turmaDoc.id,
+                                "alunos"
+                            )
+                        );
 
 
-            totalAlunos +=
-                alunosSnapshot.size;
+                    total +=
+                        alunosSub.size;
+
+                }
+                catch(erro) {
+
+                    console.warn(
+                        "Não foi possível ler alunos da turma:",
+                        turmaDoc.id
+                    );
+
+                }
+
+            }
 
         }
 
 
-        // ---------------------------------------------
-        // COMPATIBILIDADE
-        // ---------------------------------------------
-        // Alguns alunos do teu sistema podem estar na
-        // coleção global "alunos".
-        //
-        // Primeiro tentamos as subcoleções das turmas,
-        // que é a estrutura principal.
-        // ---------------------------------------------
-
         if (totalStudents) {
 
             totalStudents.textContent =
-                totalAlunos;
+                total;
 
         }
 
 
         console.log(
-            "Total de alunos:",
-            totalAlunos
+            "TOTAL DE ALUNOS:",
+            total
         );
-
 
     }
     catch (erro) {
@@ -597,87 +739,38 @@ async function carregarEstatisticas() {
 
     try {
 
-        const professoresSnapshot =
-            await getDocs(
+        const consulta =
+            query(
                 collection(
                     db,
                     "professores"
+                ),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaIdAtual
                 )
             );
 
 
-        let professoresDaEscola =
-            new Set();
-
-
-        // ---------------------------------------------
-        // IDs DAS TURMAS DA ESCOLA
-        // ---------------------------------------------
-
-        const idsTurmas =
-            new Set(
-                turmasDaEscola.map(
-                    turma => turma.id
-                )
+        const snapshot =
+            await getDocs(
+                consulta
             );
-
-
-        // ---------------------------------------------
-        // VERIFICAR ATRIBUIÇÕES
-        // ---------------------------------------------
-
-        professoresSnapshot.forEach(
-            professorDoc => {
-
-                const professor =
-                    professorDoc.data();
-
-
-                const atribuicoes =
-                    Array.isArray(
-                        professor.atribuicoes
-                    )
-                    ? professor.atribuicoes
-                    : [];
-
-
-                const pertence =
-                    atribuicoes.some(
-                        atribuicao => {
-
-                            return idsTurmas.has(
-                                atribuicao.turmaId
-                            );
-
-                        }
-                    );
-
-
-                if (pertence) {
-
-                    professoresDaEscola.add(
-                        professorDoc.id
-                    );
-
-                }
-
-            }
-        );
 
 
         if (totalTeachers) {
 
             totalTeachers.textContent =
-                professoresDaEscola.size;
+                snapshot.size;
 
         }
 
 
         console.log(
-            "Professores da escola:",
-            professoresDaEscola.size
+            "TOTAL DE PROFESSORES:",
+            snapshot.size
         );
-
 
     }
     catch (erro) {
@@ -699,40 +792,125 @@ async function carregarEstatisticas() {
 
 
     // =================================================
+    // TURMAS
+    // =================================================
+
+    try {
+
+        const consulta =
+            query(
+                collection(
+                    db,
+                    "turmas"
+                ),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaIdAtual
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                consulta
+            );
+
+
+        if (totalClasses) {
+
+            totalClasses.textContent =
+                snapshot.size;
+
+        }
+
+
+        console.log(
+            "TOTAL DE TURMAS:",
+            snapshot.size
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao contar turmas:",
+            erro
+        );
+
+
+        if (totalClasses) {
+
+            totalClasses.textContent =
+                "0";
+
+        }
+
+    }
+
+
+    // =================================================
     // DISCIPLINAS
     // =================================================
 
     try {
 
-        const disciplinas =
-            new Set();
+        let totalDisciplinas =
+            0;
 
 
         // ---------------------------------------------
-        // PEGAR DISCIPLINAS SOMENTE DAS TURMAS DA ESCOLA
+        // PRIMEIRO: CONFIGURAÇÃO DA ESCOLA
         // ---------------------------------------------
 
-        turmasDaEscola.forEach(
-            turmaDoc => {
+        const consultaConfig =
+            query(
+                collection(
+                    db,
+                    "config"
+                ),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaIdAtual
+                )
+            );
 
-                const turma =
-                    turmaDoc.data();
+
+        const configSnapshot =
+            await getDocs(
+                consultaConfig
+            );
+
+
+        configSnapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
 
 
                 if (
-                    Array.isArray(
-                        turma.disciplinas
-                    )
+                    dados.disciplinas
                 ) {
 
-                    turma.disciplinas.forEach(
-                        disciplina => {
+                    const disciplinas =
+                        dados.disciplinas;
 
-                            if (disciplina) {
 
-                                disciplinas.add(
-                                    disciplina
-                                );
+                    Object.values(
+                        disciplinas
+                    ).forEach(
+                        lista => {
+
+                            if (
+                                Array.isArray(
+                                    lista
+                                )
+                            ) {
+
+                                totalDisciplinas +=
+                                    lista.length;
 
                             }
 
@@ -745,19 +923,83 @@ async function carregarEstatisticas() {
         );
 
 
+        // ---------------------------------------------
+        // SE NÃO HOUVER CONFIG POR ESCOLA,
+        // OBTER DISCIPLINAS DAS TURMAS DA ESCOLA
+        // ---------------------------------------------
+
+        if (
+            totalDisciplinas === 0
+        ) {
+
+            const turmasSnapshot =
+                await getDocs(
+                    query(
+                        collection(
+                            db,
+                            "turmas"
+                        ),
+                        where(
+                            "escolaId",
+                            "==",
+                            escolaIdAtual
+                        )
+                    )
+                );
+
+
+            const conjunto =
+                new Set();
+
+
+            turmasSnapshot.forEach(
+                documento => {
+
+                    const dados =
+                        documento.data();
+
+
+                    if (
+                        Array.isArray(
+                            dados.disciplinas
+                        )
+                    ) {
+
+                        dados.disciplinas
+                            .forEach(
+                                disciplina => {
+
+                                    conjunto.add(
+                                        disciplina
+                                    );
+
+                                }
+                            );
+
+                    }
+
+                }
+            );
+
+
+            totalDisciplinas =
+                conjunto.size;
+
+        }
+
+
         if (totalSubjects) {
 
             totalSubjects.textContent =
-                disciplinas.size;
+                totalDisciplinas;
 
         }
 
 
         console.log(
-            "Disciplinas da escola:",
-            disciplinas.size
+            "TOTAL DE DISCIPLINAS:",
+            totalDisciplinas
         );
-
 
     }
     catch (erro) {
@@ -797,7 +1039,28 @@ async function carregarAtividadesRecentes() {
     }
 
 
+    if (!escolaIdAtual) {
+
+        activity.innerHTML = `
+            <div style="
+                padding:15px;
+                text-align:center;
+                color:#64748b;
+            ">
+                📭 Nenhuma atividade registada.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
     try {
+
+        // =================================================
+        // SOMENTE ATIVIDADES DESTA ESCOLA
+        // =================================================
 
         const referencia =
             collection(
@@ -809,17 +1072,31 @@ async function carregarAtividadesRecentes() {
         const consulta =
             query(
                 referencia,
+
+                where(
+                    "escolaId",
+                    "==",
+                    escolaIdAtual
+                ),
+
                 orderBy(
                     "data",
                     "desc"
                 ),
+
                 limit(10)
             );
 
 
         const resultado =
-            await getDocs(consulta);
+            await getDocs(
+                consulta
+            );
 
+
+        // =================================================
+        // NENHUMA ATIVIDADE
+        // =================================================
 
         if (resultado.empty) {
 
@@ -843,30 +1120,23 @@ async function carregarAtividadesRecentes() {
         }
 
 
-        activity.innerHTML = "";
+        // =================================================
+        // LIMPAR
+        // =================================================
 
+        activity.innerHTML =
+            "";
+
+
+        // =================================================
+        // MOSTRAR
+        // =================================================
 
         resultado.forEach(
             documento => {
 
                 const dados =
                     documento.data();
-
-
-                // -------------------------------------
-                // SE A ATIVIDADE POSSUI ESCOLA ID,
-                // MOSTRAR SOMENTE A ESCOLA ATUAL
-                // -------------------------------------
-
-                if (
-                    dados.escolaId &&
-                    dados.escolaId !==
-                    escolaIdAtual
-                ) {
-
-                    return;
-
-                }
 
 
                 const item =
@@ -931,7 +1201,9 @@ async function carregarAtividadesRecentes() {
                                 color:#1e293b;
                             ">
 
-                                ${descricao}
+                                ${escaparHTML(
+                                    descricao
+                                )}
 
                             </div>
 
@@ -942,7 +1214,9 @@ async function carregarAtividadesRecentes() {
                                 margin-top:4px;
                             ">
 
-                                👤 ${utilizador}
+                                👤 ${escaparHTML(
+                                    utilizador
+                                )}
 
                                 ${
                                     data
@@ -966,33 +1240,6 @@ async function carregarAtividadesRecentes() {
             }
         );
 
-
-        // ---------------------------------------------
-        // CASO TODAS TENHAM SIDO FILTRADAS
-        // ---------------------------------------------
-
-        if (
-            activity.children.length === 0
-        ) {
-
-            activity.innerHTML = `
-
-                <div style="
-                    padding:15px;
-                    text-align:center;
-                    color:#64748b;
-                ">
-
-                    📭 Nenhuma atividade
-                    registada ainda.
-
-                </div>
-
-            `;
-
-        }
-
-
     }
     catch (erro) {
 
@@ -1001,16 +1248,19 @@ async function carregarAtividadesRecentes() {
             erro
         );
 
+      // -------------------------------------------------
+        // SE FALHAR POR ÍNDICE DO FIRESTORE
+        // NÃO PARAR O DASHBOARD
+        // -------------------------------------------------
 
         activity.innerHTML = `
 
             <div style="
                 padding:15px;
-                color:#b91c1c;
+                color:#64748b;
             ">
 
-                ⚠️ Não foi possível
-                carregar as atividades.
+                📭 Nenhuma atividade registada.
 
             </div>
 
@@ -1025,38 +1275,59 @@ async function carregarAtividadesRecentes() {
 // ÍCONE DA ATIVIDADE
 // =====================================================
 
-function obterIconeAtividade(tipo) {
+function obterIconeAtividade(
+    tipo
+) {
 
     switch (tipo) {
 
         case "aluno":
+
             return "👨‍🎓";
 
+
         case "professor":
+
             return "👨‍🏫";
 
+
         case "turma":
+
             return "🏫";
 
+
         case "disciplina":
+
             return "📚";
 
+
         case "nota":
+
             return "📝";
 
+
         case "financeiro":
+
             return "💰";
 
+
         case "pauta":
+
             return "📑";
 
+
         case "configuracao":
+
             return "⚙️";
 
+
         case "sistema":
+
             return "🔧";
 
+
         default:
+
             return "📌";
 
     }
@@ -1068,7 +1339,9 @@ function obterIconeAtividade(tipo) {
 // FORMATAR DATA
 // =====================================================
 
-function formatarDataAtividade(timestamp) {
+function formatarDataAtividade(
+    timestamp
+) {
 
     if (!timestamp) {
 
@@ -1120,6 +1393,49 @@ function formatarDataAtividade(timestamp) {
 
 
 // =====================================================
+// ESCAPAR HTML
+// =====================================================
+
+function escaparHTML(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(valor)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =====================================================
 // SAIR
 // =====================================================
 
@@ -1150,31 +1466,23 @@ if (logoutBtn) {
             catch (erro) {
 
                 console.error(
-                    "Erro ao sair:",
+                    "Erro ao terminar sessão:",
                     erro
                 );
 
             }
 
 
+            sessionStorage.clear();
+
+
             localStorage.removeItem(
                 "gestorLogado"
             );
 
+
             localStorage.removeItem(
                 "professorLogado"
-            );
-
-            sessionStorage.removeItem(
-                "escolaId"
-            );
-
-            sessionStorage.removeItem(
-                "nomeEscola"
-            );
-
-            sessionStorage.removeItem(
-                "logoEscola"
             );
 
 
@@ -1200,14 +1508,21 @@ onAuthStateChanged(
         );
 
         console.log(
-            "ESTADO DO LOGIN:",
+            "ESTADO DO LOGIN:"
+        );
+
+        console.log(
             usuario
+        );
+
+        console.log(
+            "===================================="
         );
 
 
         if (!usuario) {
 
-            console.log(
+            console.warn(
                 "Nenhum gestor autenticado."
             );
 
@@ -1222,29 +1537,24 @@ onAuthStateChanged(
 
 
         console.log(
-            "GESTOR AUTENTICADO:",
+            "GESTOR AUTENTICADO:"
+        );
+
+        console.log(
             usuario.email
         );
 
 
         console.log(
-            "UID:",
+            "UID:"
+        );
+
+        console.log(
             usuario.uid
         );
 
 
-        await iniciarDashboard(
-            usuario
-        );
+        await iniciarDashboard();
 
     }
-);
-
-
-// =====================================================
-// FIM
-// =====================================================
-
-alert(
-    "DASHBOARD-GESTOR.JS CARREGADO df COMPLETAMENTE ✅"
 );
