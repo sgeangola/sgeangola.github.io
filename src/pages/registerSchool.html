@@ -54,7 +54,7 @@
 
         main {
             width: 100%;
-            max-width: 850px;
+            max-width: 900px;
             margin: 35px auto;
             padding: 0 18px;
         }
@@ -79,6 +79,18 @@
         .title p {
             color: #70879a;
             font-size: 14px;
+        }
+
+        .secao {
+            margin-top: 30px;
+            margin-bottom: 18px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid #dceaf2;
+        }
+
+        .secao h3 {
+            font-size: 18px;
+            color: #087bb8;
         }
 
         .logo-area {
@@ -147,8 +159,18 @@
             box-shadow: 0 0 0 3px rgba(22, 135, 196, 0.10);
         }
 
+        .senha-info {
+            background: #eef8fd;
+            border: 1px solid #cce7f4;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #4c6c80;
+            margin-bottom: 18px;
+        }
+
         .acoes {
-            margin-top: 28px;
+            margin-top: 30px;
         }
 
         button {
@@ -193,7 +215,36 @@
             color: #a52626;
         }
 
+        #resultadoCadastro {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 14px;
+            background: #eef8fd;
+            border: 1px solid #cce7f4;
+        }
+
+        #resultadoCadastro h3 {
+            margin-bottom: 15px;
+            color: #087bb8;
+        }
+
+        .credencial {
+            background: white;
+            padding: 12px;
+            border-radius: 9px;
+            margin-bottom: 10px;
+        }
+
+        .credencial strong {
+            display: block;
+            font-size: 12px;
+            color: #718797;
+            margin-bottom: 4px;
+        }
+
         @media (max-width: 650px) {
+
             .grid {
                 grid-template-columns: 1fr;
             }
@@ -216,146 +267,306 @@
 <body>
 
 <header>
-    <div class="logo">SGE</div>
+
+    <div class="logo">
+        SGE
+    </div>
 
     <div>
         <h1>SGE Angola</h1>
         <p>Sistema de Gestão Escolar</p>
     </div>
+
 </header>
 
 <main>
 
-    <section class="card">
+<section class="card">
 
-        <div class="title">
-            <h2>Cadastro da Escola</h2>
-            <p>
-                Registe os dados da escola para começar a utilizar o SGE.
-            </p>
+    <div class="title">
+
+        <h2>Cadastro da Escola</h2>
+
+        <p>
+            Registe a escola e crie a conta do gestor.
+        </p>
+
+    </div>
+
+    <form id="formEscola">
+
+        <!-- ================================================= -->
+        <!-- DADOS DA ESCOLA -->
+        <!-- ================================================= -->
+
+        <div class="secao">
+            <h3>Dados da Escola</h3>
         </div>
 
-        <form id="formEscola">
+        <div class="logo-area">
 
-            <div class="logo-area">
+            <div
+                class="logo-preview"
+                id="logoPreview"
+            >
+                Logotipo
+            </div>
 
-                <div class="logo-preview" id="logoPreview">
-                    Logotipo
-                </div>
+            <label for="logo">
+                Logotipo da escola
+            </label>
 
-                <label for="logo">Logotipo da escola</label>
+            <br><br>
 
-                <br><br>
+            <input
+                type="file"
+                id="logo"
+                accept="image/png,image/jpeg,image/webp"
+            >
+
+        </div>
+
+        <div class="grid">
+
+            <div class="campo full">
+
+                <label for="nome">
+                    Nome da escola *
+                </label>
 
                 <input
-                    type="file"
-                    id="logo"
-                    accept="image/png,image/jpeg,image/webp"
+                    type="text"
+                    id="nome"
+                    required
+                    placeholder="Nome completo da escola"
                 >
 
             </div>
 
-            <div class="grid">
+            <div class="campo">
 
-                <div class="campo full">
-                    <label for="nome">
-                        Nome da escola *
-                    </label>
+                <label for="provincia">
+                    Província *
+                </label>
 
-                    <input
-                        type="text"
-                        id="nome"
-                        placeholder="Ex.: Complexo Escolar Nº 89M Eduardo Domingos Sukuete"
-                        required
-                    >
-                </div>
-
-                <div class="campo">
-                    <label for="provincia">
-                        Província *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="provincia"
-                        placeholder="Ex.: Namibe"
-                        required
-                    >
-                </div>
-
-                <div class="campo">
-                    <label for="municipio">
-                        Município *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="municipio"
-                        placeholder="Ex.: Moçâmedes"
-                        required
-                    >
-                </div>
-
-                <div class="campo">
-                    <label for="telefone">
-                        Telefone
-                    </label>
-
-                    <input
-                        type="tel"
-                        id="telefone"
-                        placeholder="Ex.: 923 000 000"
-                    >
-                </div>
-
-                <div class="campo">
-                    <label for="email">
-                        E-mail
-                    </label>
-
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="escola@email.com"
-                    >
-                </div>
-
-                <div class="campo">
-                    <label for="anoLetivo">
-                        Ano letivo *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="anoLetivo"
-                        placeholder="Ex.: 2026"
-                        value="2026"
-                        required
-                    >
-                </div>
-
-            </div>
-
-            <div class="acoes">
-
-                <button
-                    type="submit"
-                    id="btnCadastrar"
+                <input
+                    type="text"
+                    id="provincia"
+                    required
+                    placeholder="Província"
                 >
-                    Cadastrar Escola
-                </button>
 
             </div>
 
-            <div id="mensagem"></div>
+            <div class="campo">
 
-        </form>
+                <label for="municipio">
+                    Município *
+                </label>
 
-    </section>
+                <input
+                    type="text"
+                    id="municipio"
+                    required
+                    placeholder="Município"
+                >
+
+            </div>
+
+            <div class="campo">
+
+                <label for="telefone">
+                    Telefone
+                </label>
+
+                <input
+                    type="tel"
+                    id="telefone"
+                    placeholder="Telefone"
+                >
+
+            </div>
+
+            <div class="campo">
+
+                <label for="emailEscola">
+                    E-mail da escola
+                </label>
+
+                <input
+                    type="email"
+                    id="emailEscola"
+                    placeholder="E-mail da escola"
+                >
+
+            </div>
+
+            <div class="campo">
+
+                <label for="anoLetivo">
+                    Ano letivo *
+                </label>
+
+                <input
+                    type="text"
+                    id="anoLetivo"
+                    value="2026"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- DADOS DO GESTOR -->
+        <!-- ================================================= -->
+
+        <div class="secao">
+            <h3>Conta do Gestor</h3>
+        </div>
+
+        <div class="senha-info">
+
+            O gestor utilizará o seu
+            <strong>e-mail e senha</strong>
+            para entrar no sistema.
+
+        </div>
+
+        <div class="grid">
+
+            <div class="campo full">
+
+                <label for="nomeGestor">
+                    Nome completo do gestor *
+                </label>
+
+                <input
+                    type="text"
+                    id="nomeGestor"
+                    required
+                    placeholder="Nome completo"
+                >
+
+            </div>
+
+            <div class="campo">
+
+                <label for="emailGestor">
+                    E-mail do gestor *
+                </label>
+
+                <input
+                    type="email"
+                    id="emailGestor"
+                    required
+                    placeholder="gestor@email.com"
+                >
+
+            </div>
+
+            <div class="campo">
+
+                <label for="senhaGestor">
+                    Senha *
+                </label>
+
+                <input
+                    type="password"
+                    id="senhaGestor"
+                    required
+                    minlength="6"
+                    placeholder="Mínimo 6 caracteres"
+                >
+
+            </div>
+
+            <div class="campo full">
+
+                <label for="confirmarSenha">
+                    Confirmar senha *
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmarSenha"
+                    required
+                    minlength="6"
+                    placeholder="Digite novamente a senha"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- BOTÃO -->
+        <!-- ================================================= -->
+
+        <div class="acoes">
+
+            <button
+                type="submit"
+                id="btnCadastrar"
+            >
+                Cadastrar Escola
+            </button>
+
+        </div>
+
+        <div id="mensagem"></div>
+
+
+        <!-- ================================================= -->
+        <!-- RESULTADO -->
+        <!-- ================================================= -->
+
+        <div id="resultadoCadastro">
+
+            <h3>
+                Escola cadastrada com sucesso!
+            </h3>
+
+            <div class="credencial">
+
+                <strong>
+                    E-mail do gestor
+                </strong>
+
+                <span id="resultadoEmail"></span>
+
+            </div>
+
+            <div class="credencial">
+
+                <strong>
+                    Escola
+                </strong>
+
+                <span id="resultadoEscola"></span>
+
+            </div>
+
+            <p style="font-size:13px;color:#5d7180;margin-top:12px;">
+                Utilize o e-mail e a senha cadastrados para entrar
+                na área do gestor.
+            </p>
+
+        </div>
+
+    </form>
+
+</section>
 
 </main>
 
-<script type="module" src="../services/registerSchool.js"></script>
+<script
+    type="module"
+    src="../services/registerSchool.js">
+</script>
 
 </body>
-  </html>
+    </html>
