@@ -223,7 +223,7 @@ form.addEventListener("submit", async (event) => {
         // =================================================
 
         window.location.href =
-            "../páginas/dashboard-gestor.html";
+            "../pages/dashboard-gestor.html";
 
 
     } catch (erro) {
