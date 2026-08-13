@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cadastrar Escola — SGE Angola</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f9fc;
+            color: #17324d;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid #dceaf2;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #0b78b5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        header h1 {
+            font-size: 20px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: #688196;
+            margin-top: 3px;
+        }
+
+        main {
+            width: 100%;
+            max-width: 850px;
+            margin: 35px auto;
+            padding: 0 18px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(30, 80, 110, 0.08);
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .title h2 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .title p {
+            color: #70879a;
+            font-size: 14px;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-preview {
+            width: 110px;
+            height: 110px;
+            border: 2px dashed #b8d4e4;
+            border-radius: 18px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f7fbfd;
+            color: #7893a5;
+            font-size: 13px;
+        }
+
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-area input {
+            max-width: 280px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .campo.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbdde8;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+        }
+
+        input:focus {
+            border-color: #1687c4;
+            box-shadow: 0 0 0 3px rgba(22, 135, 196, 0.10);
+        }
+
+        .acoes {
+            margin-top: 28px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 11px;
+            background: #087bb8;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #066b9f;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #mensagem {
+            margin-top: 18px;
+            padding: 13px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #mensagem.sucesso {
+            display: block;
+            background: #e8f7ed;
+            color: #18743a;
+        }
+
+        #mensagem.erro {
+            display: block;
+            background: #fdecec;
+            color: #a52626;
+        }
+
+        @media (max-width: 650px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .campo.full {
+                grid-column: auto;
+            }
+
+            .card {
+                padding: 22px 17px;
+            }
+
+            .title h2 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">SGE</div>
+
+    <div>
+        <h1>SGE Angola</h1>
+        <p>Sistema de Gestão Escolar</p>
+    </div>
+</header>
+
+<main>
+
+    <section class="card">
+
+        <div class="title">
+            <h2>Cadastro da Escola</h2>
+            <p>
+                Registe os dados da escola para começar a utilizar o SGE.
+            </p>
+        </div>
+
+        <form id="formEscola">
+
+            <div class="logo-area">
+
+                <div class="logo-preview" id="logoPreview">
+                    Logotipo
+                </div>
+
+                <label for="logo">Logotipo da escola</label>
+
+                <br><br>
+
+                <input
+                    type="file"
+                    id="logo"
+                    accept="image/png,image/jpeg,image/webp"
+                >
+
+            </div>
+
+            <div class="grid">
+
+                <div class="campo full">
+                    <label for="nome">
+                        Nome da escola *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nome"
+                        placeholder="Ex.: Complexo Escolar Nº 89M Eduardo Domingos Sukuete"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="provincia">
+                        Província *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="provincia"
+                        placeholder="Ex.: Namibe"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="municipio">
+                        Município *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="municipio"
+                        placeholder="Ex.: Moçâmedes"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="telefone">
+                        Telefone
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="telefone"
+                        placeholder="Ex.: 923 000 000"
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="email">
+                        E-mail
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="escola@email.com"
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="anoLetivo">
+                        Ano letivo *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="anoLetivo"
+                        placeholder="Ex.: 2026"
+                        value="2026"
+                        required
+                    >
+                </div>
+
+            </div>
+
+            <div class="acoes">
+
+                <button
+                    type="submit"
+                    id="btnCadastrar"
+                >
+                    Cadastrar Escola
+                </button>
+
+            </div>
+
+            <div id="mensagem"></div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<script type="module" src="../serviços/registerSchool.js"></script>
+
+</body>
+  </html>
