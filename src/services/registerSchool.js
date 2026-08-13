@@ -3,8 +3,6 @@
 // Cadastro completo da escola
 // =====================================================
 
-alert("df");
-
 import {
     createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
@@ -25,24 +23,95 @@ import {
 // ELEMENTOS
 // =====================================================
 
-const form =
-    document.getElementById("formEscola");
+const form = document.getElementById("formEscola");
+const btnCadastrar = document.getElementById("btnCadastrar");
+const mensagem = document.getElementById("mensagem");
+const resultadoCadastro = document.getElementById("resultadoCadastro");
 
-const btnCadastrar =
-    document.getElementById("btnCadastrar");
 
-const mensagem =
-    document.getElementById("mensagem");
+// =====================================================
+// ENSINOS
+// =====================================================
 
-const resultadoCadastro =
-    document.getElementById("resultadoCadastro");
+const checkboxesEnsino =
+    document.querySelectorAll(
+        'input[name="ensino"]'
+    );
+
+const opcoesPrimario =
+    document.getElementById(
+        "opcoesPrimario"
+    );
+
+const opcoesPrimeiroCiclo =
+    document.getElementById(
+        "opcoesPrimeiroCiclo"
+    );
+
+
+// =====================================================
+// MOSTRAR / ESCONDER ESTRUTURAS
+// =====================================================
+
+function atualizarEstruturaEnsino() {
+
+    const primarioSelecionado =
+        document.querySelector(
+            'input[name="ensino"][value="ensinoPrimario"]:checked'
+        );
+
+    const cicloSelecionado =
+        document.querySelector(
+            'input[name="ensino"][value="primeiroCiclo"]:checked'
+        );
+
+
+    if (opcoesPrimario) {
+
+        opcoesPrimario.style.display =
+            primarioSelecionado
+                ? "block"
+                : "none";
+
+    }
+
+
+    if (opcoesPrimeiroCiclo) {
+
+        opcoesPrimeiroCiclo.style.display =
+            cicloSelecionado
+                ? "block"
+                : "none";
+
+    }
+
+}
+
+
+// =====================================================
+// EVENTO ENSINO
+// =====================================================
+
+checkboxesEnsino.forEach(
+    checkbox => {
+
+        checkbox.addEventListener(
+            "change",
+            atualizarEstruturaEnsino
+        );
+
+    }
+);
 
 
 // =====================================================
 // MENSAGEM
 // =====================================================
 
-function mostrarMensagem(texto, tipo) {
+function mostrarMensagem(
+    texto,
+    tipo
+) {
 
     if (!mensagem) return;
 
@@ -57,20 +126,31 @@ function mostrarMensagem(texto, tipo) {
 // NOME DO ENSINO
 // =====================================================
 
-function nomeEnsino(ensino) {
+function nomeEnsino(
+    ensino
+) {
 
-    switch (ensino) {
+    if (
+        ensino ===
+        "ensinoPrimario"
+    ) {
 
-        case "ensinoPrimario":
-            return "Ensino Primário";
-
-        case "primeiroCiclo":
-            return "Primeiro Ciclo";
-
-        default:
-            return ensino;
+        return "Ensino Primário";
 
     }
+
+
+    if (
+        ensino ===
+        "primeiroCiclo"
+    ) {
+
+        return "Primeiro Ciclo";
+
+    }
+
+
+    return ensino;
 
 }
 
@@ -79,7 +159,9 @@ function nomeEnsino(ensino) {
 // NOME DA ESTRUTURA
 // =====================================================
 
-function nomeEstrutura(valor) {
+function nomeEstrutura(
+    valor
+) {
 
     const nomes = {
 
@@ -109,23 +191,6 @@ function nomeEstrutura(valor) {
 
 
 // =====================================================
-// LER CHECKBOXES
-// =====================================================
-
-function obterCheckboxes(nome) {
-
-    return Array.from(
-        document.querySelectorAll(
-            `input[name="${nome}"]:checked`
-        )
-    ).map(
-        checkbox => checkbox.value
-    );
-
-}
-
-
-// =====================================================
 // CADASTRO
 // =====================================================
 
@@ -138,9 +203,16 @@ if (form) {
             evento.preventDefault();
 
 
+            // =========================================
+            // BLOQUEAR BOTÃO
+            // =========================================
+
             if (btnCadastrar) {
 
                 btnCadastrar.disabled = true;
+
+                btnCadastrar.textContent =
+                    "A cadastrar escola...";
 
             }
 
@@ -213,36 +285,51 @@ if (form) {
 
                 // =====================================
                 // ENSINOS
-                // IMPORTANTE:
-                // O HTML usa name="ensino"
                 // =====================================
 
-                const ensinos =
-                    obterCheckboxes("ensino");
+                const ensinosSelecionados =
+                    Array.from(
+                        document.querySelectorAll(
+                            'input[name="ensino"]:checked'
+                        )
+                    ).map(
+                        checkbox =>
+                            checkbox.value
+                    );
 
 
                 // =====================================
-                // ESTRUTURA DO PRIMÁRIO
+                // ESTRUTURA PRIMÁRIO
                 // =====================================
 
                 const estruturaPrimario =
-                    obterCheckboxes(
-                        "estruturaPrimario"
+                    Array.from(
+                        document.querySelectorAll(
+                            'input[name="estruturaPrimario"]:checked'
+                        )
+                    ).map(
+                        checkbox =>
+                            checkbox.value
                     );
 
 
                 // =====================================
-                // ESTRUTURA DO PRIMEIRO CICLO
+                // ESTRUTURA PRIMEIRO CICLO
                 // =====================================
 
                 const estruturaPrimeiroCiclo =
-                    obterCheckboxes(
-                        "estruturaPrimeiroCiclo"
+                    Array.from(
+                        document.querySelectorAll(
+                            'input[name="estruturaPrimeiroCiclo"]:checked'
+                        )
+                    ).map(
+                        checkbox =>
+                            checkbox.value
                     );
 
 
                 // =====================================
-                // DADOS DO GESTOR
+                // GESTOR
                 // =====================================
 
                 const nomeGestor =
@@ -320,7 +407,13 @@ if (form) {
                 }
 
 
-                if (ensinos.length === 0) {
+                // =====================================
+                // PELO MENOS UM ENSINO
+                // =====================================
+
+                if (
+                    ensinosSelecionados.length === 0
+                ) {
 
                     throw new Error(
                         "Selecione pelo menos um ensino."
@@ -330,11 +423,11 @@ if (form) {
 
 
                 // =====================================
-                // VALIDAR ESTRUTURA
+                // VALIDAR ESTRUTURA DO PRIMÁRIO
                 // =====================================
 
                 if (
-                    ensinos.includes(
+                    ensinosSelecionados.includes(
                         "ensinoPrimario"
                     ) &&
                     estruturaPrimario.length === 0
@@ -347,19 +440,27 @@ if (form) {
                 }
 
 
+                // =====================================
+                // VALIDAR ESTRUTURA DO PRIMEIRO CICLO
+                // =====================================
+
                 if (
-                    ensinos.includes(
+                    ensinosSelecionados.includes(
                         "primeiroCiclo"
                     ) &&
                     estruturaPrimeiroCiclo.length === 0
                 ) {
 
                     throw new Error(
-                        "Selecione pelo menos uma classe ou EJA do Primeiro Ciclo."
+                        "Selecione pelo menos uma classe ou etapa do Primeiro Ciclo."
                     );
 
                 }
 
+
+                // =====================================
+                // GESTOR
+                // =====================================
 
                 if (!nomeGestor) {
 
@@ -379,7 +480,9 @@ if (form) {
                 }
 
 
-                if (senhaGestor.length < 6) {
+                if (
+                    senhaGestor.length < 6
+                ) {
 
                     throw new Error(
                         "A senha deve ter pelo menos 6 caracteres."
@@ -401,7 +504,7 @@ if (form) {
 
 
                 // =====================================
-                // MOSTRAR PROCESSAMENTO
+                // MENSAGEM
                 // =====================================
 
                 mostrarMensagem(
@@ -411,7 +514,7 @@ if (form) {
 
 
                 // =====================================
-                // CRIAR UTILIZADOR FIREBASE AUTH
+                // CRIAR UTILIZADOR FIREBASE
                 // =====================================
 
                 const credencial =
@@ -438,10 +541,6 @@ if (form) {
 
                 const dadosEscola = {
 
-                    // -----------------------------
-                    // IDENTIFICAÇÃO
-                    // -----------------------------
-
                     nome: nome,
 
                     provincia: provincia,
@@ -452,29 +551,12 @@ if (form) {
 
                     email: emailEscola,
 
-                    anoLetivoAtual:
-                        anoLetivo,
+                    anoLetivoAtual: anoLetivo,
 
-
-                    // -----------------------------
-                    // TIPO
-                    // -----------------------------
-
-                    tipoEscola:
-                        tipoEscola,
-
-
-                    // -----------------------------
-                    // ENSINOS
-                    // -----------------------------
+                    tipoEscola: tipoEscola,
 
                     ensinos:
-                        ensinos,
-
-
-                    // -----------------------------
-                    // ESTRUTURA
-                    // -----------------------------
+                        ensinosSelecionados,
 
                     estrutura: {
 
@@ -486,11 +568,6 @@ if (form) {
 
                     },
 
-
-                    // -----------------------------
-                    // GESTOR
-                    // -----------------------------
-
                     gestorUid:
                         uidGestor,
 
@@ -500,24 +577,9 @@ if (form) {
                     emailGestor:
                         emailGestor,
 
-
-                    // -----------------------------
-                    // LOGOTIPO
-                    // -----------------------------
-
                     logoUrl: "",
 
-
-                    // -----------------------------
-                    // ESTADO
-                    // -----------------------------
-
                     ativo: true,
-
-
-                    // -----------------------------
-                    // DATA
-                    // -----------------------------
 
                     criadoEm:
                         serverTimestamp()
@@ -526,7 +588,7 @@ if (form) {
 
 
                 // =====================================
-                // GRAVAR ESCOLA NO FIRESTORE
+                // GUARDAR ESCOLA
                 // =====================================
 
                 const escolaRef =
@@ -546,7 +608,7 @@ if (form) {
 
 
                 // =====================================
-                // RESULTADO
+                // SUCESSO
                 // =====================================
 
                 mostrarMensagem(
@@ -555,35 +617,14 @@ if (form) {
                 );
 
 
+                // =====================================
+                // RESULTADO
+                // =====================================
+
                 const resultadoEscola =
                     document.getElementById(
                         "resultadoEscola"
                     );
-
-                const resultadoNomeGestor =
-                    document.getElementById(
-                        "resultadoNomeGestor"
-                    );
-
-                const resultadoEmail =
-                    document.getElementById(
-                        "resultadoEmail"
-                    );
-
-                const resultadoTipo =
-                    document.getElementById(
-                        "resultadoTipo"
-                    );
-
-                const resultadoEnsinos =
-                    document.getElementById(
-                        "resultadoEnsinos"
-                    );
-
-
-                // =====================================
-                // ESCOLA
-                // =====================================
 
                 if (resultadoEscola) {
 
@@ -593,9 +634,10 @@ if (form) {
                 }
 
 
-                // =====================================
-                // GESTOR
-                // =====================================
+                const resultadoNomeGestor =
+                    document.getElementById(
+                        "resultadoNomeGestor"
+                    );
 
                 if (resultadoNomeGestor) {
 
@@ -605,9 +647,10 @@ if (form) {
                 }
 
 
-                // =====================================
-                // EMAIL
-                // =====================================
+                const resultadoEmail =
+                    document.getElementById(
+                        "resultadoEmail"
+                    );
 
                 if (resultadoEmail) {
 
@@ -617,37 +660,37 @@ if (form) {
                 }
 
 
-                // =====================================
-                // TIPO
-                // =====================================
+                const resultadoTipo =
+                    document.getElementById(
+                        "resultadoTipo"
+                    );
 
                 if (resultadoTipo) {
 
                     resultadoTipo.textContent =
                         tipoEscola === "publica"
-                        ? "Pública"
-                        : "Privada";
+                            ? "Pública"
+                            : "Privada";
 
                 }
 
 
-                // =====================================
-                // ENSINOS
-                // =====================================
+                const resultadoEnsinos =
+                    document.getElementById(
+                        "resultadoEnsinos"
+                    );
 
                 if (resultadoEnsinos) {
 
                     resultadoEnsinos.textContent =
-                        ensinos
-                        .map(nomeEnsino)
+                        ensinosSelecionados
+                        .map(
+                            nomeEnsino
+                        )
                         .join(" + ");
 
                 }
 
-
-                // =====================================
-                // MOSTRAR RESULTADO
-                // =====================================
 
                 if (resultadoCadastro) {
 
@@ -658,89 +701,53 @@ if (form) {
 
 
                 // =====================================
+                // GUARDAR ESCOLA ATUAL
+                // =====================================
+
+                sessionStorage.setItem(
+                    "escolaId",
+                    escolaRef.id
+                );
+
+                sessionStorage.setItem(
+                    "nomeEscola",
+                    nome
+                );
+
+                sessionStorage.setItem(
+                    "tipoEscola",
+                    tipoEscola
+                );
+
+                sessionStorage.setItem(
+                    "ensinos",
+                    JSON.stringify(
+                        ensinosSelecionados
+                    )
+                );
+
+
+                sessionStorage.setItem(
+                    "estruturaEscola",
+                    JSON.stringify({
+
+                        ensinoPrimario:
+                            estruturaPrimario,
+
+                        primeiroCiclo:
+                            estruturaPrimeiroCiclo
+
+                    })
+                );
+
+
+                // =====================================
                 // LIMPAR FORMULÁRIO
                 // =====================================
 
                 form.reset();
 
-
-                // =====================================
-                // ESCONDER ESTRUTURAS
-                // =====================================
-
-                const opcoesPrimario =
-                    document.getElementById(
-                        "opcoesPrimario"
-                    );
-
-                const opcoesPrimeiroCiclo =
-                    document.getElementById(
-                        "opcoesPrimeiroCiclo"
-                    );
-
-
-                if (opcoesPrimario) {
-
-                    opcoesPrimario.style.display =
-                        "none";
-
-                }
-
-
-                if (opcoesPrimeiroCiclo) {
-
-                    opcoesPrimeiroCiclo.style.display =
-                        "none";
-
-                }
-
-
-                console.log(
-                    "====================================="
-                );
-
-                console.log(
-                    "ESCOLA CADASTRADA"
-                );
-
-                console.log(
-                    "ID:",
-                    escolaRef.id
-                );
-
-                console.log(
-                    "NOME:",
-                    nome
-                );
-
-                console.log(
-                    "TIPO:",
-                    tipoEscola
-                );
-
-                console.log(
-                    "ENSINOS:",
-                    ensinos
-                );
-
-                console.log(
-                    "PRIMÁRIO:",
-                    estruturaPrimario
-                );
-
-                console.log(
-                    "PRIMEIRO CICLO:",
-                    estruturaPrimeiroCiclo
-                );
-
-                console.log(
-                    "GESTOR UID:",
-                    uidGestor
-                );
-
-                console.log(
-                    "====================================="
-                );
+                atualizarEstruturaEnsino();
 
 
             }
@@ -756,10 +763,6 @@ if (form) {
                     "Não foi possível concluir o cadastro.";
 
 
-                // =====================================
-                // ERROS AUTH
-                // =====================================
-
                 if (
                     erro.code ===
                     "auth/email-already-in-use"
@@ -769,7 +772,6 @@ if (form) {
                         "Este e-mail do gestor já está cadastrado.";
 
                 }
-
 
                 else if (
                     erro.code ===
@@ -781,32 +783,15 @@ if (form) {
 
                 }
 
-
                 else if (
                     erro.code ===
                     "auth/weak-password"
                 ) {
 
                     mensagemErro =
-                        "A senha é muito fraca.";
+                        "A senha deve ter pelo menos 6 caracteres.";
 
                 }
-
-
-                else if (
-                    erro.code ===
-                    "auth/network-request-failed"
-                ) {
-
-                    mensagemErro =
-                        "Erro de ligação com o Firebase.";
-
-                }
-
-
-                // =====================================
-                // FIRESTORE
-                // =====================================
 
                 else if (
                     erro.code ===
@@ -817,7 +802,6 @@ if (form) {
                         "Sem permissão para gravar no Firestore.";
 
                 }
-
 
                 else if (
                     erro.message
@@ -844,6 +828,9 @@ if (form) {
                     btnCadastrar.disabled =
                         false;
 
+                    btnCadastrar.textContent =
+                        "Cadastrar Escola";
+
                 }
 
             }
@@ -851,4 +838,4 @@ if (form) {
         }
     );
 
-}
+    }
