@@ -1,5 +1,6 @@
 // =====================================================
-// REGISTER SCHOOL - SGE
+// REGISTER SCHOOL - SGE ANGOLA
+// Cadastro completo da escola
 // =====================================================
 
 import {
@@ -39,49 +40,85 @@ const resultadoCadastro =
 // MENSAGEM
 // =====================================================
 
-function mostrarMensagem(
-    texto,
-    tipo
-){
+function mostrarMensagem(texto, tipo) {
 
-    mensagem.textContent =
-        texto;
+    if (!mensagem) return;
 
-    mensagem.className =
-        tipo;
+    mensagem.textContent = texto;
+
+    mensagem.className = tipo;
 
 }
 
 
 // =====================================================
-// TRADUZIR ENSINO
+// NOME DO ENSINO
 // =====================================================
 
-function nomeEnsino(
-    ensino
-){
+function nomeEnsino(ensino) {
 
-    if(
-        ensino ===
-        "ensinoPrimario"
-    ){
+    switch (ensino) {
 
-        return "Ensino Primário";
+        case "ensinoPrimario":
+            return "Ensino Primário";
 
-    }
+        case "primeiroCiclo":
+            return "Primeiro Ciclo";
 
-
-    if(
-        ensino ===
-        "primeiroCiclo"
-    ){
-
-        return "Primeiro Ciclo";
+        default:
+            return ensino;
 
     }
 
+}
 
-    return ensino;
+
+// =====================================================
+// NOME DA ESTRUTURA
+// =====================================================
+
+function nomeEstrutura(valor) {
+
+    const nomes = {
+
+        "1classe": "1ª classe",
+        "2classe": "2ª classe",
+        "3classe": "3ª classe",
+        "4classe": "4ª classe",
+        "5classe": "5ª classe",
+        "6classe": "6ª classe",
+
+        "1etapa": "1ª Etapa",
+        "2etapa": "2ª Etapa",
+        "3etapa": "3ª Etapa",
+
+        "7classe": "7ª classe",
+        "8classe": "8ª classe",
+        "9classe": "9ª classe",
+
+        "eja1": "EJA 1",
+        "eja2": "EJA 2"
+
+    };
+
+    return nomes[valor] || valor;
+
+}
+
+
+// =====================================================
+// LER CHECKBOXES
+// =====================================================
+
+function obterCheckboxes(nome) {
+
+    return Array.from(
+        document.querySelectorAll(
+            `input[name="${nome}"]:checked`
+        )
+    ).map(
+        checkbox => checkbox.value
+    );
 
 }
 
@@ -90,531 +127,726 @@ function nomeEnsino(
 // CADASTRO
 // =====================================================
 
-form.addEventListener(
-    "submit",
-    async evento => {
+if (form) {
 
-        evento.preventDefault();
+    form.addEventListener(
+        "submit",
+        async evento => {
 
-
-        btnCadastrar.disabled =
-            true;
+            evento.preventDefault();
 
 
-        resultadoCadastro.style.display =
-            "none";
+            if (btnCadastrar) {
 
-
-        try {
-
-
-            // =========================================
-            // DADOS DA ESCOLA
-            // =========================================
-
-            const nome =
-                document
-                .getElementById("nome")
-                .value
-                .trim();
-
-
-            const provincia =
-                document
-                .getElementById("provincia")
-                .value
-                .trim();
-
-
-            const municipio =
-                document
-                .getElementById("municipio")
-                .value
-                .trim();
-
-
-            const telefone =
-                document
-                .getElementById("telefone")
-                .value
-                .trim();
-
-
-            const emailEscola =
-                document
-                .getElementById("emailEscola")
-                .value
-                .trim();
-
-
-            const anoLetivo =
-                document
-                .getElementById("anoLetivo")
-                .value
-                .trim();
-
-
-            // =========================================
-            // TIPO
-            // =========================================
-
-            const tipoSelecionado =
-                document.querySelector(
-                    'input[name="tipoEscola"]:checked'
-                );
-
-
-            // =========================================
-            // ENSINOS
-            // =========================================
-
-            const ensinosSelecionados =
-                Array.from(
-                    document.querySelectorAll(
-                        'input[name="ensinos"]:checked'
-                    )
-                ).map(
-                    checkbox =>
-                        checkbox.value
-                );
-
-
-            // =========================================
-            // GESTOR
-            // =========================================
-
-            const nomeGestor =
-                document
-                .getElementById("nomeGestor")
-                .value
-                .trim();
-
-
-            const emailGestor =
-                document
-                .getElementById("emailGestor")
-                .value
-                .trim();
-
-
-            const senhaGestor =
-                document
-                .getElementById("senhaGestor")
-                .value;
-
-
-            const confirmarSenha =
-                document
-                .getElementById("confirmarSenha")
-                .value;
-
-
-            // =========================================
-            // VALIDAÇÕES
-            // =========================================
-
-            if(!nome){
-
-                throw new Error(
-                    "Informe o nome da escola."
-                );
+                btnCadastrar.disabled = true;
 
             }
 
 
-            if(!provincia){
+            if (resultadoCadastro) {
 
-                throw new Error(
-                    "Informe a província."
-                );
-
-            }
-
-
-            if(!municipio){
-
-                throw new Error(
-                    "Informe o município."
-                );
+                resultadoCadastro.style.display =
+                    "none";
 
             }
 
 
-            if(!anoLetivo){
+            try {
 
-                throw new Error(
-                    "Informe o ano letivo."
-                );
+                // =====================================
+                // DADOS DA ESCOLA
+                // =====================================
 
-            }
+                const nome =
+                    document
+                    .getElementById("nome")
+                    .value
+                    .trim();
 
 
-            if(!tipoSelecionado){
+                const provincia =
+                    document
+                    .getElementById("provincia")
+                    .value
+                    .trim();
 
-                throw new Error(
-                    "Selecione se a escola é pública ou privada."
-                );
 
-            }
+                const municipio =
+                    document
+                    .getElementById("municipio")
+                    .value
+                    .trim();
 
 
-            if(
-                ensinosSelecionados.length === 0
-            ){
+                const telefone =
+                    document
+                    .getElementById("telefone")
+                    .value
+                    .trim();
 
-                throw new Error(
-                    "Selecione pelo menos um ensino."
-                );
 
-            }
+                const emailEscola =
+                    document
+                    .getElementById("emailEscola")
+                    .value
+                    .trim();
 
 
-            if(!nomeGestor){
+                const anoLetivo =
+                    document
+                    .getElementById("anoLetivo")
+                    .value
+                    .trim();
 
-                throw new Error(
-                    "Informe o nome do gestor."
-                );
 
-            }
+                // =====================================
+                // TIPO DA ESCOLA
+                // =====================================
 
+                const tipoEscola =
+                    document
+                    .getElementById("tipoEscola")
+                    .value;
 
-            if(!emailGestor){
 
-                throw new Error(
-                    "Informe o e-mail do gestor."
-                );
+                // =====================================
+                // ENSINOS
+                // IMPORTANTE:
+                // O HTML usa name="ensino"
+                // =====================================
 
-            }
+                const ensinos =
+                    obterCheckboxes("ensino");
 
 
-            if(
-                senhaGestor.length < 6
-            ){
+                // =====================================
+                // ESTRUTURA DO PRIMÁRIO
+                // =====================================
 
-                throw new Error(
-                    "A senha deve ter pelo menos 6 caracteres."
-                );
-
-            }
-
-
-            if(
-                senhaGestor !==
-                confirmarSenha
-            ){
-
-                throw new Error(
-                    "As senhas não coincidem."
-                );
-
-            }
-
-
-            // =========================================
-            // INICIAR
-            // =========================================
-
-            mostrarMensagem(
-                "A criar a conta do gestor...",
-                "sucesso"
-            );
-
-
-            // =========================================
-            // FIREBASE AUTH
-            // =========================================
-
-            const credencial =
-                await createUserWithEmailAndPassword(
-                    auth,
-                    emailGestor,
-                    senhaGestor
-                );
-
-
-            const uidGestor =
-                credencial.user.uid;
-
-
-            console.log(
-                "GESTOR CRIADO:",
-                uidGestor
-            );
-
-
-            // =========================================
-            // DADOS
-            // =========================================
-
-            const dadosEscola = {
-
-                nome:
-
-                    nome,
-
-
-                provincia:
-
-                    provincia,
-
-
-                municipio:
-
-                    municipio,
-
-
-                telefone:
-
-                    telefone,
-
-
-                email:
-
-                    emailEscola,
-
-
-                anoLetivoAtual:
-
-                    anoLetivo,
-
-
-                tipoEscola:
-
-                    tipoSelecionado.value,
-
-
-                ensinos:
-
-                    ensinosSelecionados,
-
-
-                gestorUid:
-
-                    uidGestor,
-
-
-                nomeGestor:
-
-                    nomeGestor,
-
-
-                emailGestor:
-
-                    emailGestor,
-
-
-                logoUrl:
-
-                    "",
-
-
-                ativo:
-
-                    true,
-
-
-                criadoEm:
-
-                    serverTimestamp()
-
-            };
-
-
-            // =========================================
-            // CRIAR ESCOLA
-            // =========================================
-
-            const escolaRef =
-                await addDoc(
-                    collection(
-                        db,
-                        "escolas"
-                    ),
-                    dadosEscola
-                );
-
-
-            console.log(
-                "ESCOLA CRIADA:",
-                escolaRef.id
-            );
-
-
-            // =========================================
-            // SUCESSO
-            // =========================================
-
-            mostrarMensagem(
-                "Escola cadastrada com sucesso!",
-                "sucesso"
-            );
-
-
-            document
-                .getElementById(
-                    "resultadoEscola"
-                )
-                .textContent =
-                    nome;
-
-
-            document
-                .getElementById(
-                    "resultadoGestor"
-                )
-                .textContent =
-                    nomeGestor;
-
-
-            document
-                .getElementById(
-                    "resultadoEmail"
-                )
-                .textContent =
-                    emailGestor;
-
-
-            document
-                .getElementById(
-                    "resultadoTipo"
-                )
-                .textContent =
-                    tipoSelecionado.value ===
-                    "publica"
-                    ? "Pública"
-                    : "Privada";
-
-
-            document
-                .getElementById(
-                    "resultadoEnsinos"
-                )
-                .textContent =
-                    ensinosSelecionados
-                    .map(
-                        nomeEnsino
-                    )
-                    .join(
-                        " + "
+                const estruturaPrimario =
+                    obterCheckboxes(
+                        "estruturaPrimario"
                     );
 
 
-            resultadoCadastro.style.display =
-                "block";
+                // =====================================
+                // ESTRUTURA DO PRIMEIRO CICLO
+                // =====================================
+
+                const estruturaPrimeiroCiclo =
+                    obterCheckboxes(
+                        "estruturaPrimeiroCiclo"
+                    );
 
 
-            // =========================================
-            // LIMPAR
-            // =========================================
+                // =====================================
+                // DADOS DO GESTOR
+                // =====================================
 
-            form.reset();
-
-
-            document
-                .getElementById(
-                    "classesPrimario"
-                )
-                .style.display =
-                    "none";
+                const nomeGestor =
+                    document
+                    .getElementById("nomeGestor")
+                    .value
+                    .trim();
 
 
-            document
-                .getElementById(
-                    "etapasPrimario"
-                )
-                .style.display =
-                    "none";
+                const emailGestor =
+                    document
+                    .getElementById("emailGestor")
+                    .value
+                    .trim();
 
 
-            document
-                .getElementById(
-                    "classesCiclo"
-                )
-                .style.display =
-                    "none";
+                const senhaGestor =
+                    document
+                    .getElementById("senhaGestor")
+                    .value;
 
+
+                const confirmarSenha =
+                    document
+                    .getElementById("confirmarSenha")
+                    .value;
+
+
+                // =====================================
+                // VALIDAÇÕES
+                // =====================================
+
+                if (!nome) {
+
+                    throw new Error(
+                        "Informe o nome da escola."
+                    );
+
+                }
+
+
+                if (!provincia) {
+
+                    throw new Error(
+                        "Informe a província."
+                    );
+
+                }
+
+
+                if (!municipio) {
+
+                    throw new Error(
+                        "Informe o município."
+                    );
+
+                }
+
+
+                if (!anoLetivo) {
+
+                    throw new Error(
+                        "Informe o ano letivo."
+                    );
+
+                }
+
+
+                if (!tipoEscola) {
+
+                    throw new Error(
+                        "Selecione se a escola é pública ou privada."
+                    );
+
+                }
+
+
+                if (ensinos.length === 0) {
+
+                    throw new Error(
+                        "Selecione pelo menos um ensino."
+                    );
+
+                }
+
+
+                // =====================================
+                // VALIDAR ESTRUTURA
+                // =====================================
+
+                if (
+                    ensinos.includes(
+                        "ensinoPrimario"
+                    ) &&
+                    estruturaPrimario.length === 0
+                ) {
+
+                    throw new Error(
+                        "Selecione pelo menos uma classe ou etapa do Ensino Primário."
+                    );
+
+                }
+
+
+                if (
+                    ensinos.includes(
+                        "primeiroCiclo"
+                    ) &&
+                    estruturaPrimeiroCiclo.length === 0
+                ) {
+
+                    throw new Error(
+                        "Selecione pelo menos uma classe ou EJA do Primeiro Ciclo."
+                    );
+
+                }
+
+
+                if (!nomeGestor) {
+
+                    throw new Error(
+                        "Informe o nome do gestor."
+                    );
+
+                }
+
+
+                if (!emailGestor) {
+
+                    throw new Error(
+                        "Informe o e-mail do gestor."
+                    );
+
+                }
+
+
+                if (senhaGestor.length < 6) {
+
+                    throw new Error(
+                        "A senha deve ter pelo menos 6 caracteres."
+                    );
+
+                }
+
+
+                if (
+                    senhaGestor !==
+                    confirmarSenha
+                ) {
+
+                    throw new Error(
+                        "As senhas não coincidem."
+                    );
+
+                }
+
+
+                // =====================================
+                // MOSTRAR PROCESSAMENTO
+                // =====================================
+
+                mostrarMensagem(
+                    "A criar a conta do gestor...",
+                    "sucesso"
+                );
+
+
+                // =====================================
+                // CRIAR UTILIZADOR FIREBASE AUTH
+                // =====================================
+
+                const credencial =
+                    await createUserWithEmailAndPassword(
+                        auth,
+                        emailGestor,
+                        senhaGestor
+                    );
+
+
+                const uidGestor =
+                    credencial.user.uid;
+
+
+                console.log(
+                    "GESTOR CRIADO:",
+                    uidGestor
+                );
+
+
+                // =====================================
+                // DADOS DA ESCOLA
+                // =====================================
+
+                const dadosEscola = {
+
+                    // -----------------------------
+                    // IDENTIFICAÇÃO
+                    // -----------------------------
+
+                    nome: nome,
+
+                    provincia: provincia,
+
+                    municipio: municipio,
+
+                    telefone: telefone,
+
+                    email: emailEscola,
+
+                    anoLetivoAtual:
+                        anoLetivo,
+
+
+                    // -----------------------------
+                    // TIPO
+                    // -----------------------------
+
+                    tipoEscola:
+                        tipoEscola,
+
+
+                    // -----------------------------
+                    // ENSINOS
+                    // -----------------------------
+
+                    ensinos:
+                        ensinos,
+
+
+                    // -----------------------------
+                    // ESTRUTURA
+                    // -----------------------------
+
+                    estrutura: {
+
+                        ensinoPrimario:
+                            estruturaPrimario,
+
+                        primeiroCiclo:
+                            estruturaPrimeiroCiclo
+
+                    },
+
+
+                    // -----------------------------
+                    // GESTOR
+                    // -----------------------------
+
+                    gestorUid:
+                        uidGestor,
+
+                    nomeGestor:
+                        nomeGestor,
+
+                    emailGestor:
+                        emailGestor,
+
+
+                    // -----------------------------
+                    // LOGOTIPO
+                    // -----------------------------
+
+                    logoUrl: "",
+
+
+                    // -----------------------------
+                    // ESTADO
+                    // -----------------------------
+
+                    ativo: true,
+
+
+                    // -----------------------------
+                    // DATA
+                    // -----------------------------
+
+                    criadoEm:
+                        serverTimestamp()
+
+                };
+
+
+                // =====================================
+                // GRAVAR ESCOLA NO FIRESTORE
+                // =====================================
+
+                const escolaRef =
+                    await addDoc(
+                        collection(
+                            db,
+                            "escolas"
+                        ),
+                        dadosEscola
+                    );
+
+
+                console.log(
+                    "ESCOLA CRIADA:",
+                    escolaRef.id
+                );
+
+
+                // =====================================
+                // RESULTADO
+                // =====================================
+
+                mostrarMensagem(
+                    "Escola cadastrada com sucesso!",
+                    "sucesso"
+                );
+
+
+                const resultadoEscola =
+                    document.getElementById(
+                        "resultadoEscola"
+                    );
+
+                const resultadoNomeGestor =
+                    document.getElementById(
+                        "resultadoNomeGestor"
+                    );
+
+                const resultadoEmail =
+                    document.getElementById(
+                        "resultadoEmail"
+                    );
+
+                const resultadoTipo =
+                    document.getElementById(
+                        "resultadoTipo"
+                    );
+
+                const resultadoEnsinos =
+                    document.getElementById(
+                        "resultadoEnsinos"
+                    );
+
+
+                // =====================================
+                // ESCOLA
+                // =====================================
+
+                if (resultadoEscola) {
+
+                    resultadoEscola.textContent =
+                        nome;
+
+                }
+
+
+                // =====================================
+                // GESTOR
+                // =====================================
+
+                if (resultadoNomeGestor) {
+
+                    resultadoNomeGestor.textContent =
+                        nomeGestor;
+
+                }
+
+
+                // =====================================
+                // EMAIL
+                // =====================================
+
+                if (resultadoEmail) {
+
+                    resultadoEmail.textContent =
+                        emailGestor;
+
+                }
+
+
+                // =====================================
+                // TIPO
+                // =====================================
+
+                if (resultadoTipo) {
+
+                    resultadoTipo.textContent =
+                        tipoEscola === "publica"
+                        ? "Pública"
+                        : "Privada";
+
+                }
+
+
+                // =====================================
+                // ENSINOS
+                // =====================================
+
+                if (resultadoEnsinos) {
+
+                    resultadoEnsinos.textContent =
+                        ensinos
+                        .map(nomeEnsino)
+                        .join(" + ");
+
+                }
+
+
+                // =====================================
+                // MOSTRAR RESULTADO
+                // =====================================
+
+                if (resultadoCadastro) {
+
+                    resultadoCadastro.style.display =
+                        "block";
+
+                }
+
+
+                // =====================================
+                // LIMPAR FORMULÁRIO
+                // =====================================
+
+                form.reset();
+
+
+                // =====================================
+                // ESCONDER ESTRUTURAS
+                // =====================================
+
+                const opcoesPrimario =
+                    document.getElementById(
+                        "opcoesPrimario"
+                    );
+
+                const opcoesPrimeiroCiclo =
+                    document.getElementById(
+                        "opcoesPrimeiroCiclo"
+                    );
+
+
+                if (opcoesPrimario) {
+
+                    opcoesPrimario.style.display =
+                        "none";
+
+                }
+
+
+                if (opcoesPrimeiroCiclo) {
+
+                    opcoesPrimeiroCiclo.style.display =
+                        "none";
+
+                }
+
+
+                console.log(
+                    "====================================="
+                );
+
+                console.log(
+                    "ESCOLA CADASTRADA"
+                );
+
+                console.log(
+                    "ID:",
+                    escolaRef.id
+                );
+
+                console.log(
+                    "NOME:",
+                    nome
+                );
+
+                console.log(
+                    "TIPO:",
+                    tipoEscola
+                );
+
+                console.log(
+                    "ENSINOS:",
+                    ensinos
+                );
+
+                console.log(
+                    "PRIMÁRIO:",
+                    estruturaPrimario
+                );
+
+                console.log(
+                    "PRIMEIRO CICLO:",
+                    estruturaPrimeiroCiclo
+                );
+
+                console.log(
+                    "GESTOR UID:",
+                    uidGestor
+                );
+
+                console.log(
+                    "====================================="
+                );
+
+
+            }
+            catch (erro) {
+
+                console.error(
+                    "ERRO NO CADASTRO:",
+                    erro
+                );
+
+
+                let mensagemErro =
+                    "Não foi possível concluir o cadastro.";
+
+
+                // =====================================
+                // ERROS AUTH
+                // =====================================
+
+                if (
+                    erro.code ===
+                    "auth/email-already-in-use"
+                ) {
+
+                    mensagemErro =
+                        "Este e-mail do gestor já está cadastrado.";
+
+                }
+
+
+                else if (
+                    erro.code ===
+                    "auth/invalid-email"
+                ) {
+
+                    mensagemErro =
+                        "O e-mail informado é inválido.";
+
+                }
+
+
+                else if (
+                    erro.code ===
+                    "auth/weak-password"
+                ) {
+
+                    mensagemErro =
+                        "A senha é muito fraca.";
+
+                }
+
+
+                else if (
+                    erro.code ===
+                    "auth/network-request-failed"
+                ) {
+
+                    mensagemErro =
+                        "Erro de ligação com o Firebase.";
+
+                }
+
+
+                // =====================================
+                // FIRESTORE
+                // =====================================
+
+                else if (
+                    erro.code ===
+                    "permission-denied"
+                ) {
+
+                    mensagemErro =
+                        "Sem permissão para gravar no Firestore.";
+
+                }
+
+
+                else if (
+                    erro.message
+                ) {
+
+                    mensagemErro =
+                        erro.message;
+
+                }
+
+
+                mostrarMensagem(
+                    mensagemErro,
+                    "erro"
+                );
+
+            }
+
+
+            finally {
+
+                if (btnCadastrar) {
+
+                    btnCadastrar.disabled =
+                        false;
+
+                }
+
+            }
 
         }
-        catch(erro){
+    );
 
-            console.error(
-                "ERRO NO CADASTRO:",
-                erro
-            );
-
-
-            let mensagemErro =
-                "Não foi possível concluir o cadastro.";
-
-
-            if(
-                erro.code ===
-                "auth/email-already-in-use"
-            ){
-
-                mensagemErro =
-                    "Este e-mail do gestor já está cadastrado.";
-
-            }
-
-
-            else if(
-                erro.code ===
-                "auth/invalid-email"
-            ){
-
-                mensagemErro =
-                    "O e-mail informado é inválido.";
-
-            }
-
-
-            else if(
-                erro.code ===
-                "auth/weak-password"
-            ){
-
-                mensagemErro =
-                    "A senha é muito fraca.";
-
-            }
-
-
-            else if(
-                erro.code ===
-                "permission-denied"
-            ){
-
-                mensagemErro =
-                    "Sem permissão para gravar no Firestore.";
-
-            }
-
-
-            else if(
-                erro.message
-            ){
-
-                mensagemErro =
-                    erro.message;
-
-            }
-
-
-            mostrarMensagem(
-                mensagemErro,
-                "erro"
-            );
-
-        }
-
-
-        finally{
-
-            btnCadastrar.disabled =
-                false;
-
-        }
-
-    }
-);
+}
