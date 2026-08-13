@@ -1,3 +1,8 @@
+// =====================================================
+// REGISTER SCHOOL — SGE ANGOLA
+// Cadastro da escola + conta do gestor
+// =====================================================
+
 import {
     createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
@@ -5,22 +10,18 @@ import {
 import {
     collection,
     addDoc,
-    updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 import {
-    ref,
-    uploadBytes,
-    getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
-
-import {
     auth,
-    db,
-    storage
+    db
 } from "./firebase.js";
 
+
+// =====================================================
+// ELEMENTOS
+// =====================================================
 
 const form = document.getElementById("formEscola");
 
@@ -44,41 +45,76 @@ const resultadoCadastro =
 // PRÉ-VISUALIZAÇÃO DO LOGOTIPO
 // =====================================================
 
-logoInput.addEventListener("change", () => {
+if (logoInput) {
 
-    const arquivo = logoInput.files[0];
+    logoInput.addEventListener("change", () => {
 
-    if (!arquivo) {
+        const arquivo = logoInput.files[0];
 
-        logoPreview.textContent = "Logotipo";
+        if (!arquivo) {
 
-        return;
-    }
+            logoPreview.textContent = "Logotipo";
 
-    if (!arquivo.type.startsWith("image/")) {
+            return;
+        }
 
-        logoInput.value = "";
 
-        logoPreview.textContent =
-            "Arquivo inválido";
+        // Verificar se é imagem
 
-        return;
-    }
+        if (!arquivo.type.startsWith("image/")) {
 
-    const leitor = new FileReader();
+            logoInput.value = "";
 
-    leitor.onload = evento => {
+            logoPreview.textContent =
+                "Arquivo inválido";
 
-        logoPreview.innerHTML = `
-            <img
-                src="${evento.target.result}"
-                alt="Logotipo"
-            >
-        `;
-    };
+            mostrarMensagem(
+                "Selecione uma imagem PNG, JPG ou WEBP.",
+                "erro"
+            );
 
-    leitor.readAsDataURL(arquivo);
-});
+            return;
+        }
+
+
+        // Limite de 5 MB
+
+        if (arquivo.size > 5 * 1024 * 1024) {
+
+            logoInput.value = "";
+
+            logoPreview.textContent =
+                "Logotipo";
+
+            mostrarMensagem(
+                "O logotipo não pode ultrapassar 5 MB.",
+                "erro"
+            );
+
+            return;
+        }
+
+
+        // Pré-visualização
+
+        const leitor = new FileReader();
+
+        leitor.onload = evento => {
+
+            logoPreview.innerHTML = `
+                <img
+                    src="${evento.target.result}"
+                    alt="Logotipo da escola"
+                >
+            `;
+
+        };
+
+        leitor.readAsDataURL(arquivo);
+
+    });
+
+}
 
 
 // =====================================================
@@ -86,6 +122,8 @@ logoInput.addEventListener("change", () => {
 // =====================================================
 
 function mostrarMensagem(texto, tipo) {
+
+    if (!mensagem) return;
 
     mensagem.textContent = texto;
 
@@ -97,335 +135,388 @@ function mostrarMensagem(texto, tipo) {
 // CADASTRO
 // =====================================================
 
-form.addEventListener("submit", async evento => {
+if (form) {
 
-    evento.preventDefault();
+    form.addEventListener("submit", async evento => {
 
-    btnCadastrar.disabled = true;
-
-    resultadoCadastro.style.display = "none";
-
-    try {
-
-        // =================================================
-        // DADOS DA ESCOLA
-        // =================================================
-
-        const nome =
-            document.getElementById("nome").value.trim();
-
-        const provincia =
-            document.getElementById("provincia").value.trim();
-
-        const municipio =
-            document.getElementById("municipio").value.trim();
-
-        const telefone =
-            document.getElementById("telefone").value.trim();
-
-        const emailEscola =
-            document.getElementById("emailEscola").value.trim();
-
-        const anoLetivo =
-            document.getElementById("anoLetivo").value.trim();
+        evento.preventDefault();
 
 
-        // =================================================
-        // DADOS DO GESTOR
-        // =================================================
+        btnCadastrar.disabled = true;
 
-        const nomeGestor =
-            document.getElementById("nomeGestor").value.trim();
-
-        const emailGestor =
-            document.getElementById("emailGestor")
-            .value
-            .trim();
-
-        const senhaGestor =
-            document.getElementById("senhaGestor")
-            .value;
-
-        const confirmarSenha =
-            document.getElementById("confirmarSenha")
-            .value;
+        resultadoCadastro.style.display = "none";
 
 
-        // =================================================
-        // VALIDAÇÕES
-        // =================================================
+        try {
 
-        if (!nome) {
-            throw new Error(
-                "Informe o nome da escola."
-            );
-        }
+            // =================================================
+            // DADOS DA ESCOLA
+            // =================================================
 
-        if (!provincia) {
-            throw new Error(
-                "Informe a província."
-            );
-        }
-
-        if (!municipio) {
-            throw new Error(
-                "Informe o município."
-            );
-        }
-
-        if (!anoLetivo) {
-            throw new Error(
-                "Informe o ano letivo."
-            );
-        }
-
-        if (!nomeGestor) {
-            throw new Error(
-                "Informe o nome do gestor."
-            );
-        }
-
-        if (!emailGestor) {
-            throw new Error(
-                "Informe o e-mail do gestor."
-            );
-        }
-
-        if (senhaGestor.length < 6) {
-            throw new Error(
-                "A senha deve ter pelo menos 6 caracteres."
-            );
-        }
-
-        if (senhaGestor !== confirmarSenha) {
-            throw new Error(
-                "As senhas não coincidem."
-            );
-        }
+            const nome =
+                document
+                    .getElementById("nome")
+                    .value
+                    .trim();
 
 
-        mostrarMensagem(
-            "A criar a conta do gestor...",
-            "sucesso"
-        );
+            const provincia =
+                document
+                    .getElementById("provincia")
+                    .value
+                    .trim();
 
 
-        // =================================================
-        // CRIAR CONTA FIREBASE AUTH
-        // =================================================
-
-        const credencial =
-            await createUserWithEmailAndPassword(
-                auth,
-                emailGestor,
-                senhaGestor
-            );
+            const municipio =
+                document
+                    .getElementById("municipio")
+                    .value
+                    .trim();
 
 
-        const uidGestor =
-            credencial.user.uid;
+            const telefone =
+                document
+                    .getElementById("telefone")
+                    .value
+                    .trim();
 
 
-        // =================================================
-        // CRIAR ESCOLA
-        // =================================================
-
-        const escolaRef =
-            await addDoc(
-                collection(db, "escolas"),
-                {
-
-                    nome,
-
-                    provincia,
-
-                    municipio,
-
-                    telefone,
-
-                    email:
-                        emailEscola,
-
-                    anoLetivoAtual:
-                        anoLetivo,
-
-                    gestorUid:
-                        uidGestor,
-
-                    nomeGestor,
-
-                    emailGestor,
-
-                    logoUrl:
-                        "",
-
-                    ativo:
-                        true,
-
-                    criadoEm:
-                        serverTimestamp()
-                }
-            );
+            const emailEscola =
+                document
+                    .getElementById("emailEscola")
+                    .value
+                    .trim();
 
 
-        // =================================================
-        // LOGOTIPO
-        // =================================================
+            const anoLetivo =
+                document
+                    .getElementById("anoLetivo")
+                    .value
+                    .trim();
 
-        const arquivoLogo =
-            logoInput.files[0];
+
+            // =================================================
+            // DADOS DO GESTOR
+            // =================================================
+
+            const nomeGestor =
+                document
+                    .getElementById("nomeGestor")
+                    .value
+                    .trim();
 
 
-        if (arquivoLogo) {
+            const emailGestor =
+                document
+                    .getElementById("emailGestor")
+                    .value
+                    .trim();
 
-            if (
-                !arquivoLogo.type
-                    .startsWith("image/")
-            ) {
+
+            const senhaGestor =
+                document
+                    .getElementById("senhaGestor")
+                    .value;
+
+
+            const confirmarSenha =
+                document
+                    .getElementById("confirmarSenha")
+                    .value;
+
+
+            // =================================================
+            // VALIDAÇÕES
+            // =================================================
+
+            if (!nome) {
 
                 throw new Error(
-                    "O logotipo precisa ser uma imagem."
+                    "Informe o nome da escola."
                 );
+
             }
 
 
-            if (
-                arquivoLogo.size >
-                5 * 1024 * 1024
-            ) {
+            if (!provincia) {
 
                 throw new Error(
-                    "O logotipo não pode ultrapassar 5 MB."
+                    "Informe a província."
                 );
+
             }
 
+
+            if (!municipio) {
+
+                throw new Error(
+                    "Informe o município."
+                );
+
+            }
+
+
+            if (!anoLetivo) {
+
+                throw new Error(
+                    "Informe o ano letivo."
+                );
+
+            }
+
+
+            if (!nomeGestor) {
+
+                throw new Error(
+                    "Informe o nome completo do gestor."
+                );
+
+            }
+
+
+            if (!emailGestor) {
+
+                throw new Error(
+                    "Informe o e-mail do gestor."
+                );
+
+            }
+
+
+            if (senhaGestor.length < 6) {
+
+                throw new Error(
+                    "A senha deve ter pelo menos 6 caracteres."
+                );
+
+            }
+
+
+            if (senhaGestor !== confirmarSenha) {
+
+                throw new Error(
+                    "As senhas não coincidem."
+                );
+
+            }
+
+
+            // =================================================
+            // CRIAR CONTA DO GESTOR
+            // =================================================
 
             mostrarMensagem(
-                "A enviar o logotipo...",
+                "A criar a conta do gestor...",
                 "sucesso"
             );
 
 
-            const caminho =
-                `escolas/${escolaRef.id}/logo/${arquivoLogo.name}`;
+            const credencial =
+                await createUserWithEmailAndPassword(
+                    auth,
+                    emailGestor,
+                    senhaGestor
+                );
 
 
-            const logoRef =
-                ref(storage, caminho);
+            const uidGestor =
+                credencial.user.uid;
 
 
-            await uploadBytes(
-                logoRef,
-                arquivoLogo
+            // =================================================
+            // CADASTRAR ESCOLA NO FIRESTORE
+            // =================================================
+
+            mostrarMensagem(
+                "A guardar os dados da escola...",
+                "sucesso"
             );
 
 
-            const logoUrl =
-                await getDownloadURL(logoRef);
+            const escolaRef =
+                await addDoc(
+                    collection(db, "escolas"),
+                    {
+
+                        nome: nome,
+
+                        provincia: provincia,
+
+                        municipio: municipio,
+
+                        telefone: telefone,
+
+                        email: emailEscola,
+
+                        anoLetivoAtual:
+                            anoLetivo,
+
+                        gestorUid:
+                            uidGestor,
+
+                        nomeGestor:
+                            nomeGestor,
+
+                        emailGestor:
+                            emailGestor,
+
+                        // O Storage ainda não está ativo.
+                        // O logotipo será ligado posteriormente.
+
+                        logoUrl: "",
+
+                        ativo: true,
+
+                        criadoEm:
+                            serverTimestamp()
+
+                    }
+                );
 
 
-            await updateDoc(
-                escolaRef,
-                {
-                    logoUrl
-                }
+            // =================================================
+            // RESULTADO
+            // =================================================
+
+            mostrarMensagem(
+                "Escola cadastrada com sucesso!",
+                "sucesso"
             );
+
+
+            document.getElementById(
+                "resultadoEmail"
+            ).textContent =
+                emailGestor;
+
+
+            document.getElementById(
+                "resultadoEscola"
+            ).textContent =
+                nome;
+
+
+            resultadoCadastro.style.display =
+                "block";
+
+
+            // =================================================
+            // LIMPAR FORMULÁRIO
+            // =================================================
+
+            form.reset();
+
+
+            logoPreview.textContent =
+                "Logotipo";
+
+
+            // =================================================
+            // LOG
+            // =================================================
+
+            console.log(
+                "ESCOLA CADASTRADA:",
+                escolaRef.id
+            );
+
+            console.log(
+                "GESTOR UID:",
+                uidGestor
+            );
+
+
+        } catch (erro) {
+
+            console.error(
+                "ERRO NO CADASTRO:",
+                erro
+            );
+
+
+            let mensagemErro =
+                "Não foi possível concluir o cadastro.";
+
+
+            // =================================================
+            // ERROS FIREBASE AUTH
+            // =================================================
+
+            if (
+                erro.code ===
+                "auth/email-already-in-use"
+            ) {
+
+                mensagemErro =
+                    "Este e-mail do gestor já está cadastrado.";
+
+            }
+
+
+            else if (
+                erro.code ===
+                "auth/invalid-email"
+            ) {
+
+                mensagemErro =
+                    "O e-mail informado é inválido.";
+
+            }
+
+
+            else if (
+                erro.code ===
+                "auth/weak-password"
+            ) {
+
+                mensagemErro =
+                    "A senha deve ter pelo menos 6 caracteres.";
+
+            }
+
+
+            else if (
+                erro.code ===
+                "auth/network-request-failed"
+            ) {
+
+                mensagemErro =
+                    "Erro de conexão. Verifique a internet.";
+
+            }
+
+
+            else if (
+                erro.code ===
+                "permission-denied"
+            ) {
+
+                mensagemErro =
+                    "Sem permissão para gravar no Firestore.";
+
+            }
+
+
+            else if (erro.message) {
+
+                mensagemErro =
+                    erro.message;
+
+            }
+
+
+            mostrarMensagem(
+                mensagemErro,
+                "erro"
+            );
+
+
+        } finally {
+
+            btnCadastrar.disabled = false;
+
         }
 
-
-        // =================================================
-        // SUCESSO
-        // =================================================
-
-        mostrarMensagem(
-            "Escola cadastrada com sucesso!",
-            "sucesso"
-        );
-
-
-        document.getElementById(
-            "resultadoEmail"
-        ).textContent =
-            emailGestor;
-
-
-        document.getElementById(
-            "resultadoEscola"
-        ).textContent =
-            nome;
-
-
-        resultadoCadastro.style.display =
-            "block";
-
-
-        form.reset();
-
-        logoPreview.textContent =
-            "Logotipo";
-
-
-    } catch (erro) {
-
-        console.error(
-            "ERRO NO CADASTRO:",
-            erro
-        );
-
-
-        let mensagemErro =
-            "Não foi possível concluir o cadastro.";
-
-
-        if (
-            erro.code ===
-            "auth/email-already-in-use"
-        ) {
-
-            mensagemErro =
-                "Este e-mail já está cadastrado.";
-
-        } else if (
-            erro.code ===
-            "auth/invalid-email"
-        ) {
-
-            mensagemErro =
-                "O e-mail informado é inválido.";
-
-        } else if (
-            erro.code ===
-            "auth/weak-password"
-        ) {
-
-            mensagemErro =
-                "A senha é muito fraca.";
-
-        } else if (
-            erro.code ===
-            "permission-denied"
-        ) {
-
-            mensagemErro =
-                "Sem permissão para gravar no Firebase.";
-
-        } else if (erro.message) {
-
-            mensagemErro =
-                erro.message;
-        }
-
-
-        mostrarMensagem(
-            mensagemErro,
-            "erro"
-        );
-
-
-    } finally {
-
-        btnCadastrar.disabled = false;
+    });
 
     }
-
-});
