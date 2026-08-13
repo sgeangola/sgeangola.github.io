@@ -9,12 +9,13 @@ alert("DASHBOARD-GESTOR.JS CARREGADO ✅");
 // FIREBASE
 // =====================================================
 
-import { db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
     collection,
     getDocs,
     query,
+    where,
     orderBy,
     limit
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
@@ -77,46 +78,226 @@ async function carregarInformacoesUsuario() {
 
     try {
 
-        const gestor =
-            JSON.parse(
-                localStorage.getItem(
-                    "gestorLogado"
-                ) || "null"
+        // ==========================================
+        // VERIFICAR GESTOR AUTENTICADO
+        // ==========================================
+
+        const usuario = auth.currentUser;
+
+        if (!usuario) {
+
+            console.warn(
+                "Nenhum gestor autenticado."
             );
 
-
-        if (gestor) {
-
-            if (userInfo) {
-
-                userInfo.textContent =
-                    `Administrador: ${
-                        gestor.nome ||
-                        gestor.email ||
-                        "Gestor"
-                    }`;
-
+            if (schoolName) {
+                schoolName.textContent = "🏫 Escola";
             }
 
-        }
-        else {
-
             if (userInfo) {
-
                 userInfo.textContent =
                     "Administrador";
-
             }
 
+            return;
         }
+
+
+        console.log(
+            "Gestor autenticado:",
+            usuario.email
+        );
+
+
+        // ==========================================
+        // PROCURAR A ESCOLA DO GESTOR
+        // ==========================================
+
+        const consulta = query(
+            collection(db, "escolas"),
+            where(
+                "gestorUid",
+                "==",
+                usuario.uid
+            )
+        );
+
+
+        const resultado =
+            await getDocs(consulta);
+
+
+        if (resultado.empty) {
+
+            console.warn(
+                "Nenhuma escola encontrada para este gestor."
+            );
+
+            if (schoolName) {
+                schoolName.textContent =
+                    "🏫 Escola";
+            }
+
+            if (userInfo) {
+                userInfo.textContent =
+                    `Administrador: ${usuario.email}`;
+            }
+
+            return;
+        }
+
+
+        // ==========================================
+        // DADOS DA ESCOLA
+        // ==========================================
+
+        const escolaDoc =
+            resultado.docs[0];
+
+        const escola =
+            escolaDoc.data();
+
+
+        console.log(
+            "Escola encontrada:",
+            escola
+        );
+
+
+        // ==========================================
+        // NOME DA ESCOLA
+        // ==========================================
+
+        if (schoolName) {
+
+            schoolName.innerHTML = `
+
+                <span
+                    style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                    "
+                >
+
+                    ${
+                        escola.logoUrl
+                        ? `
+                            <img
+                                src="${escola.logoUrl}"
+                                alt="Logotipo"
+                                style="
+                                    width:42px;
+                                    height:42px;
+                                    object-fit:contain;
+                                    border-radius:8px;
+                                    background:white;
+                                "
+                            >
+                          `
+                        : `
+                            <span
+                                style="
+                                    font-size:32px;
+                                "
+                            >
+                                🏫
+                            </span>
+                          `
+                    }
+
+                    <span>
+                        ${escola.nome || "Escola"}
+                    </span>
+
+                </span>
+
+            `;
+        }
+
+
+        // ==========================================
+        // INFORMAÇÕES DO GESTOR
+        // ==========================================
+
+        if (userInfo) {
+
+            userInfo.textContent =
+                `Administrador: ${
+                    escola.nomeGestor ||
+                    usuario.email ||
+                    "Gestor"
+                }`;
+
+        }
+
+
+        // ==========================================
+        // GUARDAR DADOS DA ESCOLA PARA OUTRAS PÁGINAS
+        // ==========================================
+
+        sessionStorage.setItem(
+            "escolaId",
+            escolaDoc.id
+        );
+
+        sessionStorage.setItem(
+            "nomeEscola",
+            escola.nome || ""
+        );
+
+        sessionStorage.setItem(
+            "logoEscola",
+            escola.logoUrl || ""
+        );
+
+        sessionStorage.setItem(
+            "provinciaEscola",
+            escola.provincia || ""
+        );
+
+        sessionStorage.setItem(
+            "municipioEscola",
+            escola.municipio || ""
+        );
+
+        sessionStorage.setItem(
+            "anoLetivo",
+            escola.anoLetivoAtual || ""
+        );
+
+        sessionStorage.setItem(
+            "nomeGestor",
+            escola.nomeGestor || ""
+        );
+
+        sessionStorage.setItem(
+            "emailGestor",
+            usuario.email || ""
+        );
+
 
     }
     catch (erro) {
 
         console.error(
-            "Erro ao carregar utilizador:",
+            "Erro ao carregar informações da escola:",
             erro
         );
+
+        if (schoolName) {
+
+            schoolName.textContent =
+                "🏫 Escola";
+
+        }
+
+        if (userInfo) {
+
+            userInfo.textContent =
+                "Administrador";
+
+        }
 
     }
 
