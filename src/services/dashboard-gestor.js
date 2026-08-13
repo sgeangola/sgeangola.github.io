@@ -2,7 +2,7 @@
 // DASHBOARD GESTOR - SIGEA
 // =====================================================
 
-alert("DASHBOARD-GESTOR.JS CARREGADO ✅");
+alert("DASHBOARD-GESTOR.JS fARREGADO ✅");
 
 
 // =====================================================
