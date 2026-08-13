@@ -1,5 +1,5 @@
 // =====================================================
-// LOGIN DO GESTOR — SGE ANGOLA
+// LOGIN DO GESTOR — SGE
 // =====================================================
 
 import { login } from "./auth.js";
@@ -15,63 +15,51 @@ import { db } from "./firebase.js";
 
 
 // =====================================================
-// FORMULÁRIO
+// ELEMENTOS
 // =====================================================
 
-const form =
-    document.getElementById("loginForm");
+const form = document.getElementById("loginForm");
+
+const emailInput = document.getElementById("email");
+
+const passwordInput = document.getElementById("password");
+
+const botao = form.querySelector("button");
 
 
 // =====================================================
-// LOGIN
+// VERIFICAR FORMULÁRIO
 // =====================================================
 
-form.addEventListener("submit", async (event) => {
+if (!form) {
 
-    event.preventDefault();
+    console.error(
+        "ERRO: loginForm não encontrado."
+    );
 
-
-    const email =
-        document
-            .getElementById("email")
-            .value
-            .trim();
+} else {
 
 
-    const password =
-        document
-            .getElementById("password")
-            .value;
+    // =================================================
+    // LOGIN
+    // =================================================
+
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
 
 
-    if (!email || !password) {
+        const email =
+            emailInput.value.trim();
 
-        alert(
-            "Informe o e-mail e a senha."
-        );
-
-        return;
-    }
+        const password =
+            passwordInput.value;
 
 
-    try {
-
-        // =================================================
-        // AUTENTICAR GESTOR
-        // =================================================
-
-        const result =
-            await login(
-                email,
-                password
-            );
-
-
-        if (!result.success) {
+        if (!email || !password) {
 
             alert(
-                "Erro no login: " +
-                result.message
+                "Preencha o e-mail e a senha."
             );
 
             return;
@@ -79,167 +67,245 @@ form.addEventListener("submit", async (event) => {
 
 
         // =================================================
-        // UID DO GESTOR
+        // DESATIVAR BOTÃO
         // =================================================
 
-        const uidGestor =
-            result.user?.uid;
+        botao.disabled = true;
+
+        botao.textContent =
+            "A entrar...";
 
 
-        if (!uidGestor) {
-
-            throw new Error(
-                "Não foi possível identificar o gestor."
-            );
-        }
+        try {
 
 
-        console.log(
-            "UID DO GESTOR:",
-            uidGestor
-        );
+            // =================================================
+            // 1 — AUTENTICAÇÃO
+            // =================================================
 
-
-        // =================================================
-        // PROCURAR A ESCOLA DO GESTOR
-        // =================================================
-
-        const consulta =
-            query(
-                collection(db, "escolas"),
-                where(
-                    "gestorUid",
-                    "==",
-                    uidGestor
-                )
+            console.log(
+                "1. A autenticar gestor..."
             );
 
 
-        const resultado =
-            await getDocs(consulta);
+            const resultado =
+                await login(
+                    email,
+                    password
+                );
 
 
-        if (resultado.empty) {
+            console.log(
+                "Resultado do login:",
+                resultado
+            );
+
+
+            if (!resultado.success) {
+
+                throw new Error(
+                    resultado.message
+                );
+            }
+
+
+            // =================================================
+            // 2 — UID
+            // =================================================
+
+            const usuario =
+                resultado.user;
+
+
+            if (!usuario) {
+
+                throw new Error(
+                    "O Firebase não devolveu os dados do utilizador."
+                );
+            }
+
+
+            const uidGestor =
+                usuario.uid;
+
+
+            console.log(
+                "2. UID do gestor:",
+                uidGestor
+            );
+
+
+            botao.textContent =
+                "A procurar escola...";
+
+
+            // =================================================
+            // 3 — PROCURAR ESCOLA
+            // =================================================
+
+            console.log(
+                "3. A procurar escola..."
+            );
+
+
+            const consulta =
+                query(
+                    collection(db, "escolas"),
+                    where(
+                        "gestorUid",
+                        "==",
+                        uidGestor
+                    )
+                );
+
+
+            const resultadoEscolas =
+                await getDocs(consulta);
+
+
+            console.log(
+                "Escolas encontradas:",
+                resultadoEscolas.size
+            );
+
+
+            // =================================================
+            // NENHUMA ESCOLA
+            // =================================================
+
+            if (resultadoEscolas.empty) {
+
+                throw new Error(
+                    "Este gestor não está associado a nenhuma escola."
+                );
+            }
+
+
+            // =================================================
+            // 4 — PEGAR ESCOLA
+            // =================================================
+
+            const documento =
+                resultadoEscolas.docs[0];
+
+
+            const escola =
+                documento.data();
+
+
+            const escolaId =
+                documento.id;
+
+
+            console.log(
+                "4. Escola encontrada:",
+                escola
+            );
+
+
+            // =================================================
+            // 5 — GUARDAR SESSÃO
+            // =================================================
+
+            sessionStorage.setItem(
+                "escolaId",
+                escolaId
+            );
+
+
+            sessionStorage.setItem(
+                "gestorUid",
+                uidGestor
+            );
+
+
+            sessionStorage.setItem(
+                "nomeEscola",
+                escola.nome || ""
+            );
+
+
+            sessionStorage.setItem(
+                "logoEscola",
+                escola.logoUrl || ""
+            );
+
+
+            sessionStorage.setItem(
+                "nomeGestor",
+                escola.nomeGestor || ""
+            );
+
+
+            sessionStorage.setItem(
+                "emailGestor",
+                escola.emailGestor || email
+            );
+
+
+            sessionStorage.setItem(
+                "provinciaEscola",
+                escola.provincia || ""
+            );
+
+
+            sessionStorage.setItem(
+                "municipioEscola",
+                escola.municipio || ""
+            );
+
+
+            sessionStorage.setItem(
+                "anoLetivo",
+                escola.anoLetivoAtual || ""
+            );
+
+
+            // =================================================
+            // 6 — SUCESSO
+            // =================================================
+
+            console.log(
+                "5. Login concluído."
+            );
+
+
+            botao.textContent =
+                "Entrando...";
+
+
+            // Pequeno intervalo para garantir
+            // que a sessão seja gravada
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "../pages/dashboard-gestor.html";
+
+            }, 300);
+
+
+        } catch (erro) {
+
+            console.error(
+                "ERRO NO LOGIN:",
+                erro
+            );
+
 
             alert(
-                "A conta foi autenticada, mas nenhuma escola está associada a este gestor."
+                "Não foi possível entrar:\n\n" +
+                (erro.message ||
+                 "Erro desconhecido.")
             );
 
-            return;
+
+            botao.disabled = false;
+
+            botao.textContent =
+                "Entrar";
         }
 
+    });
 
-        // =================================================
-        // PEGAR A ESCOLA
-        // =================================================
-
-        const documento =
-            resultado.docs[0];
-
-
-        const escola =
-            documento.data();
-
-
-        const escolaId =
-            documento.id;
-
-
-        console.log(
-            "ESCOLA ENCONTRADA:",
-            escola
-        );
-
-
-        // =================================================
-        // GUARDAR DADOS DA SESSÃO
-        // =================================================
-
-        sessionStorage.setItem(
-            "escolaId",
-            escolaId
-        );
-
-
-        sessionStorage.setItem(
-            "gestorUid",
-            uidGestor
-        );
-
-
-        sessionStorage.setItem(
-            "nomeEscola",
-            escola.nome || ""
-        );
-
-
-        sessionStorage.setItem(
-            "logoEscola",
-            escola.logoUrl || ""
-        );
-
-
-        sessionStorage.setItem(
-            "nomeGestor",
-            escola.nomeGestor || ""
-        );
-
-
-        sessionStorage.setItem(
-            "emailGestor",
-            escola.emailGestor || email
-        );
-
-
-        sessionStorage.setItem(
-            "provinciaEscola",
-            escola.provincia || ""
-        );
-
-
-        sessionStorage.setItem(
-            "municipioEscola",
-            escola.municipio || ""
-        );
-
-
-        sessionStorage.setItem(
-            "anoLetivo",
-            escola.anoLetivoAtual || ""
-        );
-
-
-        // =================================================
-        // LOGIN CONCLUÍDO
-        // =================================================
-
-        alert(
-            "Login efetuado com sucesso!"
-        );
-
-
-        // =================================================
-        // IR PARA O DASHBOARD
-        // =================================================
-
-        window.location.href =
-            "../pages/dashboard-gestor.html";
-
-
-    } catch (erro) {
-
-        console.error(
-            "ERRO NO LOGIN DO GESTOR:",
-            erro
-        );
-
-
-        alert(
-            "Erro ao entrar: " +
-            (erro.message ||
-             "Erro desconhecido.")
-        );
-
-    }
-
-});
+                }
