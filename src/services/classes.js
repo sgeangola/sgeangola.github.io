@@ -1,4 +1,4 @@
-alert("CLASSES.JS COMPLETO tCARREGADO ✅");
+alert("CLASSES.JS COMPLETO oCARREGADO ✅");
 
 import { app } from "./firebase.js";
 
@@ -119,6 +119,74 @@ const classesPorEnsino = {
 
 const escolaId = "YNY5XygXQqQfcPfIyK62";
 
+async function carregarEnsinosDaEscola() {
+
+    try {
+
+        const referencia = doc(
+            db,
+            "escolas",
+            escolaId
+        );
+
+        const resultado = await getDoc(
+            referencia
+        );
+
+        if (!resultado.exists()) {
+
+            alert("Escola não encontrada no Firebase.");
+
+            return;
+
+        }
+
+        const dados = resultado.data();
+
+        const ensinos = Array.isArray(dados.ensinos)
+            ? dados.ensinos
+            : [];
+
+        console.log(
+            "ENSINOS DA ESCOLA:",
+            ensinos
+        );
+
+        ensinoInput.innerHTML = "";
+
+        ensinos.forEach(ensino => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = ensino;
+
+            option.textContent =
+                nomeEnsino(ensino);
+
+            ensinoInput.appendChild(option);
+
+        });
+
+        atualizarClasses();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Erro ao carregar ensino:",
+            error
+        );
+
+        alert(
+            "Erro ao carregar ensino:\n\n" +
+            error.message
+        );
+
+    }
+
+    }
 
 // =====================================================
 // ATUALIZAR CLASSES
@@ -1143,7 +1211,7 @@ ensinoInput.addEventListener(
 // INICIALIZAR CLASSES
 // =====================================================
 
-atualizarClasses();
+carregarEnsinosDaEscola();
 
 alert(
     "CLASSES DISPONÍVEIS: " +
