@@ -1,28 +1,36 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>SGE - Sistema de Gestão Escolar</title><style>
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SGE — Sistema de Gestão Escolar</title>
+
+<style>
 
 *{
-    box-sizing:border-box;
     margin:0;
     padding:0;
-    font-family:Arial,sans-serif;
-}
-
-html{
-    scroll-behavior:smooth;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 body{
-    background:#f8fafc;
-    color:#1e293b;
+    background:#ffffff;
+    color:#0f172a;
+    line-height:1.6;
 }
 
-/* ============================= */
-/* CABEÇALHO */
-/* ============================= */
+
+/* ================================
+   CABEÇALHO
+================================ */
 
 header{
-    background:white;
+    width:100%;
+    background:#ffffff;
     border-bottom:1px solid #e2e8f0;
     position:sticky;
     top:0;
@@ -30,122 +38,122 @@ header{
 }
 
 .navbar{
-    max-width:1200px;
+    max-width:1150px;
     margin:auto;
     padding:15px 25px;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:20px;
 }
 
-/* LOGOTIPO */
-
-.logo{
+.logo-area{
     display:flex;
     align-items:center;
-    gap:10px;
-    text-decoration:none;
+    gap:12px;
 }
 
-.logo img{
-    width:52px;
-    height:52px;
+.logo-area img{
+    width:48px;
+    height:48px;
     object-fit:contain;
 }
 
 .logo-text{
-    color:#1e3a8a;
-    font-size:23px;
+    font-size:22px;
     font-weight:bold;
+    color:#1e3a8a;
 }
 
 .logo-text span{
     display:block;
-    color:#64748b;
     font-size:11px;
     font-weight:normal;
+    color:#64748b;
 }
 
-/* MENU */
 
-nav{
+/* ================================
+   BOTÕES DO CABEÇALHO
+================================ */
+
+.nav-buttons{
     display:flex;
-    align-items:center;
-    gap:25px;
+    gap:10px;
 }
 
-nav a{
+.btn{
     text-decoration:none;
-    color:#334155;
-    font-size:15px;
-    font-weight:500;
+    padding:10px 20px;
+    border-radius:8px;
+    font-weight:bold;
+    font-size:14px;
+    transition:.2s;
 }
 
-nav a:hover{
+.btn-login{
     color:#1e3a8a;
-}
-
-.btn-entrar{
-    background:#1e3a8a;
-    color:white !important;
-    padding:11px 20px;
-    border-radius:8px;
-}
-
-.btn-cadastrar{
     border:1px solid #1e3a8a;
-    color:#1e3a8a !important;
-    padding:10px 18px;
-    border-radius:8px;
+    background:white;
 }
 
-/* ============================= */
-/* HERO */
-/* ============================= */
+.btn-login:hover{
+    background:#eff6ff;
+}
+
+.btn-register{
+    background:#1e3a8a;
+    color:white;
+}
+
+.btn-register:hover{
+    background:#2563eb;
+}
+
+
+/* ================================
+   HERO
+================================ */
 
 .hero{
-    background:linear-gradient(
-        135deg,
-        #eff6ff,
-        #ffffff
-    );
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #ffffff
+        );
 
-    min-height:560px;
-
-    display:flex;
-    align-items:center;
+    padding:85px 25px;
 }
 
 .hero-content{
-    max-width:1200px;
-    width:100%;
+    max-width:1150px;
     margin:auto;
 
-    padding:70px 25px;
-
     display:grid;
-    grid-template-columns:1.1fr .9fr;
-    gap:50px;
+    grid-template-columns:
+        1.2fr
+        .8fr;
+
     align-items:center;
+    gap:60px;
 }
 
-.hero h1{
-    color:#1e3a8a;
+.hero-text h1{
     font-size:48px;
     line-height:1.15;
+    color:#0f2f75;
     margin-bottom:20px;
 }
 
-.hero h1 span{
+.hero-text h1 span{
     color:#2563eb;
 }
 
-.hero p{
+.hero-text p{
+    max-width:650px;
     color:#475569;
     font-size:18px;
-    line-height:1.7;
-    max-width:600px;
     margin-bottom:30px;
 }
 
@@ -155,25 +163,36 @@ nav a:hover{
     flex-wrap:wrap;
 }
 
-.hero-btn{
-    text-decoration:none;
+.hero-buttons a{
     padding:14px 25px;
-    border-radius:8px;
+    border-radius:9px;
+    text-decoration:none;
     font-weight:bold;
 }
 
-.hero-btn-primary{
+.hero-primary{
     background:#1e3a8a;
     color:white;
 }
 
-.hero-btn-secondary{
-    border:1px solid #1e3a8a;
-    color:#1e3a8a;
-    background:white;
+.hero-primary:hover{
+    background:#2563eb;
 }
 
-/* ÁREA DO LOGO */
+.hero-secondary{
+    background:white;
+    color:#1e3a8a;
+    border:1px solid #cbd5e1;
+}
+
+.hero-secondary:hover{
+    background:#f8fafc;
+}
+
+
+/* ================================
+   LOGOTIPO PRINCIPAL
+================================ */
 
 .hero-logo{
     display:flex;
@@ -181,36 +200,38 @@ nav a:hover{
     align-items:center;
 }
 
-.logo-circle{
-    width:300px;
-    height:300px;
+.hero-logo-box{
+    width:280px;
+    height:280px;
 
     background:white;
 
-    border-radius:50%;
+    border-radius:30px;
 
     display:flex;
     justify-content:center;
     align-items:center;
 
     box-shadow:
-        0 15px 40px rgba(30,58,138,.15);
+        0 20px 50px
+        rgba(30,58,138,.15);
 
-    border:8px solid #eff6ff;
+    border:1px solid #dbeafe;
 }
 
-.logo-circle img{
-    width:220px;
-    height:220px;
+.hero-logo img{
+    width:210px;
+    height:210px;
     object-fit:contain;
 }
 
-/* ============================= */
-/* SEÇÕES */
-/* ============================= */
+
+/* ================================
+   SEÇÕES
+================================ */
 
 .section{
-    max-width:1200px;
+    max-width:1150px;
     margin:auto;
     padding:75px 25px;
 }
@@ -221,92 +242,60 @@ nav a:hover{
 }
 
 .section-title h2{
-    color:#1e3a8a;
+    color:#0f2f75;
     font-size:32px;
-    margin-bottom:12px;
+    margin-bottom:10px;
 }
 
 .section-title p{
     color:#64748b;
-    max-width:650px;
-    margin:auto;
-    line-height:1.6;
 }
 
-/* ============================= */
-/* SOBRE */
-/* ============================= */
 
-.about{
-    background:white;
-}
-
-.about-box{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:35px;
-    align-items:center;
-}
-
-.about-text h3{
-    color:#1e3a8a;
-    font-size:25px;
-    margin-bottom:15px;
-}
-
-.about-text p{
-    color:#475569;
-    line-height:1.8;
-    margin-bottom:15px;
-}
-
-.about-card{
-    background:#eff6ff;
-    border-radius:15px;
-    padding:35px;
-    text-align:center;
-}
-
-.about-card strong{
-    display:block;
-    color:#1e3a8a;
-    font-size:45px;
-    margin-bottom:8px;
-}
-
-/* ============================= */
-/* FUNCIONALIDADES */
-/* ============================= */
+/* ================================
+   FUNCIONALIDADES
+================================ */
 
 .features{
     display:grid;
     grid-template-columns:
-        repeat(auto-fit,minmax(220px,1fr));
+        repeat(3,1fr);
 
-    gap:20px;
+    gap:25px;
 }
 
 .feature{
-    background:white;
-    padding:28px;
-    border-radius:12px;
-
-    box-shadow:
-        0 4px 15px rgba(0,0,0,.06);
-
+    padding:30px;
     border:1px solid #e2e8f0;
+    border-radius:15px;
+    background:white;
 
     transition:.2s;
 }
 
 .feature:hover{
     transform:translateY(-4px);
-    border-color:#bfdbfe;
+
+    box-shadow:
+        0 10px 25px
+        rgba(15,23,42,.08);
 }
 
 .feature-icon{
-    font-size:35px;
-    margin-bottom:15px;
+    width:50px;
+    height:50px;
+
+    border-radius:12px;
+
+    background:#eff6ff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:25px;
+
+    margin-bottom:18px;
 }
 
 .feature h3{
@@ -316,117 +305,87 @@ nav a:hover{
 
 .feature p{
     color:#64748b;
-    line-height:1.5;
-    font-size:14px;
+    font-size:15px;
 }
 
-/* ============================= */
-/* ESCOLAS PARCEIRAS */
-/* ============================= */
 
-.partners{
-    background:white;
+/* ================================
+   ESCOLAS
+================================ */
+
+.schools-section{
+    background:#f8fafc;
 }
 
 .schools{
-    display:grid;
-
-    grid-template-columns:
-        repeat(auto-fit,minmax(220px,1fr));
-
-    gap:20px;
+    max-width:1150px;
+    margin:auto;
+    padding:75px 25px;
 }
 
-.school{
-    background:#f8fafc;
-
+.school-box{
+    background:white;
     border:1px solid #e2e8f0;
-
-    border-radius:12px;
-
-    padding:25px;
-
+    border-radius:15px;
+    padding:40px;
     text-align:center;
 }
 
-.school-logo{
-    width:80px;
-    height:80px;
-
-    border-radius:50%;
-
-    background:#eff6ff;
-
-    margin:0 auto 15px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
+.school-number{
+    font-size:42px;
+    font-weight:bold;
     color:#1e3a8a;
-
-    font-size:30px;
 }
 
-.school h3{
-    color:#1e3a8a;
-    margin-bottom:7px;
-}
-
-.school p{
+.school-box p{
     color:#64748b;
-    font-size:14px;
 }
 
-/* ============================= */
-/* COMO FUNCIONA */
-/* ============================= */
 
-.steps{
+/* ================================
+   SOBRE
+================================ */
+
+.about{
     display:grid;
     grid-template-columns:
-        repeat(auto-fit,minmax(200px,1fr));
+        1fr 1fr;
 
-    gap:25px;
-}
-
-.step{
-    text-align:center;
-    padding:25px;
-}
-
-.step-number{
-    width:55px;
-    height:55px;
-
-    margin:0 auto 15px;
-
-    border-radius:50%;
-
-    background:#1e3a8a;
-    color:white;
-
-    display:flex;
+    gap:50px;
     align-items:center;
-    justify-content:center;
-
-    font-weight:bold;
-    font-size:20px;
 }
 
-.step h3{
-    color:#1e3a8a;
-    margin-bottom:8px;
+.about h2{
+    color:#0f2f75;
+    font-size:32px;
+    margin-bottom:15px;
 }
 
-.step p{
+.about p{
     color:#64748b;
-    line-height:1.5;
+    margin-bottom:15px;
 }
 
-/* ============================= */
-/* CTA */
-/* ============================= */
+.about-list{
+    list-style:none;
+}
+
+.about-list li{
+    margin:12px 0;
+    color:#334155;
+}
+
+.about-list li::before{
+    content:"✓";
+    color:#2563eb;
+    font-weight:bold;
+    margin-right:10px;
+}
+
+
+/* ================================
+   CTA
+================================ */
 
 .cta{
     background:#1e3a8a;
@@ -437,7 +396,7 @@ nav a:hover{
 
 .cta h2{
     font-size:32px;
-    margin-bottom:15px;
+    margin-bottom:12px;
 }
 
 .cta p{
@@ -449,79 +408,65 @@ nav a:hover{
     display:inline-block;
     background:white;
     color:#1e3a8a;
-    padding:14px 28px;
-    border-radius:8px;
     text-decoration:none;
+    padding:14px 28px;
+    border-radius:9px;
     font-weight:bold;
 }
 
-/* ============================= */
-/* RODAPÉ */
-/* ============================= */
+
+/* ================================
+   RODAPÉ
+================================ */
 
 footer{
     background:#0f172a;
     color:white;
-    padding:40px 25px 20px;
+    padding:35px 25px;
 }
 
 .footer-content{
-    max-width:1200px;
+    max-width:1150px;
     margin:auto;
 
-    display:grid;
-
-    grid-template-columns:
-        2fr 1fr 1fr;
-
-    gap:40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
 }
 
 .footer-logo{
-    font-size:24px;
+    font-size:20px;
     font-weight:bold;
-    margin-bottom:10px;
 }
 
-.footer p{
-    color:#94a3b8;
-    line-height:1.6;
-}
-
-.footer h3{
-    margin-bottom:15px;
-}
-
-.footer a{
-    display:block;
-    color:#cbd5e1;
-    text-decoration:none;
-    margin-bottom:9px;
-}
-
-.footer a:hover{
-    color:white;
-}
-
-.copyright{
-    max-width:1200px;
-    margin:30px auto 0;
-    padding-top:20px;
-    border-top:1px solid #334155;
-
-    text-align:center;
+.footer-content p{
     color:#94a3b8;
     font-size:13px;
 }
 
-/* ============================= */
-/* MOBILE */
-/* ============================= */
+
+/* ================================
+   MOBILE
+================================ */
 
 @media(max-width:800px){
 
-    nav a:not(.btn-entrar):not(.btn-cadastrar){
+    .navbar{
+        padding:12px 15px;
+    }
+
+    .logo-text span{
         display:none;
+    }
+
+    .nav-buttons .btn{
+        padding:8px 12px;
+        font-size:12px;
+    }
+
+    .hero{
+        padding:55px 20px;
     }
 
     .hero-content{
@@ -529,7 +474,7 @@ footer{
         text-align:center;
     }
 
-    .hero p{
+    .hero-text p{
         margin-left:auto;
         margin-right:auto;
     }
@@ -538,258 +483,293 @@ footer{
         justify-content:center;
     }
 
-    .hero h1{
+    .hero-text h1{
         font-size:36px;
     }
 
-    .hero-logo{
-        order:-1;
-    }
-
-    .logo-circle{
+    .hero-logo-box{
         width:220px;
         height:220px;
     }
 
-    .logo-circle img{
+    .hero-logo img{
         width:160px;
         height:160px;
     }
 
-    .about-box{
+    .features{
+        grid-template-columns:1fr;
+    }
+
+    .about{
         grid-template-columns:1fr;
     }
 
     .footer-content{
-        grid-template-columns:1fr;
+        flex-direction:column;
         text-align:center;
     }
 
 }
 
-</style></head><body><!-- ================================================= --><!-- CABEÇALHO --><!-- ================================================= --><header><div class="navbar"><a href="index.html" class="logo"><img
-src="src/assets/logo-sge.png"
-alt="Logotipo SGE"
+</style>
 
-«»
+</head>
 
-<div class="logo-text">SGE
 
-<span>
-Sistema de Gestão Escolar
-</span></div></a><nav><a href="#inicio">
-Início
-</a><a href="#sobre">
-Sobre
-</a><a href="#funcionalidades">
-Funcionalidades
-</a><a href="#escolas">
-Escolas
-</a><a href="#contactos">
-Contactos
-</a><a
-href="src/pages/entrar.html"
-class="btn-entrar"
+<body>
 
-«»
 
-Entrar
-</a>
+<!-- CABEÇALHO -->
 
-<a
-href="src/pages/register-school.html"
-class="btn-cadastrar"
+<header>
 
-«»
+<div class="navbar">
 
-Cadastrar escola
-</a>
+    <div class="logo-area">
 
-</nav></div></header><!-- ================================================= --><!-- HERO --><!-- ================================================= --><section class="hero" id="inicio"><div class="hero-content"><div><h1>Gestão escolar
-<span>
-mais simples,
-</span>
+        <img
+            src="assets/logo-sge.png"
+            alt="Logotipo SGE"
+        >
 
-mais organizada.
+        <div class="logo-text">
 
-</h1><p>O SGE — Sistema de Gestão Escolar — é uma plataforma
-digital criada para ajudar escolas a organizar alunos,
-professores, turmas, notas, documentos e outros processos
-num único lugar.
+            SGE
 
-</p><div class="hero-buttons"><a
-href="src/pages/entrar.html"
-class="hero-btn hero-btn-primary"
+            <span>
+                Sistema de Gestão Escolar
+            </span>
 
-«»
+        </div>
 
-Entrar no SGE
-</a>
+    </div>
 
-<a
-href="src/pages/register-school.html"
-class="hero-btn hero-btn-secondary"
 
-«»
+    <div class="nav-buttons">
 
-Cadastrar escola
-</a>
+        <a
+            href="login.html"
+            class="btn btn-login"
+        >
+            Entrar
+        </a>
 
-</div></div><div class="hero-logo"><div class="logo-circle"><img
-src="src/assets/logo-sge.png"
-alt="SGE"
 
-«»
+        <a
+            href="register-shcool.html"
+            class="btn btn-register"
+        >
+            Cadastrar escola
+        </a>
 
-</div></div></div></section><!-- ================================================= --><!-- SOBRE --><!-- ================================================= --><section class="about" id="sobre"><div class="section"><div class="section-title"><h2>
-Sobre o SGE
-</h2><p>
-Uma solução digital para modernizar e facilitar
-a gestão das instituições de ensino.
-</p></div><div class="about-box"><div class="about-text"><h3>
-Uma escola mais organizada começa aqui.
-</h3><p>O SGE foi pensado para centralizar as principais
-informações da escola e facilitar o trabalho de
-gestores, professores, alunos e encarregados.
+    </div>
 
-</p><p>Cada escola possui o seu próprio espaço dentro
-da plataforma, mantendo os seus dados organizados
-e separados.
+</div>
 
-</p></div><div class="about-card"><strong>
-SGE
-</strong><p>
-Sistema de Gestão Escolar
-</p></div></div></div></section><!-- ================================================= --><!-- FUNCIONALIDADES --><!-- ================================================= --><section id="funcionalidades"><div class="section"><div class="section-title"><h2>
-Tudo num só lugar
-</h2><p>
-Ferramentas para facilitar a gestão diária
-da escola.
-</p></div><div class="features"><div class="feature"><div class="feature-icon">
-👨‍🎓
-</div><h3>
-Alunos
-</h3><p>
-Cadastro, organização e acompanhamento dos alunos.
-</p></div><div class="feature"><div class="feature-icon">
-👨‍🏫
-</div><h3>
-Professores
-</h3><p>
-Gestão dos professores e suas responsabilidades.
-</p></div><div class="feature"><div class="feature-icon">
-🏫
-</div><h3>
-Turmas
-</h3><p>
-Criação e organização das turmas da escola.
-</p></div><div class="feature"><div class="feature-icon">
-📝
-</div><h3>
-Notas e Pautas
-</h3><p>
-Gestão de notas, mini-pautas e pautas escolares.
-</p></div><div class="feature"><div class="feature-icon">
-📄
-</div><h3>
-Boletins
-</h3><p>
-Organização e disponibilização dos boletins.
-</p></div><div class="feature"><div class="feature-icon">
-💰
-</div><h3>
-Financeiro
-</h3><p>
-Acompanhamento da gestão financeira da escola.
-</p></div><div class="feature"><div class="feature-icon">
-📊
-</div><h3>
-Estatísticas
-</h3><p>
-Informações e indicadores para apoiar a gestão.
-</p></div><div class="feature"><div class="feature-icon">
-📅
-</div><h3>
-Calendário
-</h3><p>
-Organização das principais datas e atividades.
-</p></div></div></div></section><!-- ================================================= --><!-- ESCOLAS PARCEIRAS --><!-- ================================================= --><section class="partners" id="escolas"><div class="section"><div class="section-title"><h2>
-Nossas escolas parceiras
-</h2><p>
-Escolas que fazem parte da plataforma SGE.
-</p></div><div class="schools"><div class="school"><div class="school-logo">
-🏫
-</div><h3>
-Escola Teresa
-</h3><p>
-Escola cadastrada no SGE
-</p></div><div class="school"><div class="school-logo">
-🏫
-</div><h3>
-Sua escola
-</h3><p>
-Cadastre a sua escola no SGE
-</p></div></div></div></section><!-- ================================================= --><!-- COMO FUNCIONA --><!-- ================================================= --><section><div class="section"><div class="section-title"><h2>
-Como funciona?
-</h2><p>
-Começar a utilizar o SGE é simples.
-</p></div><div class="steps"><div class="step"><div class="step-number">
-01
-</div><h3>
-Cadastre
-</h3><p>
-Registe a sua escola na plataforma.
-</p></div><div class="step"><div class="step-number">
-02
-</div><h3>
-Configure
-</h3><p>
-Configure os dados e estrutura da escola.
-</p></div><div class="step"><div class="step-number">
-03
-</div><h3>
-Organize
-</h3><p>
-Cadastre ou importe alunos, professores e turmas.
-</p></div><div class="step"><div class="step-number">
-04
-</div><h3>
-Comece a gerir
-</h3><p>
-Utilize as ferramentas do SGE no dia a dia.
-</p></div></div></div></section><!-- ================================================= --><!-- CTA --><!-- ================================================= --><section class="cta"><h2>
-Pronto para digitalizar a sua escola?
-</h2><p>
-Faça parte das escolas que utilizam o SGE.
-</p><a href="src/pages/register-school.html">
-Cadastrar minha escola
-</a></section><!-- ================================================= --><!-- RODAPÉ --><!-- ================================================= --><footer id="contactos"><div class="footer-content"><div><div class="footer-logo">
-SGE
-</div><p>
-Sistema de Gestão Escolar.
-Uma plataforma para uma gestão escolar
-mais simples, organizada e digital.
-</p></div><div><h3>
-Navegação
-</h3><a href="#inicio">
-Início
-</a><a href="#sobre">
-Sobre
-</a><a href="#funcionalidades">
-Funcionalidades
-</a><a href="#escolas">
-Escolas parceiras
-</a></div><div><h3>
-Acesso
-</h3><a href="src/pages/entrar.html">
-Entrar
-</a><a href="src/pages/register-school.html">
-Cadastrar escola
-</a></div></div><div class="copyright">© 2026 SGE — Sistema de Gestão Escolar.
-Todos os direitos reservados.
+</header>
 
-</div></footer>
 
-      </body>
+<!-- HERO -->
 
-  </html>
+<section class="hero">
+
+<div class="hero-content">
+
+
+    <div class="hero-text">
+
+        <h1>
+
+            Gestão escolar
+            <span>simples e eficiente.</span>
+
+        </h1>
+
+
+        <p>
+
+            O SGE é uma plataforma digital criada
+            para ajudar escolas a organizar alunos,
+            professores, turmas, notas, pautas,
+            boletins e informações escolares
+            num único sistema.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+            <a
+                href="register-shcool.html"
+                class="hero-primary"
+            >
+                Cadastrar minha escola
+            </a>
+
+
+            <a
+                href="login.html"
+                class="hero-secondary"
+            >
+                Entrar no SGE
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-logo">
+
+        <div class="hero-logo-box">
+
+            <img
+                src="assets/logo-sge.png"
+                alt="SGE"
+            >
+
+        </div>
+
+    </div>
+
+
+</div>
+
+</section>
+
+
+<!-- FUNCIONALIDADES -->
+
+<section class="section">
+
+<div class="section-title">
+
+    <h2>
+        Tudo o que a escola precisa
+    </h2>
+
+    <p>
+        Uma plataforma pensada para facilitar
+        a gestão escolar.
+    </p>
+
+</div>
+
+
+<div class="features">
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            🏫
+        </div>
+
+        <h3>
+            Gestão da escola
+        </h3>
+
+        <p>
+            Organize as informações da instituição
+            e tenha uma visão centralizada da
+            gestão escolar.
+        </p>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            👨‍🎓
+        </div>
+
+        <h3>
+            Gestão de alunos
+        </h3>
+
+        <p>
+            Cadastre e organize alunos, turmas,
+            informações pessoais e situação escolar.
+        </p>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            📊
+        </div>
+
+        <h3>
+            Notas e pautas
+        </h3>
+
+        <p>
+            Facilite o lançamento de notas,
+            mini-pautas, pautas e resultados
+            escolares.
+        </p>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            👨‍🏫
+        </div>
+
+        <h3>
+            Professores
+        </h3>
+
+        <p>
+            Organize professores, disciplinas,
+            turmas e acessos ao sistema.
+        </p>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            📄
+        </div>
+
+        <h3>
+            Boletins e documentos
+        </h3>
+
+        <p>
+            Centralize boletins, documentos e
+            informações importantes da escola.
+        </p>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            🔐
+        </div>
+
+        <h3>
+            Acessos seguros
+        </h3>
+
+        <p>
+            Cada utilizador possui o seu próprio
+            acesso de acordo com a sua função.
+        </p>
+
+    </div>
+
+
+</div>
+
+    </section>
