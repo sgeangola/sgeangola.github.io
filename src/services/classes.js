@@ -1,4 +1,4 @@
-alert("CLASSES.JS COMPLETO oCARREGADO ✅");
+alert("CLASSES.JS COMPLETO 9CARREGADO ✅");
 
 import { app } from "./firebase.js";
 
@@ -639,7 +639,7 @@ const resultado =
         // NENHUMA TURMA
         // =================================================
 
-        if (resultado.empty) {
+if (turmasDaEscola.length === 0) {
 
             listaTurmas.innerHTML = `
 
@@ -774,8 +774,8 @@ const resultado =
         // LINHAS
         // =================================================
 
-        resultado.forEach(
-            item => {
+        turmasDaEscola.forEach(
+    item => {
 
                 const turma =
                     item.data();
