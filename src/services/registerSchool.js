@@ -539,52 +539,58 @@ if (form) {
                 // DADOS DA ESCOLA
                 // =====================================
 
-                const dadosEscola = {
+const dadosEscola = {
 
-                    nome: nome,
+    nome: nome,
 
-                    provincia: provincia,
+    provincia: provincia,
 
-                    municipio: municipio,
+    municipio: municipio,
 
-                    telefone: telefone,
+    telefone: telefone,
 
-                    email: emailEscola,
+    email: emailEscola,
 
-                    anoLetivoAtual: anoLetivo,
+    anoLetivoAtual: anoLetivo,
 
-                    tipoEscola: tipoEscola,
+    tipoEscola: tipoEscola,
 
-                    ensinos:
-                        ensinosSelecionados,
+    ensinos:
+        ensinosSelecionados,
 
-                    estrutura: {
+    estrutura: {
 
-                        ensinoPrimario:
-                            estruturaPrimario,
+        ensinoPrimario:
+            estruturaPrimario,
 
-                        primeiroCiclo:
-                            estruturaPrimeiroCiclo
+        primeiroCiclo:
+            estruturaPrimeiroCiclo
 
-                    },
+    },
 
-                    gestorUid:
-                        uidGestor,
+    gestorUid:
+        uidGestor,
 
-                    nomeGestor:
-                        nomeGestor,
+    nomeGestor:
+        nomeGestor,
 
-                    emailGestor:
-                        emailGestor,
+    emailGestor:
+        emailGestor,
 
-                    logoUrl: "",
+    logoUrl: "",
 
-                    ativo: true,
+    // =====================================
+    // APROVAÇÃO DA ESCOLA
+    // =====================================
 
-                    criadoEm:
-                        serverTimestamp()
+    estado: "pendente",
 
-                };
+    ativo: false,
+
+    criadoEm:
+        serverTimestamp()
+
+};
 
 
                 // =====================================
