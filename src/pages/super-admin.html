@@ -2,6 +2,7 @@
 <html lang="pt">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,6 +12,7 @@
 
     <title>Super Admin - SGE</title>
 
+
     <style>
 
         * {
@@ -19,156 +21,393 @@
             padding: 0;
         }
 
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-            color: #1f2937;
+
+            font-family:
+                Arial,
+                sans-serif;
+
+            background:
+                #f4f7fb;
+
+            color:
+                #1f2937;
+
         }
+
+
+        /* =========================================
+           CABEÇALHO
+        ========================================== */
 
         header {
-            background: #0d6efd;
-            color: white;
-            padding: 20px;
+
+            background:
+                #0d6efd;
+
+            color:
+                white;
+
+            padding:
+                20px;
+
         }
+
 
         header h1 {
-            font-size: 22px;
+
+            font-size:
+                22px;
+
         }
+
 
         header p {
-            margin-top: 5px;
-            opacity: 0.9;
+
+            margin-top:
+                5px;
+
+            opacity:
+                0.9;
+
         }
+
+
+        /* =========================================
+           CONTAINER
+        ========================================== */
 
         .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
+
+            max-width:
+                1200px;
+
+            margin:
+                auto;
+
+            padding:
+                20px;
+
         }
+
+
+        /* =========================================
+           CARDS
+        ========================================== */
 
         .cards {
-            display: grid;
-            grid-template-columns:
-                repeat(auto-fit, minmax(200px, 1fr));
 
-            gap: 15px;
-            margin-bottom: 25px;
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        200px,
+                        1fr
+                    )
+                );
+
+            gap:
+                15px;
+
+            margin-bottom:
+                25px;
+
         }
+
 
         .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
+
+            background:
+                white;
+
+            padding:
+                20px;
+
+            border-radius:
+                12px;
+
             box-shadow:
-                0 2px 8px rgba(0,0,0,0.08);
+                0 2px 8px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.08
+                );
+
         }
+
 
         .card h3 {
-            font-size: 15px;
-            color: #6b7280;
-            margin-bottom: 10px;
+
+            font-size:
+                15px;
+
+            color:
+                #6b7280;
+
+            margin-bottom:
+                10px;
+
         }
+
 
         .numero {
-            font-size: 30px;
-            font-weight: bold;
+
+            font-size:
+                30px;
+
+            font-weight:
+                bold;
+
         }
+
 
         .pendente {
-            color: #f59e0b;
+
+            color:
+                #f59e0b;
+
         }
+
 
         .ativo {
-            color: #16a34a;
+
+            color:
+                #16a34a;
+
         }
+
 
         .rejeitado {
-            color: #dc2626;
+
+            color:
+                #dc2626;
+
         }
+
+
+        /* =========================================
+           SEÇÃO
+        ========================================== */
 
         .secao {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
+
+            background:
+                white;
+
+            padding:
+                20px;
+
+            border-radius:
+                12px;
+
             box-shadow:
-                0 2px 8px rgba(0,0,0,0.08);
+                0 2px 8px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.08
+                );
+
         }
+
 
         .secao h2 {
-            margin-bottom: 20px;
+
+            margin-bottom:
+                20px;
+
         }
+
+
+        /* =========================================
+           ESCOLA
+        ========================================== */
 
         .escola {
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 18px;
-            margin-bottom: 15px;
+
+            border:
+                1px solid #e5e7eb;
+
+            border-radius:
+                10px;
+
+            padding:
+                18px;
+
+            margin-bottom:
+                15px;
+
         }
+
 
         .escola h3 {
-            margin-bottom: 10px;
+
+            margin-bottom:
+                10px;
+
         }
+
 
         .dados {
-            display: grid;
-            gap: 6px;
-            color: #4b5563;
-            margin-bottom: 15px;
+
+            display:
+                grid;
+
+            gap:
+                6px;
+
+            color:
+                #4b5563;
+
+            margin-bottom:
+                15px;
+
         }
+
+
+        /* =========================================
+           BOTÕES
+        ========================================== */
 
         .acoes {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+
+            display:
+                flex;
+
+            gap:
+                10px;
+
+            flex-wrap:
+                wrap;
+
         }
+
 
         button {
-            border: none;
-            padding: 10px 15px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-weight: bold;
+
+            border:
+                none;
+
+            padding:
+                10px 15px;
+
+            border-radius:
+                7px;
+
+            cursor:
+                pointer;
+
+            font-weight:
+                bold;
+
         }
+
+
+        button:hover {
+
+            opacity:
+                0.9;
+
+        }
+
 
         .btn-ver {
-            background: #e5e7eb;
-            color: #111827;
+
+            background:
+                #e5e7eb;
+
+            color:
+                #111827;
+
         }
+
 
         .btn-aprovar {
-            background: #16a34a;
-            color: white;
+
+            background:
+                #16a34a;
+
+            color:
+                white;
+
         }
+
 
         .btn-rejeitar {
-            background: #dc2626;
-            color: white;
-        }
 
-        #mensagem {
-            margin-bottom: 15px;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-        }
+            background:
+                #dc2626;
 
-        @media (max-width: 600px) {
-
-            .container {
-                padding: 12px;
-            }
-
-            .acoes button {
-                width: 100%;
-            }
+            color:
+                white;
 
         }
+
 
         .btn-eliminar {
-    background: #7f1d1d;
-    color: white;
+
+            background:
+                #7f1d1d;
+
+            color:
+                white;
+
+        }
+
+
+        /* =========================================
+           MENSAGEM
+        ========================================== */
+
+        #mensagem {
+
+            margin-bottom:
+                15px;
+
+            padding:
+                12px;
+
+            border-radius:
+                8px;
+
+            display:
+                none;
+
+        }
+
+
+        /* =========================================
+           RESPONSIVO
+        ========================================== */
+
+        @media (
+            max-width: 600px
+        ) {
+
+            .container {
+
+                padding:
+                    12px;
+
             }
-        
+
+
+            .acoes button {
+
+                width:
+                    100%;
+
+            }
+
+        }
+
     </style>
 
 </head>
@@ -177,136 +416,151 @@
 <body>
 
 
-<header>
-
-    <h1>SGE — Super Admin</h1>
-
-    <p>
-        Gestão geral das escolas
-    </p>
-
-</header>
-
-
-<main class="container">
-
-
     <!-- =========================================
-         ESTATÍSTICAS
+         CABEÇALHO
     ========================================== -->
 
-    <section class="cards">
+    <header>
+
+        <h1>
+            SGE — Super Admin
+        </h1>
+
+        <p>
+            Gestão geral das escolas
+        </p>
+
+    </header>
 
 
-        <div class="card">
 
-            <h3>
+    <main class="container">
+
+
+        <!-- =====================================
+             ESTATÍSTICAS
+        ====================================== -->
+
+        <section class="cards">
+
+
+            <div class="card">
+
+                <h3>
+                    Escolas Pendentes
+                </h3>
+
+                <div
+                    id="totalPendentes"
+                    class="numero pendente"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <h3>
+                    Escolas Ativas
+                </h3>
+
+                <div
+                    id="totalAtivas"
+                    class="numero ativo"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <h3>
+                    Escolas Rejeitadas
+                </h3>
+
+                <div
+                    id="totalRejeitadas"
+                    class="numero rejeitado"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <h3>
+                    Total de Escolas
+                </h3>
+
+                <div
+                    id="totalEscolas"
+                    class="numero"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================
+             MENSAGEM
+        ====================================== -->
+
+        <div
+            id="mensagem"
+        ></div>
+
+
+
+        <!-- =====================================
+             ESCOLAS PENDENTES
+        ====================================== -->
+
+        <section class="secao">
+
+            <h2>
                 Escolas Pendentes
-            </h3>
+            </h2>
+
 
             <div
-                id="totalPendentes"
-                class="numero pendente"
+                id="listaEscolas"
             >
-                0
+
+                A carregar escolas...
+
             </div>
 
-        </div>
+        </section>
 
 
-        <div class="card">
-
-            <h3>
-                Escolas Ativas
-            </h3>
-
-            <div
-                id="totalAtivas"
-                class="numero ativo"
-            >
-                0
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3>
-                Escolas Rejeitadas
-            </h3>
-
-            <div
-                id="totalRejeitadas"
-                class="numero rejeitado"
-            >
-                0
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3>
-                Total de Escolas
-            </h3>
-
-            <div
-                id="totalEscolas"
-                class="numero"
-            >
-                0
-            </div>
-
-        </div>
-
-
-    </section>
+    </main>
 
 
 
     <!-- =========================================
-         MENSAGEM
+         JAVASCRIPT
     ========================================== -->
 
-    <div id="mensagem"></div>
-
-
-
-    <!-- =========================================
-         ESCOLAS PENDENTES
-    ========================================== -->
-
-    <section class="secao">
-
-        <h2>
-            Escolas Pendentes
-        </h2>
-
-
-        <div id="listaEscolas">
-
-            A carregar escolas...
-
-        </div>
-
-    </section>
-
-
-</main>
-
-
-<!-- =========================================
-     JAVASCRIPT
-========================================== -->
-
-<script
-    type="module"
-    src="../serviços/super-admin.js"
-></script>
+    <script
+        type="module"
+        src="../serviços/super-admin.js"
+    ></script>
 
 
 </body>
 
-      </html>
+        </html>
