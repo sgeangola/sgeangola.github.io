@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Entrar — SGE</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
+
+body{
+
+    min-height:100vh;
+
+    background:#f1f5f9;
+
+    color:#1e293b;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+/* ==============================
+   CABEÇALHO
+============================== */
+
+header{
+
+    background:#1e3a8a;
+
+    color:white;
+
+    padding:25px 20px;
+
+    text-align:center;
+
+}
+
+.logo{
+
+    width:75px;
+
+    height:75px;
+
+    margin:auto;
+
+    background:white;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    color:#1e3a8a;
+
+    box-shadow:
+        0 4px 12px
+        rgba(0,0,0,.2);
+
+}
+
+header h1{
+
+    margin-top:12px;
+
+    font-size:28px;
+
+}
+
+header p{
+
+    margin-top:5px;
+
+    color:white;
+
+}
+
+
+/* ==============================
+   CONTEÚDO
+============================== */
+
+.container{
+
+    width:100%;
+
+    max-width:850px;
+
+    margin:40px auto;
+
+    padding:20px;
+
+    flex:1;
+
+}
+
+.card{
+
+    background:white;
+
+    padding:35px 25px;
+
+    border-radius:16px;
+
+    box-shadow:
+        0 5px 18px
+        rgba(0,0,0,.10);
+
+    text-align:center;
+
+}
+
+.card h2{
+
+    color:#1e3a8a;
+
+    margin-bottom:10px;
+
+    font-size:26px;
+
+}
+
+.descricao{
+
+    color:#64748b;
+
+    margin-bottom:30px;
+
+    line-height:1.6;
+
+}
+
+
+/* ==============================
+   OPÇÕES DE LOGIN
+============================== */
+
+.login-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(210px,1fr)
+        );
+
+    gap:20px;
+
+}
+
+.login-card{
+
+    background:#f8fafc;
+
+    border:2px solid #e2e8f0;
+
+    border-radius:14px;
+
+    padding:25px 18px;
+
+    transition:.2s;
+
+}
+
+.login-card:hover{
+
+    transform:translateY(-4px);
+
+    border-color:#2563eb;
+
+    box-shadow:
+        0 5px 15px
+        rgba(37,99,235,.15);
+
+}
+
+.icone{
+
+    font-size:42px;
+
+    margin-bottom:15px;
+
+}
+
+.login-card h3{
+
+    color:#1e3a8a;
+
+    margin-bottom:8px;
+
+}
+
+.login-card p{
+
+    color:#64748b;
+
+    font-size:14px;
+
+    min-height:40px;
+
+    margin-bottom:18px;
+
+}
+
+.btn{
+
+    display:block;
+
+    width:100%;
+
+    padding:13px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1e3a8a;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.btn:hover{
+
+    background:#2563eb;
+
+}
+
+
+/* ==============================
+   VOLTAR
+============================== */
+
+.voltar{
+
+    display:inline-block;
+
+    margin-top:25px;
+
+    color:#1e3a8a;
+
+    text-decoration:none;
+
+    font-weight:bold;
+
+}
+
+.voltar:hover{
+
+    text-decoration:underline;
+
+}
+
+
+/* ==============================
+   RODAPÉ
+============================== */
+
+footer{
+
+    background:#1e3a8a;
+
+    color:white;
+
+    text-align:center;
+
+    padding:18px;
+
+    font-size:14px;
+
+}
+
+footer p{
+
+    color:white;
+
+}
+
+
+/* ==============================
+   MOBILE
+============================== */
+
+@media(max-width:600px){
+
+    header{
+
+        padding:20px 15px;
+
+    }
+
+    header h1{
+
+        font-size:24px;
+
+    }
+
+    .container{
+
+        margin:25px auto;
+
+        padding:15px;
+
+    }
+
+    .card{
+
+        padding:25px 18px;
+
+    }
+
+    .card h2{
+
+        font-size:22px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        SGE
+    </div>
+
+    <h1>
+        SGE
+    </h1>
+
+    <p>
+        Sistema de Gestão Escolar
+    </p>
+
+</header>
+
+
+<main class="container">
+
+    <section class="card">
+
+        <h2>
+            Entrar no SGE
+        </h2>
+
+        <p class="descricao">
+
+            Selecione o tipo de acesso
+            que pretende utilizar.
+
+        </p>
+
+
+        <div class="login-grid">
+
+
+            <!-- =========================
+                 GESTOR
+            ========================== -->
+
+            <div class="login-card">
+
+                <div class="icone">
+                    🏫
+                </div>
+
+                <h3>
+                    Gestor / Administrador
+                </h3>
+
+                <p>
+                    Gestão da escola,
+                    professores, alunos,
+                    turmas e configurações.
+                </p>
+
+                <a
+                    class="btn"
+                    href="src/pages/login-gestor.html"
+                >
+                    Entrar como Gestor
+                </a>
+
+            </div>
+
+
+            <!-- =========================
+                 PROFESSOR
+            ========================== -->
+
+            <div class="login-card">
+
+                <div class="icone">
+                    👨‍🏫
+                </div>
+
+                <h3>
+                    Professor
+                </h3>
+
+                <p>
+                    Acesso às turmas,
+                    notas, mini-pautas
+                    e funções do professor.
+                </p>
+
+                <a
+                    class="btn"
+                    href="src/pages/login-professor.html"
+                >
+                    Entrar como Professor
+                </a>
+
+            </div>
+
+
+            <!-- =========================
+                 ALUNO
+            ========================== -->
+
+            <div class="login-card">
+
+                <div class="icone">
+                    👨‍🎓
+                </div>
+
+                <h3>
+                    Aluno
+                </h3>
+
+                <p>
+                    Consulte as suas notas,
+                    boletins e informações
+                    escolares.
+                </p>
+
+                <a
+                    class="btn"
+                    href="src/pages/student-login.html"
+                >
+                    Entrar como Aluno
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+        <a
+            class="voltar"
+            href="index.html"
+        >
+            ← Voltar para a página inicial
+        </a>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <p>
+        SGE — Sistema de Gestão Escolar © 2026
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>
