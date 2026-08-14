@@ -1,4 +1,4 @@
-alert("TESTE");
+alert("TESTE t");
 
 import { app } from "./firebase.js";
 
@@ -270,6 +270,8 @@ dataNascimento:dataAluno.value,
 
 turmaId: turmaSelecionada,
 
+        escolaId: "YNY5XygXQqQfcPfIyK62",
+        
 turmaNome: turmaSelect.options[turmaSelect.selectedIndex].text,
 
 codigoAluno: gerarCodigoAluno(numeroAluno.value),
@@ -585,6 +587,8 @@ dataNascimento:dados[3].trim(),
 
 turmaId:turmaSelecionada,
 
+                escolaId: "YNY5XygXQqQfcPfIyK62",
+
 turmaNome: turmaSelect.options[turmaSelect.selectedIndex].text,
 
 codigoAluno: gerarCodigoAluno(dados[0].trim()),
@@ -685,6 +689,7 @@ importarPDF.addEventListener("click", async()=>{
 
                     turmaId: turmaSelecionada,
 
+                    escolaId: "YNY5XygXQqQfcPfIyK62",
 
                     turmaNome:
                     turmaSelect.options[
