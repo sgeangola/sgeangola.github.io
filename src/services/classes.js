@@ -10,8 +10,10 @@ import {
     getDoc,
     doc,
     deleteDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+    serverTimestamp,
+    query,
+    where
+} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";";
 
 
 const db = getFirestore(app);
@@ -108,7 +110,7 @@ const classesPorEnsino = {
 // ID DA ESCOLA
 // =====================================================
 
-const escolaId = "SIGEA";
+const escolaId = "YNY5XygXQqQfcPfIyK62";
 
 
 // =====================================================
@@ -542,13 +544,20 @@ async function carregarTurmas() {
         `;
 
 
-        const resultado =
-            await getDocs(
-                collection(
-                    db,
-                    "turmas"
-                )
-            );
+const resultado =
+    await getDocs(
+        query(
+            collection(
+                db,
+                "turmas"
+            ),
+            where(
+                "escolaId",
+                "==",
+                escolaId
+            )
+        )
+    );
 
 
         // =================================================
