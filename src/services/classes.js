@@ -13,7 +13,7 @@ import {
     serverTimestamp,
     query,
     where
-} from "https://www.gstatic.com/firebasejs/10.0.0/firebasejs/10.0.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 alert("CLASSES.JS COMPLETO CARREGADO ✅");
 
