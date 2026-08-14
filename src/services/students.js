@@ -1,23 +1,26 @@
-alert("TESTE DG 3");
+alert("TESTE");
 
 import { app } from "./firebase.js";
 
 import { lerPDF } from "./pdf-reader.js";
 
 import {
-    getFirestore,
-    collection,
-    getDocs,
-    addDoc,
-    updateDoc,
-    doc,
-    deleteDoc,
-    serverTimestamp
+getFirestore,
+collection,
+getDocs,
+addDoc,
+updateDoc,
+doc,
+deleteDoc,
+serverTimestamp,
+query,
+where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
 const db = getFirestore(app);
 
+const escolaId = "YNY5XygXQqQfcPfIyK62";
 
 alert("Firebase iniciado");
 
@@ -84,9 +87,12 @@ async function carregarTurmas(){
         alert("Vou consultar Firestore");
 
 
-        const dados = await getDocs(
-            collection(db,"turmas")
-        );
+const dados = await getDocs(
+    query(
+        collection(db, "turmas"),
+        where("escolaId", "==", escolaId)
+    )
+);
 
 
         alert("Consulta terminou");
