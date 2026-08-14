@@ -1,4 +1,4 @@
-alert("CLASSES.JS COMPLETO5 CARREGADO ✅");
+alert("CLASSES.JS COMPLETO tCARREGADO ✅");
 
 import { app } from "./firebase.js";
 
@@ -1145,6 +1145,10 @@ ensinoInput.addEventListener(
 
 atualizarClasses();
 
+alert(
+    "CLASSES DISPONÍVEIS: " +
+    classeInput.options.length
+);
 
 // =====================================================
 // CARREGAR TURMAS
