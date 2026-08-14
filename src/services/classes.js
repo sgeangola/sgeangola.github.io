@@ -1,4 +1,4 @@
-alert("CLASSES.JS COMPLETO CARREGADO ✅");
+alert("CLASSES.JS COMPLETO dfh CARREGADO ✅");
 
 import { app } from "./firebase.js";
 
