@@ -4,91 +4,609 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Gestão de Alunos</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Gestão de Alunos - SGE</title>
+
 
 <style>
 
-body{
-font-family:Arial;
-background:#f4f6f9;
-padding:20px;
+/* =====================================================
+   RESET
+===================================================== */
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
+
+
+/* =====================================================
+   BODY
+===================================================== */
+
+body{
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:#f4f7fb;
+
+    color:#1f2937;
+
+    min-height:100vh;
+
+}
+
+
+/* =====================================================
+   CABEÇALHO
+===================================================== */
+
+.header{
+
+    background:#1976d2;
+
+    color:white;
+
+    padding:18px 20px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,.12);
+
+}
+
+
+.header-content{
+
+    max-width:1200px;
+
+    margin:auto;
+
+}
+
+
+.header h1{
+
+    font-size:23px;
+
+    margin-bottom:5px;
+
+}
+
+
+.header p{
+
+    font-size:14px;
+
+    opacity:.92;
+
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
 
 .container{
-max-width:1200px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
+
+    max-width:1200px;
+
+    margin:25px auto;
+
+    padding:0 15px;
+
 }
 
-input,select,button{
-width:100%;
-padding:12px;
-margin-top:10px;
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+        0 2px 10px rgba(0,0,0,.06);
+
 }
+
+
+.card-title{
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    color:#1976d2;
+
+    margin-bottom:5px;
+
+}
+
+
+.card-subtitle{
+
+    color:#6b7280;
+
+    font-size:13px;
+
+    margin-bottom:18px;
+
+}
+
+
+/* =====================================================
+   FORMULÁRIO
+===================================================== */
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(220px,1fr)
+        );
+
+    gap:15px;
+
+}
+
+
+.campo{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+.campo label{
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    margin-bottom:6px;
+
+    color:#374151;
+
+}
+
+
+input,
+select,
+textarea{
+
+    width:100%;
+
+    border:1px solid #d1d5db;
+
+    border-radius:7px;
+
+    padding:11px 12px;
+
+    font-size:14px;
+
+    background:white;
+
+    color:#1f2937;
+
+    outline:none;
+
+}
+
+
+input:focus,
+select:focus,
+textarea:focus{
+
+    border-color:#1976d2;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(25,118,210,.12);
+
+}
+
+
+textarea{
+
+    resize:vertical;
+
+    min-height:140px;
+
+}
+
+
+/* =====================================================
+   BOTÕES
+===================================================== */
 
 button{
-background:#1976d2;
-color:white;
-border:none;
-border-radius:5px;
+
+    border:none;
+
+    border-radius:7px;
+
+    padding:11px 16px;
+
+    background:#1976d2;
+
+    color:white;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
 }
 
-.aluno{
-background:#eee;
-padding:10px;
-margin-top:10px;
-border-radius:5px;
+
+button:hover{
+
+    opacity:.9;
+
 }
+
+
+button:disabled{
+
+    opacity:.6;
+
+    cursor:not-allowed;
+
+}
+
+
+/* =====================================================
+   BOTÃO PRINCIPAL
+===================================================== */
+
+.btn-principal{
+
+    margin-top:18px;
+
+    width:100%;
+
+}
+
+
+/* =====================================================
+   IMPORTAÇÃO
+===================================================== */
+
+.import-box{
+
+    background:#f8fafc;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:9px;
+
+    padding:15px;
+
+    margin-top:15px;
+
+}
+
+
+.import-box h3{
+
+    color:#374151;
+
+    font-size:16px;
+
+    margin-bottom:7px;
+
+}
+
+
+.import-box p{
+
+    color:#6b7280;
+
+    font-size:13px;
+
+    line-height:1.5;
+
+    margin-bottom:10px;
+
+}
+
+
+.import-box button{
+
+    margin-top:10px;
+
+}
+
+
+/* =====================================================
+   PDF
+===================================================== */
+
+.pdf-box{
+
+    margin-top:20px;
+
+    padding:15px;
+
+    background:#f8fafc;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:9px;
+
+}
+
+
+.pdf-box h3{
+
+    font-size:16px;
+
+    margin-bottom:12px;
+
+}
+
+
+.pdf-box input{
+
+    margin-bottom:5px;
+
+}
+
+
+.pdf-box button{
+
+    margin-top:10px;
+
+}
+
+
+/* =====================================================
+   PESQUISA
+===================================================== */
+
+.pesquisa{
+
+    margin-bottom:15px;
+
+}
+
+
+/* =====================================================
+   TABELA
+===================================================== */
+
+.tabela-container{
+
+    width:100%;
+
+    overflow-x:auto;
+
+    border-radius:8px;
+
+}
+
 
 table{
+
     width:100%;
+
+    min-width:900px;
+
     border-collapse:collapse;
-    margin-top:20px;
-    table-layout:auto;
+
+    background:white;
+
 }
 
 
-th{
+thead th{
+
     background:#1976d2;
+
     color:white;
-    padding:6px;
-    font-size:13px;
-}
 
+    padding:10px 8px;
 
-td{
-    border:1px solid #ddd;
-    padding:4px 6px;
-    text-align:left;
-    font-size:13px;
-    white-space:nowrap;
-    height:28px;
-}
-
-
-/* Coluna do nome */
-td:nth-child(3){
-    min-width:180px;
-}
-
-
-/* Botões pequenos */
-td button{
-    width:auto;
-    padding:4px 6px;
-    margin:2px;
     font-size:12px;
+
+    text-align:left;
+
+    white-space:nowrap;
+
 }
 
 
-tr:nth-child(even){
-    background:#f8f8f8;
+tbody td{
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    padding:8px;
+
+    font-size:12px;
+
+    white-space:nowrap;
+
+    height:32px;
+
 }
-  
+
+
+tbody tr:nth-child(even){
+
+    background:#f8fafc;
+
+}
+
+
+tbody tr:hover{
+
+    background:#eef6ff;
+
+}
+
+
+/* Nome */
+
+td:nth-child(3){
+
+    min-width:200px;
+
+}
+
+
+/* =====================================================
+   BOTÕES DA TABELA
+===================================================== */
+
+td button{
+
+    width:auto;
+
+    padding:5px 8px;
+
+    margin:2px;
+
+    font-size:11px;
+
+    border-radius:5px;
+
+}
+
+
+td button:first-child{
+
+    background:#f59e0b;
+
+}
+
+
+td button:nth-child(2){
+
+    background:#1976d2;
+
+}
+
+
+td button:nth-child(3){
+
+    background:#16a34a;
+
+}
+
+
+td button:nth-child(4){
+
+    background:#dc2626;
+
+}
+
+
+/* =====================================================
+   TÍTULO DA LISTA
+===================================================== */
+
+.lista-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:15px;
+
+}
+
+
+.lista-header h2{
+
+    font-size:18px;
+
+    color:#1976d2;
+
+}
+
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+
+@media(max-width:600px){
+
+    .header{
+
+        padding:15px;
+
+    }
+
+
+    .header h1{
+
+        font-size:20px;
+
+    }
+
+
+    .container{
+
+        margin-top:15px;
+
+        padding:0 10px;
+
+    }
+
+
+    .card{
+
+        padding:15px;
+
+    }
+
+
+    .form-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .lista-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+}
+
 </style>
 
 </head>
@@ -97,128 +615,311 @@ tr:nth-child(even){
 <body>
 
 
-<div class="container">
+<!-- ===================================================
+     CABEÇALHO
+=================================================== -->
 
+<header class="header">
 
-<h2>
-Gestão de Alunos
-</h2>
+    <div class="header-content">
 
+        <h1>
+            🏫 Gestão de Alunos
+        </h1>
 
-<label>
-Selecionar Turma
-</label>
+        <p>
+            Crie, organize e gerencie os alunos da escola.
+        </p>
 
+    </div>
 
-<select id="turmaSelect">
-
-<option>
-Carregar turmas...
-</option>
-
-</select>
-
-
-
-<input 
-id="nomeAluno"
-placeholder="Nome completo">
+</header>
 
 
 
-<input 
-id="numeroAluno"
-placeholder="Número">
+<main class="container">
+
+
+<!-- ===================================================
+     CADASTRAR ALUNO
+=================================================== -->
+
+<section class="card">
+
+    <div class="card-title">
+        ➕ Cadastrar Novo Aluno
+    </div>
+
+    <div class="card-subtitle">
+        Preencha os dados do aluno e associe-o à turma.
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <div class="campo">
+
+            <label>
+                Turma
+            </label>
+
+            <select id="turmaSelect">
+
+                <option>
+                    Carregar turmas...
+                </option>
+
+            </select>
+
+        </div>
 
 
 
-<select id="sexoAluno">
+        <div class="campo">
 
-<option value="">
-Sexo
-</option>
+            <label>
+                Nome completo
+            </label>
 
-<option value="M">
-Masculino
-</option>
+            <input
+                id="nomeAluno"
+                placeholder="Nome completo"
+            >
 
-<option value="F">
-Feminino
-</option>
-
-</select>
+        </div>
 
 
 
-<input 
-id="dataAluno"
-placeholder="Data nascimento">
+        <div class="campo">
+
+            <label>
+                Número
+            </label>
+
+            <input
+                id="numeroAluno"
+                placeholder="Número"
+            >
+
+        </div>
 
 
 
-<button id="guardarAluno">
+        <div class="campo">
 
-Guardar Aluno
+            <label>
+                Sexo
+            </label>
 
-</button>
+            <select id="sexoAluno">
 
-<h3>Cadastro rápido de alunos</h3>
+                <option value="">
+                    Selecionar sexo
+                </option>
 
-<p>
-Cole a lista no formato:
-<br>
-Número;Nome;Sexo;Data
-</p>
+                <option value="M">
+                    Masculino
+                </option>
 
-<textarea 
-id="listaImportar"
-placeholder="1;João Manuel;M;01-01-2010
-2;Maria José;F;05-02-2011"
-style="width:100%;height:150px;">
-</textarea>
+                <option value="F">
+                    Feminino
+                </option>
 
-<button id="importarAlunos">
-Importar Alunos
-  </button>
+            </select>
 
-    <h3>Importar alunos pelo PDF</h3>
+        </div>
 
-<input 
-type="file" 
-id="arquivoPDF"
-accept="application/pdf"
->
 
-<button id="importarPDF">
-Ler PDF e cadastrar alunos
+
+        <div class="campo">
+
+            <label>
+                Data de nascimento
+            </label>
+
+            <input
+                id="dataAluno"
+                placeholder="DD-MM-AAAA"
+            >
+
+        </div>
+
+
+    </div>
+
+
+    <button
+        id="guardarAluno"
+        class="btn-principal"
+    >
+
+        💾 Guardar Aluno
+
     </button>
-    
-<h3>
-Lista de alunos
-</h3>
 
-<input 
-id="pesquisarAluno"
-placeholder="🔎 Pesquisar aluno..."
->
-  
-<div id="listaAlunos">
-
-  </div>
+</section>
 
 
-</div>
+
+<!-- ===================================================
+     IMPORTAÇÃO RÁPIDA
+=================================================== -->
+
+<section class="card">
+
+    <div class="card-title">
+        📥 Cadastro rápido de alunos
+    </div>
+
+    <div class="card-subtitle">
+        Adicione vários alunos de uma só vez.
+    </div>
 
 
-<h1>TESTE PÁGINA ALUNOS</h1>
-    
-<script type="module" src="../services/students.js?v=11"></script>
+    <div class="import-box">
 
-<script>
-alert("HTML carregou DF o script");
-</script>
+        <h3>
+            Colar lista de alunos
+        </h3>
+
+        <p>
+
+            Utilize o formato:
+
+            <br>
+
+            <strong>
+                Número;Nome;Sexo;Data
+            </strong>
+
+            <br><br>
+
+            Exemplo:
+
+            <br>
+
+            1;João Manuel;M;01-01-2010
+            <br>
+            2;Maria José;F;05-02-2011
+
+        </p>
+
+
+        <textarea
+            id="listaImportar"
+            placeholder="1;João Manuel;M;01-01-2010
+2;Maria José;F;05-02-2011"
+        ></textarea>
+
+
+        <button id="importarAlunos">
+
+            📥 Importar Alunos
+
+        </button>
+
+    </div>
+
+
+
+    <!-- ===============================================
+         PDF
+    ================================================ -->
+
+    <div class="pdf-box">
+
+        <h3>
+            📄 Importar alunos pelo PDF
+        </h3>
+
+
+        <input
+            type="file"
+            id="arquivoPDF"
+            accept="application/pdf"
+        >
+
+
+        <button id="importarPDF">
+
+            📄 Ler PDF e cadastrar alunos
+
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- ===================================================
+     LISTA DE ALUNOS
+=================================================== -->
+
+<section class="card">
+
+
+    <div class="lista-header">
+
+        <div>
+
+            <h2>
+                📋 Lista de alunos
+            </h2>
+
+            <p
+                style="
+                color:#6b7280;
+                font-size:13px;
+                margin-top:5px;
+                "
+            >
+
+                Consulte e gerencie os alunos cadastrados.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="pesquisa">
+
+        <input
+            id="pesquisarAluno"
+            placeholder="🔎 Pesquisar por nome, número ou código..."
+        >
+
+    </div>
+
+
+    <div
+        id="listaAlunos"
+        class="tabela-container"
+    >
+
+    </div>
+
+
+</section>
+
+
+</main>
+
+
+
+<!-- ===================================================
+     JAVASCRIPT
+=================================================== -->
+
+<script
+    type="module"
+    src="../services/student.js?v=12"
+></script>
 
 
 </body>
 
-  </html>
+    </html>
