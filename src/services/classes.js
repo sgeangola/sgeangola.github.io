@@ -1,4 +1,4 @@
-alert("CLASSES.JS COMPLETO CARREGADO ✅");
+alert("CLASSES.JS COMPLETO5 CARREGADO ✅");
 
 import { app } from "./firebase.js";
 
@@ -39,6 +39,11 @@ const classeInput =
 
 const ensinoInput =
     document.getElementById("ensino");
+
+alert(
+    "ENSINO ENCONTRADO: " +
+    ensinoInput.value
+);
 
 const anoInput =
     document.getElementById("anoLetivo");
