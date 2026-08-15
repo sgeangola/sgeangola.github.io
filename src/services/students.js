@@ -1,806 +1,1261 @@
-alert("TESTE t");
+// =====================================================
+// STUDENT.JS — GESTÃO DE ALUNOS
+// SGE ANGOLA
+// =====================================================
+
+alert("GESTÃO DE ALUNOS CARREGADO");
 
 import { app } from "./firebase.js";
 
 import { lerPDF } from "./pdf-reader.js";
 
 import {
-getFirestore,
-collection,
-getDocs,
-addDoc,
-updateDoc,
-doc,
-deleteDoc,
-serverTimestamp,
-query,
-where
+    getFirestore,
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    doc,
+    deleteDoc,
+    serverTimestamp,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
 
 const db = getFirestore(app);
 
+
+// =====================================================
+// ESCOLA ATUAL
+// =====================================================
+
 const escolaId = "YNY5XygXQqQfcPfIyK62";
 
-alert("Firebase iniciado");
 
-// Elementos
+// =====================================================
+// ELEMENTOS
+// =====================================================
 
-const turmaSelect = document.getElementById("turmaSelect");
+const turmaSelect =
+    document.getElementById("turmaSelect");
 
-if(!turmaSelect){
-alert("ERRO: Não encontrei o campo turmaSelect");
-}
-else{
-alert("Campo turmaSelect encontrado");
-}
+const nomeAluno =
+    document.getElementById("nomeAluno");
 
-const nomeAluno = document.getElementById("nomeAluno");
+const numeroAluno =
+    document.getElementById("numeroAluno");
 
-const numeroAluno = document.getElementById("numeroAluno");
+const sexoAluno =
+    document.getElementById("sexoAluno");
 
-const sexoAluno = document.getElementById("sexoAluno");
+const dataAluno =
+    document.getElementById("dataAluno");
 
-const dataAluno = document.getElementById("dataAluno");
+const guardarAluno =
+    document.getElementById("guardarAluno");
 
-const guardarAluno = document.getElementById("guardarAluno");
+const listaImportar =
+    document.getElementById("listaImportar");
 
-const listaImportar = document.getElementById("listaImportar");
+const importarAlunos =
+    document.getElementById("importarAlunos");
 
-const importarAlunos = document.getElementById("importarAlunos");
+const arquivoPDF =
+    document.getElementById("arquivoPDF");
 
-const arquivoPDF = document.getElementById("arquivoPDF");
+const importarPDF =
+    document.getElementById("importarPDF");
 
-const importarPDF = document.getElementById("importarPDF");
+const listaAlunos =
+    document.getElementById("listaAlunos");
 
-const listaAlunos = document.getElementById("listaAlunos");
+const pesquisarAluno =
+    document.getElementById("pesquisarAluno");
 
-const pesquisarAluno = document.getElementById("pesquisarAluno");
 
-// guardar ID da turma selecionada
+// =====================================================
+// VARIÁVEIS
+// =====================================================
 
 let turmaSelecionada = "";
 
 let todosAlunos = [];
 
-// =============================
-// CARREGAR TURMAS
-// =============================
 
-alert("VOU CARREGAR TURMAS");
+// =====================================================
+// CARREGAR TURMAS
+// =====================================================
 
 carregarTurmas();
 
-async function carregarTurmas(){
 
-try{  
+async function carregarTurmas() {
 
-    turmaSelect.innerHTML =  
-    "<option>A procurar turmas...</option>";  
+    try {
 
-
-    alert("Vou consultar Firestore");
-
-const dados = await getDocs(
-query(
-collection(db, "turmas"),
-where("escolaId", "==", escolaId)
-)
-);
-
-alert("Consulta terminou");  
+        turmaSelect.innerHTML =
+            "<option>A procurar turmas...</option>";
 
 
-    alert("Quantidade: " + dados.size);  
+        const dados = await getDocs(
+
+            query(
+                collection(db, "turmas"),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaId
+                )
+            )
+
+        );
 
 
-    if(dados.empty){  
+        if (dados.empty) {
 
-        turmaSelect.innerHTML =  
-        "<option>Nenhuma turma encontrada</option>";  
+            turmaSelect.innerHTML =
+                "<option>Nenhuma turma encontrada</option>";
 
-        return;  
-    }  
+            turmaSelecionada = "";
 
+            listaAlunos.innerHTML =
+                "Nenhuma turma disponível.";
 
-    turmaSelect.innerHTML = "";  
+            return;
 
-
-    dados.forEach(doc=>{  
-
-        const turma = doc.data();  
+        }
 
 
-        turmaSelect.innerHTML += `  
-
-        <option value="${doc.id}">  
-        ${turma.nome} - ${turma.classe}  
-        </option>  
-
-        `;  
-
-    });  
+        turmaSelect.innerHTML = "";
 
 
-    turmaSelecionada = turmaSelect.value;  
+        dados.forEach(turmaDoc => {
+
+            const turma =
+                turmaDoc.data();
 
 
-    carregarAlunos();  
+            turmaSelect.innerHTML += `
+
+                <option value="${turmaDoc.id}">
+
+                    ${turma.nome} - ${turma.classe}
+
+                </option>
+
+            `;
+
+        });
 
 
-}catch(erro){  
+        turmaSelecionada =
+            turmaSelect.value;
 
 
-    turmaSelect.innerHTML =  
-    "<option>Erro: "+erro.message+"</option>";  
+        carregarAlunos();
 
-
-    alert("Erro: " + erro.message);  
-
-
-}
-
-}
-
-// FORA DA FUNÇÃO
-
-turmaSelect.addEventListener("change",()=>{
-
-turmaSelecionada = turmaSelect.value;  
-
-
-alert(  
-    "Turma selecionada: " + turmaSelecionada  
-);  
-
-
-carregarAlunos();
-
-});
-
-// =============================
-// GERAR CÓDIGO DO ALUNO
-// =============================
-
-function gerarCodigoAluno(numero){
-
-const turmaTexto = turmaSelect.options[turmaSelect.selectedIndex].text;  
-
-let codigoTurma = turmaTexto  
-.replace("ª","")  
-.replace(" ","")  
-.split("-")[0];  
-
-
-return codigoTurma + "-" +   
-String(numero).padStart(3,"0");
-
-}
-
-// =============================
-// GERAR SENHA AUTOMÁTICA
-// =============================
-
-function gerarSenha(){
-
-const caracteres =  
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
-
-let senha="";  
-
-
-for(let i=0;i<6;i++){  
-
-    senha += caracteres.charAt(  
-        Math.floor(  
-            Math.random()*caracteres.length  
-        )  
-    );  
-
-}  
-
-
-return senha;  
 
     }
 
-// =============================
+    catch (erro) {
+
+        turmaSelect.innerHTML =
+            "<option>Erro ao carregar turmas</option>";
+
+
+        alert(
+            "Erro ao carregar turmas: " +
+            erro.message
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// ALTERAR TURMA
+// =====================================================
+
+turmaSelect.addEventListener(
+    "change",
+    () => {
+
+        turmaSelecionada =
+            turmaSelect.value;
+
+
+        carregarAlunos();
+
+    }
+);
+
+
+// =====================================================
+// GERAR CÓDIGO DO ALUNO
+// =====================================================
+
+function gerarCodigoAluno(numero) {
+
+    const turmaTexto =
+        turmaSelect
+        .options[
+            turmaSelect.selectedIndex
+        ]
+        .text;
+
+
+    let codigoTurma =
+        turmaTexto
+        .replace("ª", "")
+        .replace(" ", "")
+        .split("-")[0];
+
+
+    return (
+        codigoTurma +
+        "-" +
+        String(numero).padStart(3, "0")
+    );
+
+}
+
+
+// =====================================================
+// GERAR SENHA AUTOMÁTICA
+// =====================================================
+
+function gerarSenha() {
+
+    const caracteres =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+
+    let senha = "";
+
+
+    for (let i = 0; i < 6; i++) {
+
+        senha +=
+            caracteres.charAt(
+                Math.floor(
+                    Math.random() *
+                    caracteres.length
+                )
+            );
+
+    }
+
+
+    return senha;
+
+}
+
+
+// =====================================================
 // GUARDAR ALUNO
-// =============================
+// =====================================================
 
-guardarAluno.addEventListener("click",async()=>{
+guardarAluno.addEventListener(
+    "click",
+    async () => {
 
-if(!turmaSelecionada){  
+        try {
 
-    alert("Selecione uma turma");  
+            if (!turmaSelecionada) {
 
-    return;  
+                alert(
+                    "Selecione uma turma."
+                );
 
-}  
+                return;
 
+            }
 
 
-if(  
-    nomeAluno.value==="" ||  
-    numeroAluno.value===""  
-){  
+            if (
+                nomeAluno.value.trim() === "" ||
+                numeroAluno.value.trim() === ""
+            ) {
 
-    alert("Preencha nome e número");  
+                alert(
+                    "Preencha o nome e o número do aluno."
+                );
 
-    return;  
+                return;
 
-}
+            }
 
-await addDoc(
 
-collection(  
-    db,  
-    "turmas",  
-    turmaSelecionada,  
-    "alunos"  
-),  
+            await addDoc(
 
-{
+                collection(
+                    db,
+                    "turmas",
+                    turmaSelecionada,
+                    "alunos"
+                ),
 
-nome:nomeAluno.value,
+                {
 
-numero:numeroAluno.value,
+                    nome:
+                        nomeAluno.value.trim(),
 
-sexo:sexoAluno.value,
+                    numero:
+                        numeroAluno.value.trim(),
 
-dataNascimento:dataAluno.value,
+                    sexo:
+                        sexoAluno.value,
 
-turmaId: turmaSelecionada,
+                    dataNascimento:
+                        dataAluno.value.trim(),
 
-escolaId: "YNY5XygXQqQfcPfIyK62",
+                    turmaId:
+                        turmaSelecionada,
 
-turmaNome: turmaSelect.options[turmaSelect.selectedIndex].text,
+                    escolaId:
+                        escolaId,
 
-codigoAluno: gerarCodigoAluno(numeroAluno.value),
+                    turmaNome:
+                        turmaSelect
+                        .options[
+                            turmaSelect.selectedIndex
+                        ]
+                        .text,
 
-senhaAcesso: gerarSenha(),
+                    codigoAluno:
+                        gerarCodigoAluno(
+                            numeroAluno.value.trim()
+                        ),
 
-estado: "ativo",
+                    senhaAcesso:
+                        gerarSenha(),
 
-criadoEm: serverTimestamp()
+                    estado:
+                        "ativo",
 
-}
+                    criadoEm:
+                        serverTimestamp()
 
-);
+                }
 
-alert("Aluno guardado");  
-
-
-
-nomeAluno.value="";  
-numeroAluno.value="";  
-sexoAluno.value="";  
-dataAluno.value="";  
-
-
-carregarAlunos();
-
-});
-
-// =============================
-// LISTAR ALUNOS
-// =============================
-
-function calcularIdade(data){
-
-if(!data){  
-    return "";  
-}  
-
-
-let partes = data.split("-");  
-
-
-if(partes.length !== 3){  
-
-    return "";  
-
-}  
-
-
-let dia = Number(partes[0]);  
-let mes = Number(partes[1]) - 1;  
-let ano = Number(partes[2]);  
-
-
-const nascimento = new Date(  
-    ano,  
-    mes,  
-    dia  
-);  
-
-
-const hoje = new Date();  
-
-
-let idade = hoje.getFullYear() - nascimento.getFullYear();  
-
-
-let diferencaMes =  
-hoje.getMonth() - nascimento.getMonth();  
-
-
-if(  
-    diferencaMes < 0 ||  
-    (  
-        diferencaMes === 0 &&  
-        hoje.getDate() < nascimento.getDate()  
-    )  
-){  
-
-    idade--;  
-
-}  
-
-
-return idade;  
-
-                 }
-
-async function carregarAlunos(){
-
-if(!turmaSelecionada){  
-
-    return;  
-
-}  
-
-
-
-listaAlunos.innerHTML =  
-"A carregar alunos...";  
-
-
-
-const dados = await getDocs(  
-
-    collection(  
-        db,  
-        "turmas",  
-        turmaSelecionada,  
-        "alunos"  
-    )  
-
-);  
-
-
-let alunos = [];
-
-dados.forEach(doc=>{
-
-alunos.push(doc.data());
-
-});
-
-alunos.sort((a,b)=>{
-
-return Number(a.numero) - Number(b.numero);
-
-});
-
-todosAlunos = alunos;
-
-listaAlunos.innerHTML = `
-
-<table>  <thead>  
-<tr>  
-<th>Código</th>  
-<th>Nº</th>  
-<th>Nome</th>  
-<th>Sexo</th>  
-<th>Data Nascimento</th>  
-<th>Idade</th>  
-<th>Turma</th>  
-<th>Estado</th>  
-<th>Ações</th>  
-</tr>  
-</thead>  <tbody id="corpoTabela">  </tbody>  </table>  `;
-
-const corpoTabela = document.getElementById("corpoTabela");
-
-todosAlunos = alunos;
-
-mostrarAlunos(todosAlunos);
-
-}
-
-function mostrarAlunos(lista){
-
-const corpoTabela = document.getElementById("corpoTabela");
-
-corpoTabela.innerHTML="";
-
-lista.forEach(aluno=>{
-
-corpoTabela.innerHTML += `
-
-<tr>  <td>${aluno.codigoAluno || ""}</td>  <td>${aluno.numero}</td>  <td>${aluno.nome}</td>  <td>${aluno.sexo || ""}</td>  <td>${aluno.dataNascimento || ""}</td>  <td>${calcularIdade(aluno.dataNascimento)}</td>  <td>${aluno.turmaNome || ""}</td>  <td>${aluno.estado || "ativo"}</td>  <td>  <button onclick="alterarEstado('${aluno.codigoAluno}')">  
-⚙️ Estado  
-</button>  <button onclick="verAluno('${aluno.codigoAluno}')">  
-👁️  
-</button>  <button onclick="editarAluno('${aluno.codigoAluno}')">  
-✏️  
-</button>  <button onclick="apagarAluno('${aluno.codigoAluno}')">  
-🗑️  
-</button>  </td>  </tr>  `;
-
-});
-
-}
-
-// =============================
-// IMPORTAR ALUNOS
-// =============================
-
-importarAlunos.addEventListener("click", async()=>{
-
-if(!turmaSelecionada){  
-
-    alert("Selecione uma turma");  
-
-    return;  
-
-}  
-
-
-const texto = listaImportar.value.trim();  
-
-
-if(texto===""){  
-
-    alert("Cole a lista de alunos");  
-
-    return;  
-
-}  
-
-
-
-const linhas = texto.split("\n");  
-
-
-
-for(let linha of linhas){  
-
-
-    const dados = linha.split(";");  
-
-
-
-    if(dados.length < 4){  
-
-        continue;  
-
-    }  
-
-
-
-    await addDoc(  
-
-        collection(  
-            db,  
-            "turmas",  
-            turmaSelecionada,  
-            "alunos"  
-        ),  
-
-        {
-
-numero:dados[0].trim(),
-
-nome:dados[1].trim(),
-
-sexo:dados[2].trim(),
-
-dataNascimento:dados[3].trim(),
-
-turmaId:turmaSelecionada,
-
-escolaId: "YNY5XygXQqQfcPfIyK62",
-
-turmaNome: turmaSelect.options[turmaSelect.selectedIndex].text,
-
-codigoAluno: gerarCodigoAluno(dados[0].trim()),
-
-senhaAcesso: gerarSenha(),
-
-estado: "ativo",
-
-criadoEm: serverTimestamp()
-}
-
-);  
-
-
-}  
-
-
-
-alert("Alunos importados com sucesso");  
-
-
-listaImportar.value="";  
-
-
-carregarAlunos();
-
-});
-
-// =============================
-// IMPORTAR ALUNOS PELO PDF
-// =============================
-
-importarPDF.addEventListener("click", async()=>{
-
-if(!turmaSelecionada){  
-
-    alert("Selecione uma turma");  
-
-    return;  
-
-}  
-
-
-const file = arquivoPDF.files[0];  
-
-
-if(!file){  
-
-    alert("Selecione um PDF");  
-
-    return;  
-
-}  
-
-
-
-try{  
-
-
-    alert("A ler PDF...");  
-
-
-    const resultado = await lerPDF(file);  
-
-
-
-    alert(  
-        "Alunos encontrados: "  
-        + resultado.quantidade  
-    );  
-
-
-
-    for(const aluno of resultado.alunos){  
-
-
-        await addDoc(  
-
-            collection(  
-                db,  
-                "turmas",  
-                turmaSelecionada,  
-                "alunos"  
-            ),  
-
-
-            {  
-
-                numero: aluno.numero,  
-
-                nome: aluno.nome,  
-
-                sexo: aluno.sexo || "",  
-
-                turmaId: turmaSelecionada,  
-
-                escolaId: "YNY5XygXQqQfcPfIyK62",  
-
-                turmaNome:  
-                turmaSelect.options[  
-                turmaSelect.selectedIndex  
-                ].text,  
-
-
-                codigoAluno:  
-                gerarCodigoAluno(aluno.numero),  
-
-
-                senhaAcesso:  
-                gerarSenha(),  
-
-
-                estado:"ativo",  
-
-
-                criadoEm:  
-                serverTimestamp()  
-
-            }  
-
-        );  
-
-
-    }  
-
-
-
-    alert(  
-        "Importação concluída!"  
-    );  
-
-
-    carregarAlunos();  
-
-
-
-}catch(erro){  
-
-
-    alert(  
-        "Erro ao importar PDF: "  
-        + erro.message  
-    );  
-
-
-}
-
-});
-
-// PESQUISAR ALUNOS
-pesquisarAluno.addEventListener("input",()=>{
-
-const texto = pesquisarAluno.value.toLowerCase();  
-
-const resultado = todosAlunos.filter(aluno=>  
-
-    (aluno.nome || "").toLowerCase().includes(texto) ||  
-
-    String(aluno.numero).includes(texto) ||  
-
-    (aluno.codigoAluno || "").toLowerCase().includes(texto)  
-
-);  
-
-mostrarAlunos(resultado);
-
-});
-
-window.alterarEstado = async function(codigo){
-
-const opcao = prompt(  
-    "Digite o novo estado:\n\n1 - ativo\n2 - transferido\n3 - desistiu\n4 - removido"  
-);  
-
-
-let novoEstado = "";  
-
-
-if(opcao === "1"){  
-    novoEstado = "ativo";  
-}  
-
-else if(opcao === "2"){  
-    novoEstado = "transferido";  
-}  
-
-else if(opcao === "3"){  
-    novoEstado = "desistiu";  
-}  
-
-else if(opcao === "4"){  
-    novoEstado = "removido";  
-}  
-
-else{  
-    return;  
-}  
-
-
-
-const turmas = await getDocs(  
-    collection(db,"turmas")  
-);  
-
-
-for(const turma of turmas.docs){  
-
-
-    const alunos = await getDocs(  
-        collection(  
-            db,  
-            "turmas",  
-            turma.id,  
-            "alunos"  
-        )  
-    );  
-
-
-    for(const aluno of alunos.docs){  
-
-
-        if(aluno.data().codigoAluno === codigo){  
-
-
-            const motivo = prompt(  
-"Digite o motivo da alteração:"
-
-);
-
-await updateDoc(
-
-doc(  
-    db,  
-    "turmas",  
-    turma.id,  
-    "alunos",  
-    aluno.id  
-),  
-
-{  
-    estado: novoEstado,  
-
-    motivoEstado: motivo || "",  
-
-    dataEstado: serverTimestamp()  
-}
-
-);
-
-alert("Estado atualizado");  
-
-
-            carregarAlunos();  
-
-
-            return;  
-
-        }  
-
-    }  
-
-}
-
-};
-
-// =============================
-// VER DETALHES DO ALUNO
-// =============================
-
-window.verAluno = async function(codigo){
-
-const turmas = await getDocs(  
-    collection(db,"turmas")  
-);  
-
-
-for(const turma of turmas.docs){  
-
-
-    const alunos = await getDocs(  
-        collection(  
-            db,  
-            "turmas",  
-            turma.id,  
-            "alunos"  
-        )  
-    );  
-
-
-    for(const aluno of alunos.docs){  
-
-
-        const dados = aluno.data();  
-
-
-        if(dados.codigoAluno === codigo){  
+            );
 
 
             alert(
+                "Aluno guardado com sucesso!"
+            );
+
+
+            nomeAluno.value = "";
+
+            numeroAluno.value = "";
+
+            sexoAluno.value = "";
+
+            dataAluno.value = "";
+
+
+            carregarAlunos();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "Erro ao guardar aluno:",
+                erro
+            );
+
+
+            alert(
+                "Erro ao guardar aluno: " +
+                erro.message
+            );
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// CALCULAR IDADE
+// =====================================================
+
+function calcularIdade(data) {
+
+    if (!data) {
+
+        return "";
+
+    }
+
+
+    const partes =
+        data.split("-");
+
+
+    if (partes.length !== 3) {
+
+        return "";
+
+    }
+
+
+    const dia =
+        Number(partes[0]);
+
+    const mes =
+        Number(partes[1]) - 1;
+
+    const ano =
+        Number(partes[2]);
+
+
+    const nascimento =
+        new Date(
+            ano,
+            mes,
+            dia
+        );
+
+
+    const hoje =
+        new Date();
+
+
+    let idade =
+        hoje.getFullYear() -
+        nascimento.getFullYear();
+
+
+    const diferencaMes =
+        hoje.getMonth() -
+        nascimento.getMonth();
+
+
+    if (
+        diferencaMes < 0 ||
+        (
+            diferencaMes === 0 &&
+            hoje.getDate() <
+            nascimento.getDate()
+        )
+    ) {
+
+        idade--;
+
+    }
+
+
+    return idade;
+
+}
+
+
+// =====================================================
+// CARREGAR ALUNOS
+// =====================================================
+
+async function carregarAlunos() {
+
+    if (!turmaSelecionada) {
+
+        return;
+
+    }
+
+
+    listaAlunos.innerHTML =
+        "A carregar alunos...";
+
+
+    try {
+
+        const dados =
+            await getDocs(
+
+                collection(
+                    db,
+                    "turmas",
+                    turmaSelecionada,
+                    "alunos"
+                )
+
+            );
+
+
+        let alunos = [];
+
+
+        dados.forEach(
+            alunoDoc => {
+
+                alunos.push(
+                    {
+                        id: alunoDoc.id,
+                        ...alunoDoc.data()
+                    }
+                );
+
+            }
+        );
+
+
+        alunos.sort(
+            (a, b) => {
+
+                return (
+                    Number(a.numero) -
+                    Number(b.numero)
+                );
+
+            }
+        );
+
+
+        todosAlunos =
+            alunos;
+
+
+        listaAlunos.innerHTML = `
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Código</th>
+
+                        <th>Nº</th>
+
+                        <th>Nome</th>
+
+                        <th>Sexo</th>
+
+                        <th>Data Nascimento</th>
+
+                        <th>Idade</th>
+
+                        <th>Turma</th>
+
+                        <th>Estado</th>
+
+                        <th>Ações</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="corpoTabela">
+
+                </tbody>
+
+            </table>
+
+        `;
+
+
+        mostrarAlunos(todosAlunos);
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "Erro ao carregar alunos:",
+            erro
+        );
+
+
+        listaAlunos.innerHTML =
+            "Erro ao carregar alunos.";
+
+        alert(
+            "Erro ao carregar alunos: " +
+            erro.message
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// MOSTRAR ALUNOS
+// =====================================================
+
+function mostrarAlunos(lista) {
+
+    const corpoTabela =
+        document.getElementById(
+            "corpoTabela"
+        );
+
+
+    if (!corpoTabela) {
+
+        return;
+
+    }
+
+
+    corpoTabela.innerHTML = "";
+
+
+    if (lista.length === 0) {
+
+        corpoTabela.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="9"
+                    style="text-align:center;padding:20px;"
+                >
+
+                    Nenhum aluno encontrado.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    lista.forEach(aluno => {
+
+        corpoTabela.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${aluno.codigoAluno || ""}
+                </td>
+
+                <td>
+                    ${aluno.numero || ""}
+                </td>
+
+                <td>
+                    ${aluno.nome || ""}
+                </td>
+
+                <td>
+                    ${aluno.sexo || ""}
+                </td>
+
+                <td>
+                    ${aluno.dataNascimento || ""}
+                </td>
+
+                <td>
+                    ${calcularIdade(
+                        aluno.dataNascimento
+                    )}
+                </td>
+
+                <td>
+                    ${aluno.turmaNome || ""}
+                </td>
+
+                <td>
+                    ${aluno.estado || "ativo"}
+                </td>
+
+                <td>
+
+                    <button
+                        onclick="alterarEstado('${aluno.codigoAluno}')"
+                    >
+                        ⚙️ Estado
+                    </button>
+
+
+                    <button
+                        onclick="verAluno('${aluno.codigoAluno}')"
+                    >
+                        👁️
+                    </button>
+
+
+                    <button
+                        onclick="editarAluno('${aluno.codigoAluno}')"
+                    >
+                        ✏️
+                    </button>
+
+
+                    <button
+                        onclick="apagarAluno('${aluno.codigoAluno}')"
+                    >
+                        🗑️
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// =====================================================
+// IMPORTAR ALUNOS POR LISTA
+// =====================================================
+
+importarAlunos.addEventListener(
+    "click",
+    async () => {
+
+        try {
+
+            if (!turmaSelecionada) {
+
+                alert(
+                    "Selecione uma turma."
+                );
+
+                return;
+
+            }
+
+
+            const texto =
+                listaImportar.value.trim();
+
+
+            if (texto === "") {
+
+                alert(
+                    "Cole a lista de alunos."
+                );
+
+                return;
+
+            }
+
+
+            const linhas =
+                texto.split("\n");
+
+
+            let quantidadeImportada = 0;
+
+
+            for (
+                const linha of linhas
+            ) {
+
+                const dados =
+                    linha.split(";");
+
+
+                if (dados.length < 4) {
+
+                    continue;
+
+                }
+
+
+                await addDoc(
+
+                    collection(
+                        db,
+                        "turmas",
+                        turmaSelecionada,
+                        "alunos"
+                    ),
+
+                    {
+
+                        numero:
+                            dados[0].trim(),
+
+                        nome:
+                            dados[1].trim(),
+
+                        sexo:
+                            dados[2].trim(),
+
+                        dataNascimento:
+                            dados[3].trim(),
+
+                        turmaId:
+                            turmaSelecionada,
+
+                        escolaId:
+                            escolaId,
+
+                        turmaNome:
+                            turmaSelect
+                            .options[
+                                turmaSelect.selectedIndex
+                            ]
+                            .text,
+
+                        codigoAluno:
+                            gerarCodigoAluno(
+                                dados[0].trim()
+                            ),
+
+                        senhaAcesso:
+                            gerarSenha(),
+
+                        estado:
+                            "ativo",
+
+                        criadoEm:
+                            serverTimestamp()
+
+                    }
+
+                );
+
+
+                quantidadeImportada++;
+
+            }
+
+
+            alert(
+                quantidadeImportada +
+                " aluno(s) importado(s) com sucesso!"
+            );
+
+
+            listaImportar.value = "";
+
+
+            carregarAlunos();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "Erro na importação:",
+                erro
+            );
+
+
+            alert(
+                "Erro ao importar alunos: " +
+                erro.message
+            );
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// IMPORTAR ALUNOS PELO PDF
+// =====================================================
+
+importarPDF.addEventListener(
+    "click",
+    async () => {
+
+        if (!turmaSelecionada) {
+
+            alert(
+                "Selecione uma turma."
+            );
+
+            return;
+
+        }
+
+
+        const file =
+            arquivoPDF.files[0];
+
+
+        if (!file) {
+
+            alert(
+                "Selecione um PDF."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            alert(
+                "A ler PDF..."
+            );
+
+
+            const resultado =
+                await lerPDF(file);
+
+
+            if (
+                !resultado ||
+                !resultado.alunos
+            ) {
+
+                throw new Error(
+                    "Não foi possível obter os alunos do PDF."
+                );
+
+            }
+
+
+            alert(
+                "Alunos encontrados: " +
+                resultado.quantidade
+            );
+
+
+            for (
+                const aluno of resultado.alunos
+            ) {
+
+                await addDoc(
+
+                    collection(
+                        db,
+                        "turmas",
+                        turmaSelecionada,
+                        "alunos"
+                    ),
+
+                    {
+
+                        numero:
+                            aluno.numero,
+
+                        nome:
+                            aluno.nome,
+
+                        sexo:
+                            aluno.sexo || "",
+
+                        turmaId:
+                            turmaSelecionada,
+
+                        escolaId:
+                            escolaId,
+
+                        turmaNome:
+                            turmaSelect
+                            .options[
+                                turmaSelect.selectedIndex
+                            ]
+                            .text,
+
+                        codigoAluno:
+                            gerarCodigoAluno(
+                                aluno.numero
+                            ),
+
+                        senhaAcesso:
+                            gerarSenha(),
+
+                        estado:
+                            "ativo",
+
+                        criadoEm:
+                            serverTimestamp()
+
+                    }
+
+                );
+
+            }
+
+
+            alert(
+                "Importação concluída com sucesso!"
+            );
+
+
+            carregarAlunos();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "Erro ao importar PDF:",
+                erro
+            );
+
+
+            alert(
+                "Erro ao importar PDF: " +
+                erro.message
+            );
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// PESQUISAR ALUNOS
+// =====================================================
+
+pesquisarAluno.addEventListener(
+    "input",
+    () => {
+
+        const texto =
+            pesquisarAluno.value
+            .toLowerCase();
+
+
+        const resultado =
+            todosAlunos.filter(
+                aluno =>
+
+                    (
+                        aluno.nome || ""
+                    )
+                    .toLowerCase()
+                    .includes(texto)
+
+                    ||
+
+                    String(
+                        aluno.numero
+                    )
+                    .includes(texto)
+
+                    ||
+
+                    (
+                        aluno.codigoAluno || ""
+                    )
+                    .toLowerCase()
+                    .includes(texto)
+
+            );
+
+
+        mostrarAlunos(resultado);
+
+    }
+);
+
+
+// =====================================================
+// ALTERAR ESTADO
+// =====================================================
+
+window.alterarEstado =
+    async function(codigo) {
+
+        const opcao =
+            prompt(
+
+                "Digite o novo estado:\n\n" +
+
+                "1 - ativo\n" +
+
+                "2 - transferido\n" +
+
+                "3 - desistiu\n" +
+
+                "4 - removido"
+
+            );
+
+
+        let novoEstado = "";
+
+
+        if (opcao === "1") {
+
+            novoEstado = "ativo";
+
+        }
+
+        else if (opcao === "2") {
+
+            novoEstado = "transferido";
+
+        }
+
+        else if (opcao === "3") {
+
+            novoEstado = "desistiu";
+
+        }
+
+        else if (opcao === "4") {
+
+            novoEstado = "removido";
+
+        }
+
+        else {
+
+            return;
+
+        }
+
+
+        const turmas =
+            await getDocs(
+                query(
+                    collection(db, "turmas"),
+                    where(
+                        "escolaId",
+                        "==",
+                        escolaId
+                    )
+                )
+            );
+
+
+        for (
+            const turma of turmas.docs
+        ) {
+
+            const alunos =
+                await getDocs(
+
+                    collection(
+                        db,
+                        "turmas",
+                        turma.id,
+                        "alunos"
+                    )
+
+                );
+
+
+            for (
+                const aluno of alunos.docs
+            ) {
+
+                if (
+                    aluno.data()
+                    .codigoAluno === codigo
+                ) {
+
+                    const motivo =
+                        prompt(
+                            "Digite o motivo da alteração:"
+                        );
+
+
+                    await updateDoc(
+
+                        doc(
+                            db,
+                            "turmas",
+                            turma.id,
+                            "alunos",
+                            aluno.id
+                        ),
+
+                        {
+
+                            estado:
+                                novoEstado,
+
+                            motivoEstado:
+                                motivo || "",
+
+                            dataEstado:
+                                serverTimestamp()
+
+                        }
+
+                    );
+
+
+                    alert(
+                        "Estado atualizado com sucesso."
+                    );
+
+
+                    carregarAlunos();
+
+
+                    return;
+
+                }
+
+            }
+
+        }
+
+    };
+
+
+// =====================================================
+// VER DETALHES DO ALUNO
+// =====================================================
+
+window.verAluno =
+    async function(codigo) {
+
+        const turmas =
+            await getDocs(
+
+                query(
+                    collection(db, "turmas"),
+                    where(
+                        "escolaId",
+                        "==",
+                        escolaId
+                    )
+                )
+
+            );
+
+
+        for (
+            const turma of turmas.docs
+        ) {
+
+            const alunos =
+                await getDocs(
+
+                    collection(
+                        db,
+                        "turmas",
+                        turma.id,
+                        "alunos"
+                    )
+
+                );
+
+
+            for (
+                const aluno of alunos.docs
+            ) {
+
+                const dados =
+                    aluno.data();
+
+
+                if (
+                    dados.codigoAluno === codigo
+                ) {
+
+                    alert(
 
 `Código: ${dados.codigoAluno}
 
@@ -812,197 +1267,286 @@ Sexo: ${dados.sexo || ""}
 
 Data nascimento: ${dados.dataNascimento || ""}
 
-Turma: ${dados.turmaNome}
+Turma: ${dados.turmaNome || ""}
 
 Estado: ${dados.estado || "ativo"}
 
 Senha: ${dados.senhaAcesso || ""}`
-);
 
-return;  
+                    );
 
-        }  
 
-    }  
+                    return;
 
-}
+                }
 
-};
+            }
 
-// =============================
+        }
+
+    };
+
+
+// =====================================================
 // EDITAR ALUNO
-// =============================
+// =====================================================
 
-window.editarAluno = async function(codigo){
+window.editarAluno =
+    async function(codigo) {
 
-const turmas = await getDocs(  
-    collection(db,"turmas")  
-);  
+        const turmas =
+            await getDocs(
 
+                query(
+                    collection(db, "turmas"),
+                    where(
+                        "escolaId",
+                        "==",
+                        escolaId
+                    )
+                )
 
-for(const turma of turmas.docs){  
+            );
 
 
-    const alunos = await getDocs(  
-        collection(  
-            db,  
-            "turmas",  
-            turma.id,  
-            "alunos"  
-        )  
-    );  
+        for (
+            const turma of turmas.docs
+        ) {
 
+            const alunos =
+                await getDocs(
 
-    for(const aluno of alunos.docs){  
+                    collection(
+                        db,
+                        "turmas",
+                        turma.id,
+                        "alunos"
+                    )
 
+                );
 
-        const dados = aluno.data();  
 
+            for (
+                const aluno of alunos.docs
+            ) {
 
-        if(dados.codigoAluno === codigo){  
+                const dados =
+                    aluno.data();
 
 
-            const novoNome = prompt(  
-                "Nome do aluno:",  
-                dados.nome  
-            );  
+                if (
+                    dados.codigoAluno === codigo
+                ) {
 
+                    const novoNome =
+                        prompt(
+                            "Nome do aluno:",
+                            dados.nome
+                        );
 
-            const novoNumero = prompt(  
-                "Número do aluno:",  
-                dados.numero  
-            );  
 
+                    if (novoNome === null) {
 
-            const novoSexo = prompt(  
-                "Sexo:",  
-                dados.sexo || ""  
-            );  
+                        return;
 
+                    }
 
-            const novaData = prompt(  
-                "Data de nascimento:",  
-                dados.dataNascimento || ""  
-            );  
 
+                    const novoNumero =
+                        prompt(
+                            "Número do aluno:",
+                            dados.numero
+                        );
 
-            await updateDoc(  
 
-                doc(  
-                    db,  
-                    "turmas",  
-                    turma.id,  
-                    "alunos",  
-                    aluno.id  
-                ),  
+                    if (novoNumero === null) {
 
-                {  
+                        return;
 
-                    nome: novoNome,  
+                    }
 
-                    numero: novoNumero,  
 
-                    sexo: novoSexo,  
+                    const novoSexo =
+                        prompt(
+                            "Sexo:",
+                            dados.sexo || ""
+                        );
 
-                    dataNascimento: novaData  
 
-                }  
+                    if (novoSexo === null) {
 
-            );  
+                        return;
 
+                    }
 
-            alert("Aluno atualizado com sucesso");  
 
+                    const novaData =
+                        prompt(
+                            "Data de nascimento:",
+                            dados.dataNascimento || ""
+                        );
 
-            carregarAlunos();  
 
+                    if (novaData === null) {
 
-            return;  
+                        return;
 
-        }  
+                    }
 
-    }  
 
-}
+                    await updateDoc(
 
-};
+                        doc(
+                            db,
+                            "turmas",
+                            turma.id,
+                            "alunos",
+                            aluno.id
+                        ),
 
-// =============================
-// APAGAR ALUNO (APENAS DUPLICADOS)
-// =============================
+                        {
 
-window.apagarAluno = async function(codigo){
+                            nome:
+                                novoNome,
 
-const confirmar = confirm(  
-    "Tem certeza que deseja remover este aluno?\n\nUse apenas para duplicados ou erros de cadastro."  
-);  
+                            numero:
+                                novoNumero,
 
+                            sexo:
+                                novoSexo,
 
-if(!confirmar){  
+                            dataNascimento:
+                                novaData
 
-    return;  
+                        }
 
-}  
+                    );
 
 
-const turmas = await getDocs(  
-    collection(db,"turmas")  
-);  
+                    alert(
+                        "Aluno atualizado com sucesso."
+                    );
 
 
-for(const turma of turmas.docs){  
+                    carregarAlunos();
 
 
-    const alunos = await getDocs(  
-        collection(  
-            db,  
-            "turmas",  
-            turma.id,  
-            "alunos"  
-        )  
-    );  
+                    return;
 
+                }
 
-    for(const aluno of alunos.docs){  
+            }
 
+        }
 
-        const dados = aluno.data();  
+    };
 
 
-        if(dados.codigoAluno === codigo){  
+// =====================================================
+// APAGAR ALUNO
+// APENAS DUPLICADOS OU ERROS
+// =====================================================
 
+window.apagarAluno =
+    async function(codigo) {
 
-            await deleteDoc(  
+        const confirmar =
+            confirm(
 
-                doc(  
-                    db,  
-                    "turmas",  
-                    turma.id,  
-                    "alunos",  
-                    aluno.id  
-                )  
+                "Tem certeza que deseja remover este aluno?\n\n" +
 
-            );  
+                "Use esta opção apenas para duplicados " +
+                "ou erros de cadastro."
 
+            );
 
-            alert(  
-                "Aluno removido com sucesso"  
-            );  
 
+        if (!confirmar) {
 
-            carregarAlunos();  
+            return;
 
+        }
 
-            return;  
 
-        }  
+        const turmas =
+            await getDocs(
 
-    }  
+                query(
+                    collection(db, "turmas"),
+                    where(
+                        "escolaId",
+                        "==",
+                        escolaId
+                    )
+                )
 
-}
+            );
 
-};
 
-alert("CHEGUEI AO FINAL DO FICHEIRO");
+        for (
+            const turma of turmas.docs
+        ) {
+
+            const alunos =
+                await getDocs(
+
+                    collection(
+                        db,
+                        "turmas",
+                        turma.id,
+                        "alunos"
+                    )
+
+                );
+
+
+            for (
+                const aluno of alunos.docs
+            ) {
+
+                const dados =
+                    aluno.data();
+
+
+                if (
+                    dados.codigoAluno === codigo
+                ) {
+
+                    await deleteDoc(
+
+                        doc(
+                            db,
+                            "turmas",
+                            turma.id,
+                            "alunos",
+                            aluno.id
+                        )
+
+                    );
+
+
+                    alert(
+                        "Aluno removido com sucesso."
+                    );
+
+
+                    carregarAlunos();
+
+
+                    return;
+
+                }
+
+            }
+
+        }
+
+    };
+
+
+// =====================================================
+// INICIALIZAÇÃO
+// =====================================================
 
 carregarTurmas();
+                       
