@@ -1,4 +1,4 @@
-alert("CLASSES.JS COMPLETO 9CARREGADO ✅");
+alert("CLASSES.JS COMPLETO CARREGADO ✅");
 
 import { app } from "./firebase.js";
 
@@ -596,7 +596,6 @@ async function verTurma(
 
 }
 
-
 // =====================================================
 // LISTAR TURMAS EM TABELA
 // =====================================================
@@ -619,27 +618,41 @@ async function carregarTurmas() {
         `;
 
 
-const resultado =
-    await getDocs(
-        query(
-            collection(
-                db,
-                "turmas"
-            ),
-            where(
-                "escolaId",
-                "==",
-                escolaId
+        // =================================================
+        // BUSCAR SOMENTE TURMAS DA ESCOLA ATUAL
+        // =================================================
+
+        const resultado = await getDocs(
+
+            query(
+
+                collection(
+                    db,
+                    "turmas"
+                ),
+
+                where(
+                    "escolaId",
+                    "==",
+                    escolaId
+                )
+
             )
-        )
-    );
+
+        );
+
+
+        console.log(
+            "TURMAS DA ESCOLA:",
+            resultado.size
+        );
 
 
         // =================================================
         // NENHUMA TURMA
         // =================================================
 
-if (turmasDaEscola.length === 0) {
+        if (resultado.empty) {
 
             listaTurmas.innerHTML = `
 
@@ -706,57 +719,27 @@ if (turmasDaEscola.length === 0) {
                         "
                     >
 
-                        <th
-                            style="
-                                padding:13px;
-                                text-align:left;
-                            "
-                        >
+                        <th style="padding:13px;">
                             Turma
                         </th>
 
-
-                        <th
-                            style="
-                                padding:13px;
-                            "
-                        >
+                        <th style="padding:13px;">
                             Classe
                         </th>
 
-
-                        <th
-                            style="
-                                padding:13px;
-                            "
-                        >
+                        <th style="padding:13px;">
                             Ensino
                         </th>
 
-
-                        <th
-                            style="
-                                padding:13px;
-                            "
-                        >
+                        <th style="padding:13px;">
                             Ano Letivo
                         </th>
 
-
-                        <th
-                            style="
-                                padding:13px;
-                            "
-                        >
+                        <th style="padding:13px;">
                             Disciplinas
                         </th>
 
-
-                        <th
-                            style="
-                                padding:13px;
-                            "
-                        >
+                        <th style="padding:13px;">
                             Ações
                         </th>
 
@@ -764,18 +747,16 @@ if (turmasDaEscola.length === 0) {
 
                 </thead>
 
-
                 <tbody>
-
         `;
 
 
         // =================================================
-        // LINHAS
+        // LINHAS DAS TURMAS
         // =================================================
 
-        turmasDaEscola.forEach(
-    item => {
+        resultado.docs.forEach(
+            item => {
 
                 const turma =
                     item.data();
@@ -951,7 +932,6 @@ if (turmasDaEscola.length === 0) {
                             const turmaId =
                                 this.dataset.id;
 
-
                             verTurma(
                                 turmaId
                             );
@@ -980,7 +960,6 @@ if (turmasDaEscola.length === 0) {
 
                             const turmaId =
                                 this.dataset.id;
-
 
                             apagarTurma(
                                 turmaId
@@ -1025,8 +1004,7 @@ if (turmasDaEscola.length === 0) {
 
     }
 
-}
-
+            }
 
 // =====================================================
 // CRIAR TURMA
