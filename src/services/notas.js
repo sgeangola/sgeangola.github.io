@@ -1,19 +1,50 @@
 // =====================================================
 // NOTAS.JS — ADMINISTRADOR
 // SGE
-// BLOCO 1 — FILTROS EM CASCATA
+// BLOCO 1/2
+//
 // Professor → Classe → Turma → Disciplina → Trimestre
+// Controle de abertura/fecho pelo Administrador
+// Isolamento por escola
 // =====================================================
 
-alert("🔥 NOTAS.JS ADMINISTRADOR gCARREGADO!");
+alert("🔥 NOTAS.JS ADMINISTRADOR CARREGADO!");
 
 
 import { db } from "./firebase.js";
 
 import {
     collection,
-    getDocs
+    getDocs,
+    getDoc,
+    doc,
+    setDoc,
+    query,
+    where,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+
+// =====================================================
+// ESCOLA LOGADA
+// =====================================================
+
+const escolaId =
+    sessionStorage.getItem("escolaId");
+
+
+if (!escolaId) {
+
+    alert(
+        "❌ Escola não identificada.\n\n" +
+        "Faça login novamente."
+    );
+
+    throw new Error(
+        "escolaId não encontrado."
+    );
+
+}
 
 
 // =====================================================
@@ -45,6 +76,19 @@ const notasLista =
 
 let professores = [];
 
+let turmas = [];
+
+let professorSelecionado = null;
+
+let atribuicoesSelecionadas = [];
+
+
+// =====================================================
+// ESTADO DOS LANÇAMENTOS
+// =====================================================
+
+let estadosLancamentos = {};
+
 
 // =====================================================
 // INICIAR
@@ -55,15 +99,16 @@ async function iniciarNotas() {
     try {
 
         mostrarMensagem(
-            "⏳ A carregar professores..."
+            "⏳ A carregar dados da escola..."
         );
 
 
         await carregarProfessores();
 
+        await carregarTurmas();
+
 
         preencherProfessores();
-
 
         prepararFiltros();
 
@@ -74,20 +119,43 @@ async function iniciarNotas() {
 
 
         console.log(
+            "================================="
+        );
+
+        console.log(
             "✅ NOTAS.JS INICIADO"
+        );
+
+        console.log(
+            "🏫 Escola:",
+            escolaId
+        );
+
+        console.log(
+            "👨‍🏫 Professores:",
+            professores.length
+        );
+
+        console.log(
+            "🏫 Turmas:",
+            turmas.length
+        );
+
+        console.log(
+            "================================="
         );
 
     }
     catch (erro) {
 
         console.error(
-            "❌ ERRO AO INICIAR:",
+            "❌ ERRO AO INICIAR NOTAS:",
             erro
         );
 
 
         mostrarMensagem(
-            "❌ Erro ao carregar os professores."
+            "❌ Erro ao carregar os dados."
         );
 
     }
@@ -104,11 +172,25 @@ async function carregarProfessores() {
     professores = [];
 
 
+    /*
+    IMPORTANTE:
+
+    Cada escola só pode visualizar
+    os seus próprios professores.
+    */
+
     const resultado =
         await getDocs(
-            collection(
-                db,
-                "professores"
+            query(
+                collection(
+                    db,
+                    "professores"
+                ),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaId
+                )
             )
         );
 
@@ -143,8 +225,62 @@ async function carregarProfessores() {
 
 
     console.log(
-        "👨‍🏫 PROFESSORES:",
+        "👨‍🏫 PROFESSORES DA ESCOLA:",
         professores
+    );
+
+}
+
+
+// =====================================================
+// CARREGAR TURMAS
+// =====================================================
+
+async function carregarTurmas() {
+
+    turmas = [];
+
+
+    /*
+    Cada escola vê somente
+    as suas turmas.
+    */
+
+    const resultado =
+        await getDocs(
+            query(
+                collection(
+                    db,
+                    "turmas"
+                ),
+                where(
+                    "escolaId",
+                    "==",
+                    escolaId
+                )
+            )
+        );
+
+
+    resultado.forEach(
+        documento => {
+
+            turmas.push({
+
+                id:
+                    documento.id,
+
+                ...documento.data()
+
+            });
+
+        }
+    );
+
+
+    console.log(
+        "🏫 TURMAS DA ESCOLA:",
+        turmas
     );
 
 }
@@ -190,8 +326,10 @@ function preencherProfessores() {
 
 
             option.textContent =
-                professor.nome ||
-                "Professor sem nome";
+                professor.codigo
+                    ? `${professor.codigo} — ${professor.nome || "Sem nome"}`
+                    : professor.nome ||
+                      "Professor sem nome";
 
 
             filtroProfessor.appendChild(
@@ -305,15 +443,15 @@ function carregarClassesDoProfessor(
     filtroClasse.disabled = true;
 
 
-    // -----------------------------------------------
-    // PROCURAR PROFESSOR
-    // -----------------------------------------------
-
     const professor =
         professores.find(
             item =>
                 item.id === professorId
         );
+
+
+    professorSelecionado =
+        professor || null;
 
 
     if (!professor) {
@@ -322,10 +460,6 @@ function carregarClassesDoProfessor(
 
     }
 
-
-    // -----------------------------------------------
-    // ATRIBUIÇÕES
-    // -----------------------------------------------
 
     const atribuicoes =
         Array.isArray(
@@ -351,18 +485,10 @@ function carregarClassesDoProfessor(
 
         `;
 
-        alert(
-            "⚠️ Este professor não possui atribuições."
-        );
-
         return;
 
     }
 
-
-    // -----------------------------------------------
-    // CLASSES ÚNICAS
-    // -----------------------------------------------
 
     const classes =
         new Map();
@@ -397,10 +523,6 @@ function carregarClassesDoProfessor(
     );
 
 
-    // -----------------------------------------------
-    // COLOCAR CLASSES NO SELECT
-    // -----------------------------------------------
-
     classes.forEach(
         classe => {
 
@@ -431,26 +553,9 @@ function carregarClassesDoProfessor(
 
 
     console.log(
-        "📚 CLASSES ENCONTRADAS:",
+        "📚 CLASSES:",
         [...classes.values()]
     );
-
-
-    if (!classes.size) {
-
-        filtroClasse.innerHTML = `
-
-            <option value="">
-                Nenhuma classe associada
-            </option>
-
-        `;
-
-        alert(
-            "⚠️ Nenhuma classe encontrada nas atribuições."
-        );
-
-    }
 
 }
 
@@ -459,111 +564,120 @@ function carregarClassesDoProfessor(
 // CLASSE → TURMAS
 // =====================================================
 
-// =====================================================
-// CLASSE → TURMAS
-// =====================================================
-
-function carregarTurmasDaClasse(classe) {
+function carregarTurmasDaClasse(
+    classe
+) {
 
     if (!filtroTurma) return;
 
+
     filtroTurma.innerHTML = `
+
         <option value="">
             Selecionar turma
         </option>
+
     `;
+
+
+    filtroTurma.disabled = true;
+
 
     const professorId =
         filtroProfessor?.value;
 
-    if (!professorId || !classe) {
+
+    if (
+        !professorId ||
+        !classe
+    ) {
+
         return;
+
     }
+
 
     const professor =
         professores.find(
-            item => item.id === professorId
+            item =>
+                item.id === professorId
         );
 
+
     if (!professor) {
-        alert("❌ Professor não encontrado.");
+
         return;
+
     }
 
+
     const atribuicoes =
-        Array.isArray(professor.atribuicoes)
+        Array.isArray(
+            professor.atribuicoes
+        )
             ? professor.atribuicoes
             : [];
 
-    // =================================================
-    // ATRIBUIÇÕES DA CLASSE SELECIONADA
-    // =================================================
 
     const atribuicoesClasse =
         atribuicoes.filter(
-            item =>
-                String(item.classe || "").trim() ===
-                String(classe || "").trim()
+            item => {
+
+                return (
+                    String(
+                        item.classe || ""
+                    ).trim() ===
+                    String(
+                        classe || ""
+                    ).trim()
+                );
+
+            }
         );
+
 
     if (!atribuicoesClasse.length) {
 
         filtroTurma.innerHTML = `
+
             <option value="">
                 Nenhuma turma encontrada
             </option>
+
         `;
 
         return;
+
     }
 
-    // =================================================
-    // TURMAS SEM REPETIÇÃO
-    // =================================================
 
     const idsTurmas = [
         ...new Set(
             atribuicoesClasse
-                .map(item => item.turmaId)
+                .map(
+                    item =>
+                        item.turmaId
+                )
                 .filter(Boolean)
         )
     ];
 
-    console.log(
-        "🆔 IDs das turmas encontradas:",
-        idsTurmas
-    );
-
-    // =================================================
-    // PROCURAR OS DADOS REAIS DAS TURMAS
-    // NA COLEÇÃO turmas
-    // =================================================
 
     const turmasEncontradas =
         idsTurmas
-            .map(turmaId => {
+            .map(
+                turmaId => {
 
-                const turma =
-                    turmas.find(
-                        item =>
-                            item.id === turmaId
+                    return turmas.find(
+                        turma =>
+                            turma.id ===
+                            turmaId
                     );
 
-                return turma;
-
-            })
+                }
+            )
             .filter(Boolean);
 
-
-    console.log(
-        "🏫 TURMAS ENCONTRADAS:",
-        turmasEncontradas
-    );
-
-
-    // =================================================
-    // CRIAR AS OPÇÕES
-    // =================================================
 
     turmasEncontradas.forEach(
         turma => {
@@ -573,19 +687,18 @@ function carregarTurmasDaClasse(classe) {
                     "option"
                 );
 
+
             option.value =
                 turma.id;
 
-            // Tentar vários nomes possíveis
-            const nomeTurma =
+
+            option.textContent =
                 turma.nome ||
                 turma.turma ||
                 turma.designacao ||
                 turma.codigo ||
                 `Turma ${turma.id}`;
 
-            option.textContent =
-                nomeTurma;
 
             filtroTurma.appendChild(
                 option
@@ -595,51 +708,17 @@ function carregarTurmasDaClasse(classe) {
     );
 
 
-    // =================================================
-    // TESTE
-    // =================================================
+    filtroTurma.disabled =
+        turmasEncontradas.length === 0;
 
-    alert(
 
-        "🏫 TURMAS DA CLASSE\n\n" +
-
-        "Professor: " +
-        (professor.nome || "Sem nome") +
-
-        "\n\n" +
-
-        "Classe: " +
-        classe +
-
-        "\n\n" +
-
-        "IDs encontrados: " +
-        idsTurmas.length +
-
-        "\n\n" +
-
-        "Turmas carregadas: " +
-        turmasEncontradas.length +
-
-        "\n\n" +
-
-        "Opções no SELECT: " +
-        filtroTurma.options.length
-
+    console.log(
+        "🏫 TURMAS:",
+        turmasEncontradas
     );
 
+}
 
-    if (!turmasEncontradas.length) {
-
-        filtroTurma.innerHTML = `
-            <option value="">
-                Nenhuma turma encontrada
-            </option>
-        `;
-
-    }
-
-        }
 
 // =====================================================
 // TURMA → DISCIPLINAS
@@ -696,10 +775,6 @@ function carregarDisciplinasDaTurma(
             : [];
 
 
-    // -----------------------------------------------
-    // DISCIPLINAS DA TURMA
-    // -----------------------------------------------
-
     const disciplinas =
         new Set();
 
@@ -742,10 +817,6 @@ function carregarDisciplinasDaTurma(
     );
 
 
-    // -----------------------------------------------
-    // COLOCAR DISCIPLINAS
-    // -----------------------------------------------
-
     disciplinas.forEach(
         disciplina => {
 
@@ -776,23 +847,8 @@ function carregarDisciplinasDaTurma(
 
 
     console.log(
-        "📖 DISCIPLINAS ENCONTRADAS:",
+        "📖 DISCIPLINAS:",
         [...disciplinas]
-    );
-
-
-    alert(
-
-        "🏫 TURMA SELECIONADA\n\n" +
-
-        "Turma ID: " +
-        turmaId +
-
-        "\n\n" +
-
-        "Disciplinas encontradas: " +
-        disciplinas.size
-
     );
 
 
@@ -823,8 +879,6 @@ filtroProfessor?.addEventListener(
             this.value;
 
 
-        // Resetar os campos seguintes
-
         if (filtroTurma) {
 
             filtroTurma.innerHTML = `
@@ -854,8 +908,6 @@ filtroProfessor?.addEventListener(
 
         }
 
-
-        // Carregar classes
 
         carregarClassesDoProfessor(
             professorId
@@ -966,12 +1018,6 @@ filtroDisciplina?.addEventListener(
             this.value;
 
 
-        console.log(
-            "📖 Disciplina selecionada:",
-            disciplina
-        );
-
-
         if (disciplina) {
 
             mostrarMensagem(
@@ -990,54 +1036,9 @@ filtroDisciplina?.addEventListener(
 
 filtroTrimestre?.addEventListener(
     "change",
-    function () {
+    async function () {
 
-        const trimestre =
-            this.value;
-
-
-        console.log(
-            "📅 Trimestre selecionado:",
-            trimestre
-        );
-
-
-        if (
-            trimestre &&
-            filtroProfessor?.value &&
-            filtroClasse?.value &&
-            filtroTurma?.value &&
-            filtroDisciplina?.value
-        ) {
-
-            mostrarMensagem(
-
-                "✅ Seleção completa.\n\n" +
-
-                "Professor: " +
-                filtroProfessor.options[
-                    filtroProfessor.selectedIndex
-                ].text +
-
-                "\nClasse: " +
-                filtroClasse.value +
-
-                "\nTurma: " +
-                filtroTurma.options[
-                    filtroTurma.selectedIndex
-                ].text +
-
-                "\nDisciplina: " +
-                filtroDisciplina.value +
-
-                "\nTrimestre: " +
-                filtroTrimestre.options[
-                    filtroTrimestre.selectedIndex
-                ].text
-
-            );
-
-        }
+        await mostrarLancamentoSelecionado();
 
     }
 );
@@ -1087,252 +1088,218 @@ iniciarNotas();
 
 // =====================================================
 // NOTAS.JS — ADMINISTRADOR
-// BLOCO 2 — VISUALIZAÇÃO DAS NOTAS LANÇADAS
+// BLOCO 2/2
+//
+// Estado
+// Abrir / Fechar
+// Ver Mini-Pauta
+// Imprimir
 // =====================================================
 
 
 // =====================================================
-// EVENTO — TRIMESTRE
+// ID DO LANÇAMENTO
 // =====================================================
 
-filtroTrimestre?.addEventListener(
-    "change",
-    async function () {
-
-        const professorId =
-            filtroProfessor?.value || "";
-
-        const classe =
-            filtroClasse?.value || "";
-
-        const turmaId =
-            filtroTurma?.value || "";
-
-        const disciplina =
-            filtroDisciplina?.value || "";
-
-        const trimestre =
-            this.value;
-
-
-        // ---------------------------------------------
-        // VERIFICAR SE TUDO FOI SELECIONADO
-        // ---------------------------------------------
-
-        if (
-            !professorId ||
-            !classe ||
-            !turmaId ||
-            !disciplina ||
-            !trimestre
-        ) {
-
-            mostrarMensagem(
-                "Selecione professor, classe, turma, disciplina e trimestre."
-            );
-
-            return;
-
-        }
-
-
-        // ---------------------------------------------
-        // MOSTRAR CARREGAMENTO
-        // ---------------------------------------------
-
-        mostrarMensagem(
-            "⏳ A procurar as notas lançadas..."
-        );
-
-
-        try {
-
-            await mostrarNotasLancadas({
-
-                professorId,
-                classe,
-                turmaId,
-                disciplina,
-                trimestre
-
-            });
-
-        }
-        catch (erro) {
-
-            console.error(
-                "Erro ao carregar notas:",
-                erro
-            );
-
-
-            mostrarMensagem(
-                "❌ Erro ao carregar as notas."
-            );
-
-        }
-
-    }
-);
-
-
-// =====================================================
-// BUSCAR NOTAS
-// =====================================================
-
-async function mostrarNotasLancadas(
-    dadosFiltro
+function criarIdLancamento(
+    turmaId,
+    disciplina,
+    trimestre
 ) {
 
-    const {
-
-        professorId,
-        classe,
-        turmaId,
-        disciplina,
+    return (
+        turmaId +
+        "_" +
+        disciplina +
+        "_" +
         trimestre
-
-    } = dadosFiltro;
-
-
-    console.log(
-        "🔎 PROCURANDO NOTAS:",
-        dadosFiltro
     );
 
+}
 
-    // =================================================
-    // BUSCAR COLEÇÃO NOTAS
-    // =================================================
 
-    const resultado =
-        await getDocs(
-            collection(
+// =====================================================
+// OBTER ESTADO DO LANÇAMENTO
+// =====================================================
+
+async function obterEstadoLancamento(
+    turmaId,
+    disciplina,
+    trimestre
+) {
+
+    const idLancamento =
+        criarIdLancamento(
+            turmaId,
+            disciplina,
+            trimestre
+        );
+
+
+    try {
+
+        const referencia =
+            doc(
                 db,
-                "notas"
-            )
+                "notas",
+                idLancamento
+            );
+
+
+        const resultado =
+            await getDoc(
+                referencia
+            );
+
+
+        if (!resultado.exists()) {
+
+            return {
+
+                existe: false,
+
+                abertoGeral: false,
+
+                alunosAbertos: {},
+
+                alunos: []
+
+            };
+
+        }
+
+
+        const dados =
+            resultado.data();
+
+
+        /*
+        Verificação extra de segurança:
+        */
+
+        if (
+            dados.escolaId &&
+            dados.escolaId !== escolaId
+        ) {
+
+            console.warn(
+                "⚠️ Lançamento pertence a outra escola."
+            );
+
+
+            return {
+
+                existe: false,
+
+                abertoGeral: false,
+
+                alunosAbertos: {},
+
+                alunos: []
+
+            };
+
+        }
+
+
+        return {
+
+            existe: true,
+
+            abertoGeral:
+                dados.abertoGeral === true,
+
+            alunosAbertos:
+                dados.alunosAbertos || {},
+
+            alunos:
+                Array.isArray(
+                    dados.alunos
+                )
+                    ? dados.alunos
+                    : [],
+
+            dados
+
+        };
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao obter lançamento:",
+            erro
         );
 
 
-    console.log(
-        "📚 DOCUMENTOS NA COLEÇÃO NOTAS:",
-        resultado.size
-    );
+        return {
+
+            existe: false,
+
+            abertoGeral: false,
+
+            alunosAbertos: {},
+
+            alunos: []
+
+        };
+
+    }
+
+}
 
 
-    if (resultado.empty) {
+// =====================================================
+// ESTADO DAS NOTAS
+// =====================================================
 
-        mostrarMensagem(
-            "⚠️ Ainda não existem notas lançadas."
-        );
+function verificarEstadoNotas(
+    alunos
+) {
 
-        return;
+    if (
+        !Array.isArray(alunos) ||
+        alunos.length === 0
+    ) {
+
+        return "Sem lançamento";
 
     }
 
 
-    // =================================================
-    // FILTRAR
-    // =================================================
-
-    const notasEncontradas = [];
+    let completos = 0;
 
 
-    resultado.forEach(
-        documento => {
+    alunos.forEach(
+        aluno => {
 
-            const dados =
-                documento.data();
-
-
-            console.log(
-                "📄 NOTA:",
-                documento.id,
-                dados
-            );
+            const mac =
+                aluno.MAC;
 
 
-            // -----------------------------------------
-            // ACEITAR VÁRIAS FORMAS DE ID
-            // -----------------------------------------
-
-            const notaProfessor =
-                String(
-                    dados.professorId ||
-                    dados.professor ||
-                    ""
-                ).trim();
+            const npt =
+                aluno.NPT;
 
 
-            const notaTurma =
-                String(
-                    dados.turmaId ||
-                    dados.turma ||
-                    ""
-                ).trim();
-
-
-            const notaDisciplina =
-                String(
-                    dados.disciplina ||
-                    dados.subject ||
-                    ""
-                ).trim();
-
-
-            const notaTrimestre =
-                String(
-                    dados.trimestre ||
-                    dados.periodo ||
-                    ""
-                ).trim();
-
-
-            // -----------------------------------------
-            // COMPARAR
-            // -----------------------------------------
-
-            const correspondeProfessor =
-                !notaProfessor ||
-                notaProfessor ===
-                String(professorId);
-
-
-            const correspondeTurma =
-                !notaTurma ||
-                notaTurma ===
-                String(turmaId);
-
-
-            const correspondeDisciplina =
-                !notaDisciplina ||
-                notaDisciplina.toLowerCase() ===
-                disciplina.toLowerCase();
-
-
-            const correspondeTrimestre =
-                !notaTrimestre ||
-                notaTrimestre ===
-                String(trimestre);
+            const mf =
+                aluno.MF;
 
 
             if (
+                mac !== undefined &&
+                mac !== null &&
+                mac !== "" &&
 
-                correspondeProfessor &&
-                correspondeTurma &&
-                correspondeDisciplina &&
-                correspondeTrimestre
+                npt !== undefined &&
+                npt !== null &&
+                npt !== "" &&
 
+                mf !== undefined &&
+                mf !== null &&
+                mf !== ""
             ) {
 
-                notasEncontradas.push({
-
-                    id:
-                        documento.id,
-
-                    ...dados
-
-                });
+                completos++;
 
             }
 
@@ -1340,156 +1307,310 @@ async function mostrarNotasLancadas(
     );
 
 
-    console.log(
-        "✅ NOTAS ENCONTRADAS:",
-        notasEncontradas
-    );
+    if (
+        completos === 0
+    ) {
+
+        return "Sem lançamento";
+
+    }
 
 
-    // =================================================
-    // NENHUMA NOTA
-    // =================================================
+    if (
+        completos === alunos.length
+    ) {
 
-    if (!notasEncontradas.length) {
+        return "Lançamento completo";
 
-        mostrarMensagem(`
+    }
 
-            <div style="
-                padding:20px;
-                text-align:center;
-            ">
 
-                <div style="
-                    font-size:35px;
-                    margin-bottom:10px;
-                ">
-                    📋
-                </div>
+    return "Lançamento incompleto";
 
-                <strong>
-                    Nenhuma nota encontrada
-                </strong>
+}
 
-                <div style="
-                    margin-top:8px;
-                    color:#64748b;
-                ">
 
-                    Ainda não foram encontradas
-                    notas lançadas para esta seleção.
+// =====================================================
+// COR DO ESTADO
+// =====================================================
 
-                </div>
+function obterClasseEstado(
+    estado
+) {
 
-            </div>
+    if (
+        estado ===
+        "Lançamento completo"
+    ) {
 
-        `);
+        return "estado-completo";
+
+    }
+
+
+    if (
+        estado ===
+        "Lançamento incompleto"
+    ) {
+
+        return "estado-incompleto";
+
+    }
+
+
+    return "estado-sem-lancamento";
+
+}
+
+
+// =====================================================
+// MOSTRAR LANÇAMENTO SELECIONADO
+// =====================================================
+
+async function mostrarLancamentoSelecionado() {
+
+    const professorId =
+        filtroProfessor?.value || "";
+
+
+    const classe =
+        filtroClasse?.value || "";
+
+
+    const turmaId =
+        filtroTurma?.value || "";
+
+
+    const disciplina =
+        filtroDisciplina?.value || "";
+
+
+    const trimestre =
+        filtroTrimestre?.value || "";
+
+
+    if (
+        !professorId ||
+        !classe ||
+        !turmaId ||
+        !disciplina ||
+        !trimestre
+    ) {
+
+        mostrarMensagem(
+            "Selecione professor, classe, turma, disciplina e trimestre."
+        );
 
         return;
 
     }
 
 
-    // =================================================
-    // MOSTRAR TABELA
-    // =================================================
-
-    mostrarTabelaNotas(
-        notasEncontradas,
-        dadosFiltro
-    );
-
-}
+    const professor =
+        professores.find(
+            item =>
+                item.id === professorId
+        );
 
 
-// =====================================================
-// MOSTRAR TABELA DE NOTAS
-// =====================================================
+    if (!professor) {
 
-function mostrarTabelaNotas(
-    notas,
-    dadosFiltro
-) {
+        mostrarMensagem(
+            "❌ Professor não encontrado."
+        );
 
-    if (!notasLista) return;
+        return;
 
-
-    let html = "";
+    }
 
 
-    // =================================================
-    // CABEÇALHO
-    // =================================================
+    const estado =
+        await obterEstadoLancamento(
+            turmaId,
+            disciplina,
+            trimestre
+        );
 
-    html += `
+
+    const estadoNotas =
+        verificarEstadoNotas(
+            estado.alunos
+        );
+
+
+    const estadoGeral =
+        estado.abertoGeral
+            ? "ABERTO"
+            : "FECHADO";
+
+
+    const turma =
+        turmas.find(
+            item =>
+                item.id === turmaId
+        );
+
+
+    const turmaNome =
+        turma?.nome ||
+        turma?.turma ||
+        turma?.designacao ||
+        turmaId;
+
+
+    notasLista.innerHTML = `
 
         <tr>
 
-            <td
-                colspan="8"
-                style="
-                    padding:18px;
-                    background:#eff6ff;
-                    border-bottom:2px solid #2563eb;
-                "
-            >
+            <td>
 
-                <strong style="
-                    font-size:18px;
-                    color:#1e3a8a;
-                ">
+                ${
+                    professor.codigo ||
+                    "—"
+                }
 
-                    📋 Mini-Pauta
+            </td>
 
-                </strong>
+
+            <td>
+
+                ${
+                    professor.nome ||
+                    "Sem nome"
+                }
+
+            </td>
+
+
+            <td>
+
+                ${
+                    professor.ensino ||
+                    professor.nivelEnsino ||
+                    "—"
+                }
+
+            </td>
+
+
+            <td>
+
+                ${disciplina}
+
+            </td>
+
+
+            <td>
+
+                ${classe}
+
+            </td>
+
+
+            <td>
+
+                ${turmaNome}
+
+            </td>
+
+
+            <td>
+
+                ${trimestre}º Trimestre
+
+            </td>
+
+
+            <td>
+
+                <span
+                    class="${obterClasseEstado(
+                        estadoNotas
+                    )}"
+                >
+
+                    ${estadoNotas}
+
+                </span>
 
                 <br>
 
-                <span style="
-                    color:#475569;
-                    line-height:2;
-                ">
+                <small>
 
-                    Professor:
-                    <strong>
-                        ${nomeProfessor(
-                            dadosFiltro.professorId
-                        )}
-                    </strong>
+                    Sistema:
+                    ${
+                        estadoGeral
+                    }
 
-                    &nbsp; | &nbsp;
+                </small>
 
-                    Classe:
-                    <strong>
-                        ${escaparHTML(
-                            dadosFiltro.classe
-                        )}
-                    </strong>
+            </td>
 
-                    &nbsp; | &nbsp;
 
-                    Turma:
-                    <strong>
-                        ${nomeTurma(
-                            dadosFiltro.turmaId
-                        )}
-                    </strong>
+            <td>
 
-                    &nbsp; | &nbsp;
+                <button
+                    type="button"
+                    class="botao-ver"
+                    onclick="
+                        verMiniPauta(
+                            '${professorId}',
+                            '${turmaId}',
+                            '${disciplina.replace(/'/g, "\\'")}',
+                            '${trimestre}'
+                        )
+                    "
+                >
 
-                    Disciplina:
-                    <strong>
-                        ${escaparHTML(
-                            dadosFiltro.disciplina
-                        )}
-                    </strong>
+                    👁️ Ver
 
-                    &nbsp; | &nbsp;
+                </button>
 
-                    <strong>
-                        ${dadosFiltro.trimestre}º Trimestre
-                    </strong>
 
-                </span>
+                <button
+                    type="button"
+                    class="botao-imprimir"
+                    onclick="
+                        imprimirMiniPauta(
+                            '${professorId}',
+                            '${turmaId}',
+                            '${disciplina.replace(/'/g, "\\'")}',
+                            '${trimestre}'
+                        )
+                    "
+                >
+
+                    🖨️ Imprimir
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="
+                        botao-controle
+                        ${
+                            estado.abertoGeral
+                                ? "aberto"
+                                : "fechado"
+                        }
+                    "
+                    onclick="
+                        alterarEstadoGeral(
+                            '${turmaId}',
+                            '${disciplina.replace(/'/g, "\\'")}',
+                            '${trimestre}'
+                        )
+                    "
+                >
+
+                    ${
+                        estado.abertoGeral
+                            ? "🔒 Fechar"
+                            : "🔓 Abrir"
+                    }
+
+                </button>
 
             </td>
 
@@ -1498,262 +1619,831 @@ function mostrarTabelaNotas(
     `;
 
 
-    // =================================================
-    // CABEÇALHO DA TABELA
-    // =================================================
+    console.log(
+        "📋 LANÇAMENTO:",
+        {
+            professor,
+            turmaId,
+            disciplina,
+            trimestre,
+            estado
+        }
+    );
 
-    html += `
+}
+
+
+// =====================================================
+// ABRIR / FECHAR GERAL
+// =====================================================
+
+window.alterarEstadoGeral =
+async function (
+    turmaId,
+    disciplina,
+    trimestre
+) {
+
+    try {
+
+        const idLancamento =
+            criarIdLancamento(
+                turmaId,
+                disciplina,
+                trimestre
+            );
+
+
+        const referencia =
+            doc(
+                db,
+                "notas",
+                idLancamento
+            );
+
+
+        const resultado =
+            await getDoc(
+                referencia
+            );
+
+
+        let dados =
+            resultado.exists()
+                ? resultado.data()
+                : {};
+
+
+        /*
+        Segurança:
+        */
+
+        if (
+            dados.escolaId &&
+            dados.escolaId !== escolaId
+        ) {
+
+            alert(
+                "❌ Este lançamento pertence a outra escola."
+            );
+
+            return;
+
+        }
+
+
+        const estadoAtual =
+            dados.abertoGeral === true;
+
+
+        const novoEstado =
+            !estadoAtual;
+
+
+        /*
+        Criar estrutura caso ainda
+        não exista.
+        */
+
+        if (
+            !dados.alunosAbertos
+        ) {
+
+            dados.alunosAbertos = {};
+
+        }
+
+
+        await setDoc(
+
+            referencia,
+
+            {
+
+                escolaId,
+
+                turmaId,
+
+                disciplina,
+
+                trimestre,
+
+                abertoGeral:
+                    novoEstado,
+
+                alunosAbertos:
+                    dados.alunosAbertos,
+
+                atualizadoEm:
+                    serverTimestamp()
+
+            },
+
+            {
+                merge: true
+            }
+
+        );
+
+
+        alert(
+
+            novoEstado
+
+                ? "🔓 Sistema de lançamento ABERTO.\n\n" +
+                  "O professor poderá lançar ou editar as notas."
+
+                : "🔒 Sistema de lançamento FECHADO.\n\n" +
+                  "O professor não poderá alterar as notas."
+
+        );
+
+
+        await mostrarLancamentoSelecionado();
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao alterar estado:",
+            erro
+        );
+
+
+        alert(
+            "❌ Erro ao alterar o estado:\n\n" +
+            erro.message
+        );
+
+    }
+
+};
+
+
+// =====================================================
+// VER MINI-PAUTA
+// =====================================================
+
+window.verMiniPauta =
+function (
+    professorId,
+    turmaId,
+    disciplina,
+    trimestre
+) {
+
+    const professor =
+        professores.find(
+            item =>
+                item.id === professorId
+        );
+
+
+    if (!professor) {
+
+        alert(
+            "Professor não encontrado."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    Guardar contexto para a Mini-Pauta.
+    */
+
+    localStorage.setItem(
+        "turmaId",
+        turmaId
+    );
+
+
+    const turma =
+        turmas.find(
+            item =>
+                item.id === turmaId
+        );
+
+
+    localStorage.setItem(
+        "turmaNome",
+        turma?.nome ||
+        turma?.turma ||
+        turma?.designacao ||
+        ""
+    );
+
+
+    localStorage.setItem(
+        "disciplina",
+        disciplina
+    );
+
+
+    localStorage.setItem(
+        "trimestre",
+        trimestre
+    );
+
+
+    localStorage.setItem(
+        "professorSelecionadoAdmin",
+        professorId
+    );
+
+
+    localStorage.setItem(
+        "modoVisualizacao",
+        "admin"
+    );
+
+
+    /*
+    Abrir a Mini-Pauta.
+    */
+
+    window.open(
+        "mini-pauta.html",
+        "_blank"
+    );
+
+};
+
+
+// =====================================================
+// IMPRIMIR MINI-PAUTA
+// =====================================================
+
+window.imprimirMiniPauta =
+function (
+    professorId,
+    turmaId,
+    disciplina,
+    trimestre
+) {
+
+    /*
+    Guardar o mesmo contexto
+    utilizado pelo botão Ver.
+    */
+
+    const turma =
+        turmas.find(
+            item =>
+                item.id === turmaId
+        );
+
+
+    localStorage.setItem(
+        "turmaId",
+        turmaId
+    );
+
+
+    localStorage.setItem(
+        "turmaNome",
+        turma?.nome ||
+        turma?.turma ||
+        turma?.designacao ||
+        ""
+    );
+
+
+    localStorage.setItem(
+        "disciplina",
+        disciplina
+    );
+
+
+    localStorage.setItem(
+        "trimestre",
+        trimestre
+    );
+
+
+    localStorage.setItem(
+        "professorSelecionadoAdmin",
+        professorId
+    );
+
+
+    localStorage.setItem(
+        "modoVisualizacao",
+        "admin"
+    );
+
+
+    /*
+    Abrir Mini-Pauta para impressão.
+    */
+
+    const janela =
+        window.open(
+            "mini-pauta.html",
+            "_blank"
+        );
+
+
+    if (!janela) {
+
+        alert(
+            "⚠️ O navegador bloqueou a nova janela."
+        );
+
+    }
+
+};
+
+
+// =====================================================
+// FUNÇÃO PARA MOSTRAR A TABELA GERAL
+// =====================================================
+
+async function carregarTabelaProfessores() {
+
+    if (!notasLista) return;
+
+
+    notasLista.innerHTML = `
 
         <tr>
 
-            <th>Nº</th>
+            <td
+                colspan="9"
+                style="
+                    text-align:center;
+                    padding:25px;
+                "
+            >
 
-            <th>Nome Completo</th>
+                ⏳ A carregar professores...
 
-            <th>MAC</th>
-
-            <th>NPT</th>
-
-            <th>MF</th>
-
-            <th>Estado</th>
+            </td>
 
         </tr>
 
     `;
 
 
-    let numero = 1;
+    try {
+
+        if (!professores.length) {
+
+            mostrarMensagem(
+                "Nenhum professor encontrado nesta escola."
+            );
+
+            return;
+
+        }
 
 
-    // =================================================
-    // PROCESSAR DOCUMENTOS
-    // =================================================
+        notasLista.innerHTML = "";
 
-    notas.forEach(
-        nota => {
 
-            /*
-            ---------------------------------------------
-            POSSÍVEIS FORMATOS DE ALUNOS
-            ---------------------------------------------
-            */
+        for (
+            const professor
+            of professores
+        ) {
 
-            let alunos = [];
+            const atribuicoes =
+                Array.isArray(
+                    professor.atribuicoes
+                )
+                    ? professor.atribuicoes
+                    : [];
 
 
             if (
-                Array.isArray(
-                    nota.alunos
-                )
+                !atribuicoes.length
             ) {
 
-                alunos =
-                    nota.alunos;
+                const linha =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                linha.innerHTML = `
+
+                    <td>
+                        ${
+                            professor.codigo ||
+                            "—"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            professor.nome ||
+                            "Sem nome"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            professor.ensino ||
+                            professor.nivelEnsino ||
+                            "—"
+                        }
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+                        ⚪ Sem lançamento
+                    </td>
+
+                    <td>
+
+                        <button
+                            type="button"
+                            disabled
+                        >
+                            👁️ Ver
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                notasLista.appendChild(
+                    linha
+                );
+
+
+                continue;
 
             }
 
 
-            else if (
-                Array.isArray(
-                    nota.notas
-                )
+            /*
+            Mostrar uma linha por atribuição,
+            pois cada disciplina/turma pode
+            ter um lançamento diferente.
+            */
+
+            for (
+                const atribuicao
+                of atribuicoes
             ) {
 
-                alunos =
-                    nota.notas;
-
-            }
+                const turmaId =
+                    atribuicao.turmaId;
 
 
-            else {
-
-                /*
-                Se o próprio documento representar
-                um aluno.
-                */
-
-                alunos = [
-
-                    nota
-
-                ];
-
-            }
+                const disciplina =
+                    String(
+                        atribuicao.disciplina ||
+                        ""
+                    ).trim();
 
 
-            // -----------------------------------------
-            // CADA ALUNO
-            // -----------------------------------------
-
-            alunos.forEach(
-                aluno => {
-
-                    const nome =
-                        aluno.nome ||
-                        aluno.nomeCompleto ||
-                        aluno.aluno ||
-                        "Aluno";
+                const trimestre =
+                    filtroTrimestre?.value ||
+                    "1";
 
 
-                    const mac =
-                        aluno.MAC ??
-                        aluno.mac ??
-                        "";
+                if (
+                    !turmaId ||
+                    !disciplina
+                ) {
 
-
-                    const npt =
-                        aluno.NPT ??
-                        aluno.npt ??
-                        "";
-
-
-                    const mf =
-                        aluno.MF ??
-                        aluno.mf ??
-                        "";
-
-
-                    html += `
-
-                        <tr>
-
-                            <td>
-                                ${numero}
-                            </td>
-
-                            <td style="
-                                text-align:left;
-                                font-weight:600;
-                            ">
-
-                                ${escaparHTML(
-                                    nome
-                                )}
-
-                            </td>
-
-                            <td>
-
-                                ${escaparHTML(
-                                    mac
-                                )}
-
-                            </td>
-
-                            <td>
-
-                                ${escaparHTML(
-                                    npt
-                                )}
-
-                            </td>
-
-                            <td style="
-                                font-weight:bold;
-                            ">
-
-                                ${escaparHTML(
-                                    mf
-                                )}
-
-                            </td>
-
-                            <td>
-
-                                <span style="
-                                    display:inline-block;
-                                    padding:5px 9px;
-                                    border-radius:20px;
-                                    background:#dcfce7;
-                                    color:#166534;
-                                    font-size:12px;
-                                    font-weight:bold;
-                                ">
-
-                                    ✅ Lançado
-
-                                </span>
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-
-                    numero++;
+                    continue;
 
                 }
+
+
+                const turma =
+                    turmas.find(
+                        item =>
+                            item.id ===
+                            turmaId
+                    );
+
+
+                const estado =
+                    await obterEstadoLancamento(
+                        turmaId,
+                        disciplina,
+                        trimestre
+                    );
+
+
+                const estadoNotas =
+                    verificarEstadoNotas(
+                        estado.alunos
+                    );
+
+
+                const linha =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                linha.innerHTML = `
+
+                    <td>
+
+                        ${
+                            professor.codigo ||
+                            "—"
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        ${
+                            professor.nome ||
+                            "Sem nome"
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        ${
+                            professor.ensino ||
+                            professor.nivelEnsino ||
+                            atribuicao.ensino ||
+                            "—"
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        ${disciplina}
+
+                    </td>
+
+
+                    <td>
+
+                        ${
+                            atribuicao.classe ||
+                            turma?.classe ||
+                            "—"
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        ${
+                            turma?.nome ||
+                            turma?.turma ||
+                            turma?.designacao ||
+                            "—"
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        ${trimestre}º
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="${obterClasseEstado(
+                                estadoNotas
+                            )}"
+                        >
+
+                            ${estadoNotas}
+
+                        </span>
+
+
+                        <br>
+
+
+                        <small>
+
+                            ${
+                                estado.abertoGeral
+                                    ? "🔓 Aberto"
+                                    : "🔒 Fechado"
+                            }
+
+                        </small>
+
+                    </td>
+
+
+            <td>
+
+                        <button
+                            type="button"
+                            class="botao-ver"
+                            onclick="
+                                verMiniPauta(
+                                    '${professor.id}',
+                                    '${turmaId}',
+                                    '${disciplina.replace(/'/g, "\\'")}',
+                                    '${trimestre}'
+                                )
+                            "
+                        >
+
+                            👁️ Ver
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="botao-imprimir"
+                            onclick="
+                                imprimirMiniPauta(
+                                    '${professor.id}',
+                                    '${turmaId}',
+                                    '${disciplina.replace(/'/g, "\\'")}',
+                                    '${trimestre}'
+                                )
+                            "
+                        >
+
+                            🖨️ Imprimir
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="botao-controle"
+                            onclick="
+                                alterarEstadoGeral(
+                                    '${turmaId}',
+                                    '${disciplina.replace(/'/g, "\\'")}',
+                                    '${trimestre}'
+                                )
+                            "
+                        >
+
+                            ${
+                                estado.abertoGeral
+                                    ? "🔒 Fechar"
+                                    : "🔓 Abrir"
+                            }
+
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                notasLista.appendChild(
+                    linha
+                );
+
+            }
+
+        }
+
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao montar tabela:",
+            erro
+        );
+
+
+        mostrarMensagem(
+            "❌ Erro ao carregar a tabela."
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// BOTÃO GERAL EXISTENTE NO HTML
+// =====================================================
+
+const botaoGeral =
+    document.getElementById(
+        "abrirFecharSistema"
+    );
+
+
+if (botaoGeral) {
+
+    botaoGeral.addEventListener(
+        "click",
+        async function () {
+
+            const turmaId =
+                filtroTurma?.value;
+
+
+            const disciplina =
+                filtroDisciplina?.value;
+
+
+            const trimestre =
+                filtroTrimestre?.value;
+
+
+            if (
+                !turmaId ||
+                !disciplina ||
+                !trimestre
+            ) {
+
+                alert(
+                    "Selecione professor, classe, turma, disciplina e trimestre."
+                );
+
+                return;
+
+            }
+
+
+            await alterarEstadoGeral(
+                turmaId,
+                disciplina,
+                trimestre
             );
 
         }
     );
 
-
-    // =================================================
-    // COLOCAR NA PÁGINA
-    // =================================================
-
-    notasLista.innerHTML =
-        html;
-
-
-    console.log(
-        "📊 TABELA DE NOTAS MOSTRADA."
-    );
-
 }
 
 
 // =====================================================
-// NOME DO PROFESSOR
+// AO ALTERAR O TRIMESTRE,
+// ATUALIZAR A TABELA
 // =====================================================
 
-function nomeProfessor(
-    professorId
-) {
+filtroTrimestre?.addEventListener(
+    "change",
+    async function () {
 
-    const professor =
-        professores.find(
-            item =>
-                item.id ===
-                professorId
-        );
+        await carregarTabelaProfessores();
 
-
-    return escaparHTML(
-
-        professor?.nome ||
-        "Professor"
-
-    );
-
-}
+    }
+);
 
 
 // =====================================================
-// NOME DA TURMA
+// PRIMEIRA CARGA
 // =====================================================
 
-function nomeTurma(
-    turmaId
-) {
+setTimeout(
+    async function () {
 
-    const turma =
-        turmas.find(
-            item =>
-                item.id ===
-                turmaId
-        );
+        await carregarTabelaProfessores();
+
+    },
+    500
+);
 
 
-    return escaparHTML(
+// =====================================================
+// EXPOR FUNÇÕES
+// =====================================================
 
-        turma?.nome ||
-        turma?.turma ||
-        "Turma"
+window.carregarTabelaProfessores =
+    carregarTabelaProfessores;
 
-    );
 
-}
+window.obterEstadoLancamento =
+    obterEstadoLancamento;
+
+
+window.verificarEstadoNotas =
+    verificarEstadoNotas;
