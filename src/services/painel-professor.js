@@ -1,4 +1,4 @@
-alert("PAINEL PROFESSOR CARREGADO ✅");
+alert("PAINEL PROFESSOR CARREGADO ok.✅");
 
 import { db } from "./firebase.js";
 
@@ -382,7 +382,6 @@ Nenhuma disciplina atribuída
     }
 );
 
-
 // =====================================================
 // ABRIR MINI-PAUTA
 // =====================================================
@@ -393,14 +392,11 @@ if (abrirMiniPauta) {
         "click",
         () => {
 
-
             const turmaId =
                 selectTurma.value;
 
-
             const disciplina =
                 selectDisciplina.value;
-
 
             const trimestre =
                 selectTrimestre.value;
@@ -462,6 +458,59 @@ if (abrirMiniPauta) {
 
 
             // =================================================
+            // IDENTIFICAR ESCOLA
+            // =================================================
+
+            let escolaId =
+                sessionStorage.getItem(
+                    "escolaId"
+                );
+
+
+            if (!escolaId) {
+
+                escolaId =
+                    localStorage.getItem(
+                        "escolaId"
+                    );
+
+            }
+
+
+            escolaId =
+                escolaId
+                    ? String(escolaId).trim()
+                    : "";
+
+
+            console.log(
+                "🏫 ESCOLA ANTES DE ABRIR MINI-PAUTA:",
+                escolaId
+            );
+
+
+            // =================================================
+            // VERIFICAR ESCOLA
+            // =================================================
+
+            if (!escolaId) {
+
+                alert(
+                    "❌ A escola não foi identificada.\n\n" +
+                    "A sessão do professor não contém o ID da escola.\n\n" +
+                    "Faça login novamente."
+                );
+
+                console.error(
+                    "❌ escolaId inexistente."
+                );
+
+                return;
+
+            }
+
+
+            // =================================================
             // ENCONTRAR ATRIBUIÇÃO
             // =================================================
 
@@ -507,7 +556,23 @@ if (abrirMiniPauta) {
 
 
             // =================================================
-            // GUARDAR DADOS
+            // GARANTIR ESCOLA
+            // =================================================
+
+            sessionStorage.setItem(
+                "escolaId",
+                escolaId
+            );
+
+
+            localStorage.setItem(
+                "escolaId",
+                escolaId
+            );
+
+
+            // =================================================
+            // GUARDAR DADOS DA MINI-PAUTA
             // =================================================
 
             localStorage.setItem(
@@ -546,19 +611,48 @@ if (abrirMiniPauta) {
             );
 
 
+            // =================================================
+            // DEBUG FINAL
+            // =================================================
+
             console.log(
-                "DADOS GUARDADOS:",
+                "✅ DADOS DA MINI-PAUTA:",
                 {
+
+                    escolaId,
+
                     turmaId,
+
                     turmaNome:
-                        atribuicao.turmaNome,
+                        atribuicao.turmaNome || "",
+
                     disciplina,
+
                     trimestre,
+
                     ensino:
-                        professor.ensino,
+                        professor.ensino || "",
+
                     classe:
-                        atribuicao.classe
+                        atribuicao.classe || ""
+
                 }
+            );
+
+
+            console.log(
+                "🏫 sessionStorage escolaId:",
+                sessionStorage.getItem(
+                    "escolaId"
+                )
+            );
+
+
+            console.log(
+                "🏫 localStorage escolaId:",
+                localStorage.getItem(
+                    "escolaId"
+                )
             );
 
 
