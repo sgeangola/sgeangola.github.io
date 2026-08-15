@@ -6,7 +6,7 @@
 // Separação por escola
 // =====================================================
 
-alert("MINI-PAUTA.JS 1 CARREGADO ✅");
+alert("MINI-PAUTA.JS CARREGADO ✅");
 
 import { db } from "./firebase.js";
 
@@ -24,21 +24,46 @@ import {
 // DADOS DA ESCOLA
 // =====================================================
 
-const escolaId =
+// Primeiro tenta a sessão atual
+let escolaId =
     sessionStorage.getItem("escolaId");
+
+// Se não encontrar, tenta o localStorage
+if (!escolaId) {
+
+    escolaId =
+        localStorage.getItem("escolaId");
+
+}
+
+// Limpar espaços
+escolaId =
+    escolaId?.trim();
+
+
+// =====================================================
+// VERIFICAR ESCOLA
+// =====================================================
 
 if (!escolaId) {
 
     alert(
         "❌ Escola não identificada.\n\n" +
-        "Faça login novamente."
+        "O sistema não conseguiu identificar a escola " +
+        "que abriu esta Mini-Pauta."
     );
 
     throw new Error(
-        "escolaId não encontrado."
+        "escolaId não encontrado no sessionStorage nem no localStorage."
     );
 
 }
+
+
+console.log(
+    "🏫 ESCOLA DA MINI-PAUTA:",
+    escolaId
+);
 
 
 // =====================================================
