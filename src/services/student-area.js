@@ -1,4 +1,4 @@
-alert("ÁREA DO ALUNO gCARREGADA ✅");
+alert("ÁREA DO ALUNO TARREGADA ✅");
 
 import { db } from "./firebase.js";
 
