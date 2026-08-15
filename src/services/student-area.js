@@ -458,49 +458,6 @@ window.verNotas = async function () {
             of notasSnapshot.docs
         ) {
 
-const notasSnapshot =
-    await getDocs(
-        collection(
-            db,
-            "notas"
-        )
-    );
-
-let resumo = "";
-
-notasSnapshot.forEach((notaDoc) => {
-
-    const dadosNota = notaDoc.data();
-
-    resumo +=
-        "\nID: " + notaDoc.id +
-        "\nEscola: " + (dadosNota.escolaId || "—") +
-        "\nTurma: " + (dadosNota.turmaId || "—") +
-        "\nDisciplina: " + (dadosNota.disciplina || "—") +
-        "\nTrimestre: " + (dadosNota.trimestre || "—") +
-        "\nAlunos: " +
-        (
-            Array.isArray(dadosNota.alunos)
-                ? dadosNota.alunos.length
-                : "não é array"
-        ) +
-        "\n----------------------";
-
-});
-
-alert(
-    "📋 NOTAS ENCONTRADAS NO FIREBASE\n\n" +
-    "Aluno:\n" +
-    aluno.nome +
-    "\nTurma ID:\n" +
-    turmaId +
-    "\n\n" +
-    (
-        resumo ||
-        "❌ Nenhum documento encontrado."
-    )
-);
-            
             /* Somente notas da turma */
 
             if (
