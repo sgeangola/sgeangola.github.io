@@ -30,7 +30,42 @@ const db = getFirestore(app);
 // ESCOLA ATUAL
 // =====================================================
 
-const escolaId = "YNY5XygXQqQfcPfIyK62";
+let escolaId =
+    sessionStorage.getItem("escolaId");
+
+if (!escolaId) {
+
+    escolaId =
+        localStorage.getItem("escolaId");
+
+}
+
+escolaId =
+    escolaId
+        ? String(escolaId).trim()
+        : "";
+
+
+// =====================================================
+// VERIFICAR ESCOLA
+// =====================================================
+
+if (!escolaId) {
+
+    alert(
+        "❌ Escola não identificada."
+    );
+
+    throw new Error(
+        "escolaId não encontrado."
+    );
+
+}
+
+console.log(
+    "🏫 ESCOLA ATUAL DOS ALUNOS:",
+    escolaId
+);
 
 
 // =====================================================
