@@ -1,1261 +1,806 @@
-// =====================================================
-// STUDENT.JS — GESTÃO DE ALUNOS
-// SGE ANGOLA
-// =====================================================
-
-alert("GESTÃO DE ALUNOS CARREGADO");
+alert("TESTE t");
 
 import { app } from "./firebase.js";
 
 import { lerPDF } from "./pdf-reader.js";
 
 import {
-    getFirestore,
-    collection,
-    getDocs,
-    addDoc,
-    updateDoc,
-    doc,
-    deleteDoc,
-    serverTimestamp,
-    query,
-    where
+getFirestore,
+collection,
+getDocs,
+addDoc,
+updateDoc,
+doc,
+deleteDoc,
+serverTimestamp,
+query,
+where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
-
 
 const db = getFirestore(app);
 
-
-// =====================================================
-// ESCOLA ATUAL
-// =====================================================
-
 const escolaId = "YNY5XygXQqQfcPfIyK62";
 
+alert("Firebase iniciado");
 
-// =====================================================
-// ELEMENTOS
-// =====================================================
+// Elementos
 
-const turmaSelect =
-    document.getElementById("turmaSelect");
+const turmaSelect = document.getElementById("turmaSelect");
 
-const nomeAluno =
-    document.getElementById("nomeAluno");
+if(!turmaSelect){
+alert("ERRO: Não encontrei o campo turmaSelect");
+}
+else{
+alert("Campo turmaSelect encontrado");
+}
 
-const numeroAluno =
-    document.getElementById("numeroAluno");
+const nomeAluno = document.getElementById("nomeAluno");
 
-const sexoAluno =
-    document.getElementById("sexoAluno");
+const numeroAluno = document.getElementById("numeroAluno");
 
-const dataAluno =
-    document.getElementById("dataAluno");
+const sexoAluno = document.getElementById("sexoAluno");
 
-const guardarAluno =
-    document.getElementById("guardarAluno");
+const dataAluno = document.getElementById("dataAluno");
 
-const listaImportar =
-    document.getElementById("listaImportar");
+const guardarAluno = document.getElementById("guardarAluno");
 
-const importarAlunos =
-    document.getElementById("importarAlunos");
+const listaImportar = document.getElementById("listaImportar");
 
-const arquivoPDF =
-    document.getElementById("arquivoPDF");
+const importarAlunos = document.getElementById("importarAlunos");
 
-const importarPDF =
-    document.getElementById("importarPDF");
+const arquivoPDF = document.getElementById("arquivoPDF");
 
-const listaAlunos =
-    document.getElementById("listaAlunos");
+const importarPDF = document.getElementById("importarPDF");
 
-const pesquisarAluno =
-    document.getElementById("pesquisarAluno");
+const listaAlunos = document.getElementById("listaAlunos");
 
+const pesquisarAluno = document.getElementById("pesquisarAluno");
 
-// =====================================================
-// VARIÁVEIS
-// =====================================================
+// guardar ID da turma selecionada
 
 let turmaSelecionada = "";
 
 let todosAlunos = [];
 
-
-// =====================================================
+// =============================
 // CARREGAR TURMAS
-// =====================================================
+// =============================
+
+alert("VOU CARREGAR TURMAS");
 
 carregarTurmas();
 
+async function carregarTurmas(){
 
-async function carregarTurmas() {
+try{  
 
-    try {
-
-        turmaSelect.innerHTML =
-            "<option>A procurar turmas...</option>";
-
-
-        const dados = await getDocs(
-
-            query(
-                collection(db, "turmas"),
-                where(
-                    "escolaId",
-                    "==",
-                    escolaId
-                )
-            )
-
-        );
+    turmaSelect.innerHTML =  
+    "<option>A procurar turmas...</option>";  
 
 
-        if (dados.empty) {
+    alert("Vou consultar Firestore");
 
-            turmaSelect.innerHTML =
-                "<option>Nenhuma turma encontrada</option>";
+const dados = await getDocs(
+query(
+collection(db, "turmas"),
+where("escolaId", "==", escolaId)
+)
+);
 
-            turmaSelecionada = "";
-
-            listaAlunos.innerHTML =
-                "Nenhuma turma disponível.";
-
-            return;
-
-        }
+alert("Consulta terminou");  
 
 
-        turmaSelect.innerHTML = "";
+    alert("Quantidade: " + dados.size);  
 
 
-        dados.forEach(turmaDoc => {
+    if(dados.empty){  
 
-            const turma =
-                turmaDoc.data();
+        turmaSelect.innerHTML =  
+        "<option>Nenhuma turma encontrada</option>";  
 
-
-            turmaSelect.innerHTML += `
-
-                <option value="${turmaDoc.id}">
-
-                    ${turma.nome} - ${turma.classe}
-
-                </option>
-
-            `;
-
-        });
+        return;  
+    }  
 
 
-        turmaSelecionada =
-            turmaSelect.value;
+    turmaSelect.innerHTML = "";  
 
 
-        carregarAlunos();
+    dados.forEach(doc=>{  
+
+        const turma = doc.data();  
 
 
-    }
+        turmaSelect.innerHTML += `  
 
-    catch (erro) {
+        <option value="${doc.id}">  
+        ${turma.nome} - ${turma.classe}  
+        </option>  
 
-        turmaSelect.innerHTML =
-            "<option>Erro ao carregar turmas</option>";
+        `;  
+
+    });  
 
 
-        alert(
-            "Erro ao carregar turmas: " +
-            erro.message
-        );
+    turmaSelecionada = turmaSelect.value;  
 
-    }
+
+    carregarAlunos();  
+
+
+}catch(erro){  
+
+
+    turmaSelect.innerHTML =  
+    "<option>Erro: "+erro.message+"</option>";  
+
+
+    alert("Erro: " + erro.message);  
+
 
 }
 
+}
 
-// =====================================================
-// ALTERAR TURMA
-// =====================================================
+// FORA DA FUNÇÃO
 
-turmaSelect.addEventListener(
-    "change",
-    () => {
+turmaSelect.addEventListener("change",()=>{
 
-        turmaSelecionada =
-            turmaSelect.value;
+turmaSelecionada = turmaSelect.value;  
 
 
-        carregarAlunos();
+alert(  
+    "Turma selecionada: " + turmaSelecionada  
+);  
 
-    }
-);
 
+carregarAlunos();
 
-// =====================================================
+});
+
+// =============================
 // GERAR CÓDIGO DO ALUNO
-// =====================================================
+// =============================
 
-function gerarCodigoAluno(numero) {
+function gerarCodigoAluno(numero){
 
-    const turmaTexto =
-        turmaSelect
-        .options[
-            turmaSelect.selectedIndex
-        ]
-        .text;
+const turmaTexto = turmaSelect.options[turmaSelect.selectedIndex].text;  
 
-
-    let codigoTurma =
-        turmaTexto
-        .replace("ª", "")
-        .replace(" ", "")
-        .split("-")[0];
+let codigoTurma = turmaTexto  
+.replace("ª","")  
+.replace(" ","")  
+.split("-")[0];  
 
 
-    return (
-        codigoTurma +
-        "-" +
-        String(numero).padStart(3, "0")
-    );
+return codigoTurma + "-" +   
+String(numero).padStart(3,"0");
 
 }
 
-
-// =====================================================
+// =============================
 // GERAR SENHA AUTOMÁTICA
-// =====================================================
+// =============================
 
-function gerarSenha() {
+function gerarSenha(){
 
-    const caracteres =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const caracteres =  
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
+
+let senha="";  
 
 
-    let senha = "";
+for(let i=0;i<6;i++){  
+
+    senha += caracteres.charAt(  
+        Math.floor(  
+            Math.random()*caracteres.length  
+        )  
+    );  
+
+}  
 
 
-    for (let i = 0; i < 6; i++) {
-
-        senha +=
-            caracteres.charAt(
-                Math.floor(
-                    Math.random() *
-                    caracteres.length
-                )
-            );
+return senha;  
 
     }
 
-
-    return senha;
-
-}
-
-
-// =====================================================
+// =============================
 // GUARDAR ALUNO
-// =====================================================
+// =============================
 
-guardarAluno.addEventListener(
-    "click",
-    async () => {
+guardarAluno.addEventListener("click",async()=>{
 
-        try {
+if(!turmaSelecionada){  
 
-            if (!turmaSelecionada) {
+    alert("Selecione uma turma");  
 
-                alert(
-                    "Selecione uma turma."
-                );
+    return;  
 
-                return;
-
-            }
+}  
 
 
-            if (
-                nomeAluno.value.trim() === "" ||
-                numeroAluno.value.trim() === ""
-            ) {
 
-                alert(
-                    "Preencha o nome e o número do aluno."
-                );
+if(  
+    nomeAluno.value==="" ||  
+    numeroAluno.value===""  
+){  
 
-                return;
+    alert("Preencha nome e número");  
 
-            }
+    return;  
 
+}
 
-            await addDoc(
+await addDoc(
 
-                collection(
-                    db,
-                    "turmas",
-                    turmaSelecionada,
-                    "alunos"
-                ),
+collection(  
+    db,  
+    "turmas",  
+    turmaSelecionada,  
+    "alunos"  
+),  
 
-                {
+{
 
-                    nome:
-                        nomeAluno.value.trim(),
+nome:nomeAluno.value,
 
-                    numero:
-                        numeroAluno.value.trim(),
+numero:numeroAluno.value,
 
-                    sexo:
-                        sexoAluno.value,
+sexo:sexoAluno.value,
 
-                    dataNascimento:
-                        dataAluno.value.trim(),
+dataNascimento:dataAluno.value,
 
-                    turmaId:
-                        turmaSelecionada,
+turmaId: turmaSelecionada,
 
-                    escolaId:
-                        escolaId,
+escolaId: "YNY5XygXQqQfcPfIyK62",
 
-                    turmaNome:
-                        turmaSelect
-                        .options[
-                            turmaSelect.selectedIndex
-                        ]
-                        .text,
+turmaNome: turmaSelect.options[turmaSelect.selectedIndex].text,
 
-                    codigoAluno:
-                        gerarCodigoAluno(
-                            numeroAluno.value.trim()
-                        ),
+codigoAluno: gerarCodigoAluno(numeroAluno.value),
 
-                    senhaAcesso:
-                        gerarSenha(),
+senhaAcesso: gerarSenha(),
 
-                    estado:
-                        "ativo",
+estado: "ativo",
 
-                    criadoEm:
-                        serverTimestamp()
+criadoEm: serverTimestamp()
 
-                }
+}
 
-            );
-
-
-            alert(
-                "Aluno guardado com sucesso!"
-            );
-
-
-            nomeAluno.value = "";
-
-            numeroAluno.value = "";
-
-            sexoAluno.value = "";
-
-            dataAluno.value = "";
-
-
-            carregarAlunos();
-
-        }
-
-        catch (erro) {
-
-            console.error(
-                "Erro ao guardar aluno:",
-                erro
-            );
-
-
-            alert(
-                "Erro ao guardar aluno: " +
-                erro.message
-            );
-
-        }
-
-    }
 );
 
-
-// =====================================================
-// CALCULAR IDADE
-// =====================================================
-
-function calcularIdade(data) {
-
-    if (!data) {
-
-        return "";
-
-    }
+alert("Aluno guardado");  
 
 
-    const partes =
-        data.split("-");
+
+nomeAluno.value="";  
+numeroAluno.value="";  
+sexoAluno.value="";  
+dataAluno.value="";  
 
 
-    if (partes.length !== 3) {
+carregarAlunos();
 
-        return "";
+});
 
-    }
+// =============================
+// LISTAR ALUNOS
+// =============================
 
+function calcularIdade(data){
 
-    const dia =
-        Number(partes[0]);
-
-    const mes =
-        Number(partes[1]) - 1;
-
-    const ano =
-        Number(partes[2]);
+if(!data){  
+    return "";  
+}  
 
 
-    const nascimento =
-        new Date(
-            ano,
-            mes,
-            dia
-        );
+let partes = data.split("-");  
 
 
-    const hoje =
-        new Date();
+if(partes.length !== 3){  
+
+    return "";  
+
+}  
 
 
-    let idade =
-        hoje.getFullYear() -
-        nascimento.getFullYear();
+let dia = Number(partes[0]);  
+let mes = Number(partes[1]) - 1;  
+let ano = Number(partes[2]);  
 
 
-    const diferencaMes =
-        hoje.getMonth() -
-        nascimento.getMonth();
+const nascimento = new Date(  
+    ano,  
+    mes,  
+    dia  
+);  
 
 
-    if (
-        diferencaMes < 0 ||
-        (
-            diferencaMes === 0 &&
-            hoje.getDate() <
-            nascimento.getDate()
-        )
-    ) {
-
-        idade--;
-
-    }
+const hoje = new Date();  
 
 
-    return idade;
+let idade = hoje.getFullYear() - nascimento.getFullYear();  
+
+
+let diferencaMes =  
+hoje.getMonth() - nascimento.getMonth();  
+
+
+if(  
+    diferencaMes < 0 ||  
+    (  
+        diferencaMes === 0 &&  
+        hoje.getDate() < nascimento.getDate()  
+    )  
+){  
+
+    idade--;  
+
+}  
+
+
+return idade;  
+
+                 }
+
+async function carregarAlunos(){
+
+if(!turmaSelecionada){  
+
+    return;  
+
+}  
+
+
+
+listaAlunos.innerHTML =  
+"A carregar alunos...";  
+
+
+
+const dados = await getDocs(  
+
+    collection(  
+        db,  
+        "turmas",  
+        turmaSelecionada,  
+        "alunos"  
+    )  
+
+);  
+
+
+let alunos = [];
+
+dados.forEach(doc=>{
+
+alunos.push(doc.data());
+
+});
+
+alunos.sort((a,b)=>{
+
+return Number(a.numero) - Number(b.numero);
+
+});
+
+todosAlunos = alunos;
+
+listaAlunos.innerHTML = `
+
+<table>  <thead>  
+<tr>  
+<th>Código</th>  
+<th>Nº</th>  
+<th>Nome</th>  
+<th>Sexo</th>  
+<th>Data Nascimento</th>  
+<th>Idade</th>  
+<th>Turma</th>  
+<th>Estado</th>  
+<th>Ações</th>  
+</tr>  
+</thead>  <tbody id="corpoTabela">  </tbody>  </table>  `;
+
+const corpoTabela = document.getElementById("corpoTabela");
+
+todosAlunos = alunos;
+
+mostrarAlunos(todosAlunos);
 
 }
 
+function mostrarAlunos(lista){
 
-// =====================================================
-// CARREGAR ALUNOS
-// =====================================================
+const corpoTabela = document.getElementById("corpoTabela");
 
-async function carregarAlunos() {
+corpoTabela.innerHTML="";
 
-    if (!turmaSelecionada) {
+lista.forEach(aluno=>{
 
-        return;
+corpoTabela.innerHTML += `
 
-    }
+<tr>  <td>${aluno.codigoAluno || ""}</td>  <td>${aluno.numero}</td>  <td>${aluno.nome}</td>  <td>${aluno.sexo || ""}</td>  <td>${aluno.dataNascimento || ""}</td>  <td>${calcularIdade(aluno.dataNascimento)}</td>  <td>${aluno.turmaNome || ""}</td>  <td>${aluno.estado || "ativo"}</td>  <td>  <button onclick="alterarEstado('${aluno.codigoAluno}')">  
+⚙️ Estado  
+</button>  <button onclick="verAluno('${aluno.codigoAluno}')">  
+👁️  
+</button>  <button onclick="editarAluno('${aluno.codigoAluno}')">  
+✏️  
+</button>  <button onclick="apagarAluno('${aluno.codigoAluno}')">  
+🗑️  
+</button>  </td>  </tr>  `;
 
-
-    listaAlunos.innerHTML =
-        "A carregar alunos...";
-
-
-    try {
-
-        const dados =
-            await getDocs(
-
-                collection(
-                    db,
-                    "turmas",
-                    turmaSelecionada,
-                    "alunos"
-                )
-
-            );
-
-
-        let alunos = [];
-
-
-        dados.forEach(
-            alunoDoc => {
-
-                alunos.push(
-                    {
-                        id: alunoDoc.id,
-                        ...alunoDoc.data()
-                    }
-                );
-
-            }
-        );
-
-
-        alunos.sort(
-            (a, b) => {
-
-                return (
-                    Number(a.numero) -
-                    Number(b.numero)
-                );
-
-            }
-        );
-
-
-        todosAlunos =
-            alunos;
-
-
-        listaAlunos.innerHTML = `
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>Código</th>
-
-                        <th>Nº</th>
-
-                        <th>Nome</th>
-
-                        <th>Sexo</th>
-
-                        <th>Data Nascimento</th>
-
-                        <th>Idade</th>
-
-                        <th>Turma</th>
-
-                        <th>Estado</th>
-
-                        <th>Ações</th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="corpoTabela">
-
-                </tbody>
-
-            </table>
-
-        `;
-
-
-        mostrarAlunos(todosAlunos);
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao carregar alunos:",
-            erro
-        );
-
-
-        listaAlunos.innerHTML =
-            "Erro ao carregar alunos.";
-
-        alert(
-            "Erro ao carregar alunos: " +
-            erro.message
-        );
-
-    }
+});
 
 }
 
+// =============================
+// IMPORTAR ALUNOS
+// =============================
 
-// =====================================================
-// MOSTRAR ALUNOS
-// =====================================================
+importarAlunos.addEventListener("click", async()=>{
 
-function mostrarAlunos(lista) {
+if(!turmaSelecionada){  
 
-    const corpoTabela =
-        document.getElementById(
-            "corpoTabela"
-        );
+    alert("Selecione uma turma");  
 
+    return;  
 
-    if (!corpoTabela) {
-
-        return;
-
-    }
+}  
 
 
-    corpoTabela.innerHTML = "";
+const texto = listaImportar.value.trim();  
 
 
-    if (lista.length === 0) {
+if(texto===""){  
 
-        corpoTabela.innerHTML = `
+    alert("Cole a lista de alunos");  
 
-            <tr>
+    return;  
 
-                <td
-                    colspan="9"
-                    style="text-align:center;padding:20px;"
-                >
-
-                    Nenhum aluno encontrado.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
+}  
 
 
-    lista.forEach(aluno => {
 
-        corpoTabela.innerHTML += `
-
-            <tr>
-
-                <td>
-                    ${aluno.codigoAluno || ""}
-                </td>
-
-                <td>
-                    ${aluno.numero || ""}
-                </td>
-
-                <td>
-                    ${aluno.nome || ""}
-                </td>
-
-                <td>
-                    ${aluno.sexo || ""}
-                </td>
-
-                <td>
-                    ${aluno.dataNascimento || ""}
-                </td>
-
-                <td>
-                    ${calcularIdade(
-                        aluno.dataNascimento
-                    )}
-                </td>
-
-                <td>
-                    ${aluno.turmaNome || ""}
-                </td>
-
-                <td>
-                    ${aluno.estado || "ativo"}
-                </td>
-
-                <td>
-
-                    <button
-                        onclick="alterarEstado('${aluno.codigoAluno}')"
-                    >
-                        ⚙️ Estado
-                    </button>
+const linhas = texto.split("\n");  
 
 
-                    <button
-                        onclick="verAluno('${aluno.codigoAluno}')"
-                    >
-                        👁️
-                    </button>
+
+for(let linha of linhas){  
 
 
-                    <button
-                        onclick="editarAluno('${aluno.codigoAluno}')"
-                    >
-                        ✏️
-                    </button>
+    const dados = linha.split(";");  
 
 
-                    <button
-                        onclick="apagarAluno('${aluno.codigoAluno}')"
-                    >
-                        🗑️
-                    </button>
 
-                </td>
+    if(dados.length < 4){  
 
-            </tr>
+        continue;  
 
-        `;
+    }  
 
-    });
 
+
+    await addDoc(  
+
+        collection(  
+            db,  
+            "turmas",  
+            turmaSelecionada,  
+            "alunos"  
+        ),  
+
+        {
+
+numero:dados[0].trim(),
+
+nome:dados[1].trim(),
+
+sexo:dados[2].trim(),
+
+dataNascimento:dados[3].trim(),
+
+turmaId:turmaSelecionada,
+
+escolaId: "YNY5XygXQqQfcPfIyK62",
+
+turmaNome: turmaSelect.options[turmaSelect.selectedIndex].text,
+
+codigoAluno: gerarCodigoAluno(dados[0].trim()),
+
+senhaAcesso: gerarSenha(),
+
+estado: "ativo",
+
+criadoEm: serverTimestamp()
 }
 
-
-// =====================================================
-// IMPORTAR ALUNOS POR LISTA
-// =====================================================
-
-importarAlunos.addEventListener(
-    "click",
-    async () => {
-
-        try {
-
-            if (!turmaSelecionada) {
-
-                alert(
-                    "Selecione uma turma."
-                );
-
-                return;
-
-            }
+);  
 
 
-            const texto =
-                listaImportar.value.trim();
+}  
 
 
-            if (texto === "") {
 
-                alert(
-                    "Cole a lista de alunos."
-                );
-
-                return;
-
-            }
+alert("Alunos importados com sucesso");  
 
 
-            const linhas =
-                texto.split("\n");
+listaImportar.value="";  
 
 
-            let quantidadeImportada = 0;
+carregarAlunos();
 
+});
 
-            for (
-                const linha of linhas
-            ) {
-
-                const dados =
-                    linha.split(";");
-
-
-                if (dados.length < 4) {
-
-                    continue;
-
-                }
-
-
-                await addDoc(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turmaSelecionada,
-                        "alunos"
-                    ),
-
-                    {
-
-                        numero:
-                            dados[0].trim(),
-
-                        nome:
-                            dados[1].trim(),
-
-                        sexo:
-                            dados[2].trim(),
-
-                        dataNascimento:
-                            dados[3].trim(),
-
-                        turmaId:
-                            turmaSelecionada,
-
-                        escolaId:
-                            escolaId,
-
-                        turmaNome:
-                            turmaSelect
-                            .options[
-                                turmaSelect.selectedIndex
-                            ]
-                            .text,
-
-                        codigoAluno:
-                            gerarCodigoAluno(
-                                dados[0].trim()
-                            ),
-
-                        senhaAcesso:
-                            gerarSenha(),
-
-                        estado:
-                            "ativo",
-
-                        criadoEm:
-                            serverTimestamp()
-
-                    }
-
-                );
-
-
-                quantidadeImportada++;
-
-            }
-
-
-            alert(
-                quantidadeImportada +
-                " aluno(s) importado(s) com sucesso!"
-            );
-
-
-            listaImportar.value = "";
-
-
-            carregarAlunos();
-
-        }
-
-        catch (erro) {
-
-            console.error(
-                "Erro na importação:",
-                erro
-            );
-
-
-            alert(
-                "Erro ao importar alunos: " +
-                erro.message
-            );
-
-        }
-
-    }
-);
-
-
-// =====================================================
+// =============================
 // IMPORTAR ALUNOS PELO PDF
-// =====================================================
+// =============================
 
-importarPDF.addEventListener(
-    "click",
-    async () => {
+importarPDF.addEventListener("click", async()=>{
 
-        if (!turmaSelecionada) {
+if(!turmaSelecionada){  
 
-            alert(
-                "Selecione uma turma."
-            );
+    alert("Selecione uma turma");  
 
-            return;
+    return;  
 
-        }
+}  
 
 
-        const file =
-            arquivoPDF.files[0];
+const file = arquivoPDF.files[0];  
 
 
-        if (!file) {
+if(!file){  
 
-            alert(
-                "Selecione um PDF."
-            );
+    alert("Selecione um PDF");  
 
-            return;
+    return;  
 
-        }
+}  
 
 
-        try {
 
-            alert(
-                "A ler PDF..."
-            );
+try{  
 
 
-            const resultado =
-                await lerPDF(file);
+    alert("A ler PDF...");  
 
 
-            if (
-                !resultado ||
-                !resultado.alunos
-            ) {
-
-                throw new Error(
-                    "Não foi possível obter os alunos do PDF."
-                );
-
-            }
+    const resultado = await lerPDF(file);  
 
 
-            alert(
-                "Alunos encontrados: " +
-                resultado.quantidade
-            );
+
+    alert(  
+        "Alunos encontrados: "  
+        + resultado.quantidade  
+    );  
 
 
-            for (
-                const aluno of resultado.alunos
-            ) {
 
-                await addDoc(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turmaSelecionada,
-                        "alunos"
-                    ),
-
-                    {
-
-                        numero:
-                            aluno.numero,
-
-                        nome:
-                            aluno.nome,
-
-                        sexo:
-                            aluno.sexo || "",
-
-                        turmaId:
-                            turmaSelecionada,
-
-                        escolaId:
-                            escolaId,
-
-                        turmaNome:
-                            turmaSelect
-                            .options[
-                                turmaSelect.selectedIndex
-                            ]
-                            .text,
-
-                        codigoAluno:
-                            gerarCodigoAluno(
-                                aluno.numero
-                            ),
-
-                        senhaAcesso:
-                            gerarSenha(),
-
-                        estado:
-                            "ativo",
-
-                        criadoEm:
-                            serverTimestamp()
-
-                    }
-
-                );
-
-            }
+    for(const aluno of resultado.alunos){  
 
 
-            alert(
-                "Importação concluída com sucesso!"
-            );
+        await addDoc(  
+
+            collection(  
+                db,  
+                "turmas",  
+                turmaSelecionada,  
+                "alunos"  
+            ),  
 
 
-            carregarAlunos();
+            {  
 
-        }
+                numero: aluno.numero,  
 
-        catch (erro) {
+                nome: aluno.nome,  
 
-            console.error(
-                "Erro ao importar PDF:",
-                erro
-            );
+                sexo: aluno.sexo || "",  
 
+                turmaId: turmaSelecionada,  
 
-            alert(
-                "Erro ao importar PDF: " +
-                erro.message
-            );
+                escolaId: "YNY5XygXQqQfcPfIyK62",  
 
-        }
-
-    }
-);
+                turmaNome:  
+                turmaSelect.options[  
+                turmaSelect.selectedIndex  
+                ].text,  
 
 
-// =====================================================
+                codigoAluno:  
+                gerarCodigoAluno(aluno.numero),  
+
+
+                senhaAcesso:  
+                gerarSenha(),  
+
+
+                estado:"ativo",  
+
+
+                criadoEm:  
+                serverTimestamp()  
+
+            }  
+
+        );  
+
+
+    }  
+
+
+
+    alert(  
+        "Importação concluída!"  
+    );  
+
+
+    carregarAlunos();  
+
+
+
+}catch(erro){  
+
+
+    alert(  
+        "Erro ao importar PDF: "  
+        + erro.message  
+    );  
+
+
+}
+
+});
+
 // PESQUISAR ALUNOS
-// =====================================================
+pesquisarAluno.addEventListener("input",()=>{
 
-pesquisarAluno.addEventListener(
-    "input",
-    () => {
+const texto = pesquisarAluno.value.toLowerCase();  
 
-        const texto =
-            pesquisarAluno.value
-            .toLowerCase();
+const resultado = todosAlunos.filter(aluno=>  
 
+    (aluno.nome || "").toLowerCase().includes(texto) ||  
 
-        const resultado =
-            todosAlunos.filter(
-                aluno =>
+    String(aluno.numero).includes(texto) ||  
 
-                    (
-                        aluno.nome || ""
-                    )
-                    .toLowerCase()
-                    .includes(texto)
+    (aluno.codigoAluno || "").toLowerCase().includes(texto)  
 
-                    ||
+);  
 
-                    String(
-                        aluno.numero
-                    )
-                    .includes(texto)
+mostrarAlunos(resultado);
 
-                    ||
+});
 
-                    (
-                        aluno.codigoAluno || ""
-                    )
-                    .toLowerCase()
-                    .includes(texto)
+window.alterarEstado = async function(codigo){
 
-            );
+const opcao = prompt(  
+    "Digite o novo estado:\n\n1 - ativo\n2 - transferido\n3 - desistiu\n4 - removido"  
+);  
 
 
-        mostrarAlunos(resultado);
+let novoEstado = "";  
 
-    }
+
+if(opcao === "1"){  
+    novoEstado = "ativo";  
+}  
+
+else if(opcao === "2"){  
+    novoEstado = "transferido";  
+}  
+
+else if(opcao === "3"){  
+    novoEstado = "desistiu";  
+}  
+
+else if(opcao === "4"){  
+    novoEstado = "removido";  
+}  
+
+else{  
+    return;  
+}  
+
+
+
+const turmas = await getDocs(  
+    collection(db,"turmas")  
+);  
+
+
+for(const turma of turmas.docs){  
+
+
+    const alunos = await getDocs(  
+        collection(  
+            db,  
+            "turmas",  
+            turma.id,  
+            "alunos"  
+        )  
+    );  
+
+
+    for(const aluno of alunos.docs){  
+
+
+        if(aluno.data().codigoAluno === codigo){  
+
+
+            const motivo = prompt(  
+"Digite o motivo da alteração:"
+
 );
 
+await updateDoc(
 
-// =====================================================
-// ALTERAR ESTADO
-// =====================================================
+doc(  
+    db,  
+    "turmas",  
+    turma.id,  
+    "alunos",  
+    aluno.id  
+),  
 
-window.alterarEstado =
-    async function(codigo) {
+{  
+    estado: novoEstado,  
 
-        const opcao =
-            prompt(
+    motivoEstado: motivo || "",  
 
-                "Digite o novo estado:\n\n" +
+    dataEstado: serverTimestamp()  
+}
 
-                "1 - ativo\n" +
+);
 
-                "2 - transferido\n" +
-
-                "3 - desistiu\n" +
-
-                "4 - removido"
-
-            );
-
-
-        let novoEstado = "";
+alert("Estado atualizado");  
 
 
-        if (opcao === "1") {
-
-            novoEstado = "ativo";
-
-        }
-
-        else if (opcao === "2") {
-
-            novoEstado = "transferido";
-
-        }
-
-        else if (opcao === "3") {
-
-            novoEstado = "desistiu";
-
-        }
-
-        else if (opcao === "4") {
-
-            novoEstado = "removido";
-
-        }
-
-        else {
-
-            return;
-
-        }
+            carregarAlunos();  
 
 
-        const turmas =
-            await getDocs(
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
-            );
+            return;  
 
+        }  
 
-        for (
-            const turma of turmas.docs
-        ) {
+    }  
 
-            const alunos =
-                await getDocs(
+}
 
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
+};
 
-                );
-
-
-            for (
-                const aluno of alunos.docs
-            ) {
-
-                if (
-                    aluno.data()
-                    .codigoAluno === codigo
-                ) {
-
-                    const motivo =
-                        prompt(
-                            "Digite o motivo da alteração:"
-                        );
-
-
-                    await updateDoc(
-
-                        doc(
-                            db,
-                            "turmas",
-                            turma.id,
-                            "alunos",
-                            aluno.id
-                        ),
-
-                        {
-
-                            estado:
-                                novoEstado,
-
-                            motivoEstado:
-                                motivo || "",
-
-                            dataEstado:
-                                serverTimestamp()
-
-                        }
-
-                    );
-
-
-                    alert(
-                        "Estado atualizado com sucesso."
-                    );
-
-
-                    carregarAlunos();
-
-
-                    return;
-
-                }
-
-            }
-
-        }
-
-    };
-
-
-// =====================================================
+// =============================
 // VER DETALHES DO ALUNO
-// =====================================================
+// =============================
 
-window.verAluno =
-    async function(codigo) {
+window.verAluno = async function(codigo){
 
-        const turmas =
-            await getDocs(
-
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
-
-            );
+const turmas = await getDocs(  
+    collection(db,"turmas")  
+);  
 
 
-        for (
-            const turma of turmas.docs
-        ) {
-
-            const alunos =
-                await getDocs(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
-
-                );
+for(const turma of turmas.docs){  
 
 
-            for (
-                const aluno of alunos.docs
-            ) {
+    const alunos = await getDocs(  
+        collection(  
+            db,  
+            "turmas",  
+            turma.id,  
+            "alunos"  
+        )  
+    );  
 
-                const dados =
-                    aluno.data();
+
+    for(const aluno of alunos.docs){  
 
 
-                if (
-                    dados.codigoAluno === codigo
-                ) {
+        const dados = aluno.data();  
 
-                    alert(
+
+        if(dados.codigoAluno === codigo){  
+
+
+            alert(
 
 `Código: ${dados.codigoAluno}
 
@@ -1267,285 +812,197 @@ Sexo: ${dados.sexo || ""}
 
 Data nascimento: ${dados.dataNascimento || ""}
 
-Turma: ${dados.turmaNome || ""}
+Turma: ${dados.turmaNome}
 
 Estado: ${dados.estado || "ativo"}
 
 Senha: ${dados.senhaAcesso || ""}`
+);
 
-                    );
+return;  
 
+        }  
 
-                    return;
+    }  
 
-                }
+}
 
-            }
+};
 
-        }
-
-    };
-
-
-// =====================================================
+// =============================
 // EDITAR ALUNO
-// =====================================================
+// =============================
 
-window.editarAluno =
-    async function(codigo) {
+window.editarAluno = async function(codigo){
 
-        const turmas =
-            await getDocs(
+const turmas = await getDocs(  
+    collection(db,"turmas")  
+);  
 
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
 
-            );
+for(const turma of turmas.docs){  
 
 
-        for (
-            const turma of turmas.docs
-        ) {
+    const alunos = await getDocs(  
+        collection(  
+            db,  
+            "turmas",  
+            turma.id,  
+            "alunos"  
+        )  
+    );  
 
-            const alunos =
-                await getDocs(
 
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
+    for(const aluno of alunos.docs){  
 
-                );
 
+        const dados = aluno.data();  
 
-            for (
-                const aluno of alunos.docs
-            ) {
 
-                const dados =
-                    aluno.data();
+        if(dados.codigoAluno === codigo){  
 
 
-                if (
-                    dados.codigoAluno === codigo
-                ) {
+            const novoNome = prompt(  
+                "Nome do aluno:",  
+                dados.nome  
+            );  
 
-                    const novoNome =
-                        prompt(
-                            "Nome do aluno:",
-                            dados.nome
-                        );
 
+            const novoNumero = prompt(  
+                "Número do aluno:",  
+                dados.numero  
+            );  
 
-                    if (novoNome === null) {
 
-                        return;
+            const novoSexo = prompt(  
+                "Sexo:",  
+                dados.sexo || ""  
+            );  
 
-                    }
 
+            const novaData = prompt(  
+                "Data de nascimento:",  
+                dados.dataNascimento || ""  
+            );  
 
-                    const novoNumero =
-                        prompt(
-                            "Número do aluno:",
-                            dados.numero
-                        );
 
+            await updateDoc(  
 
-                    if (novoNumero === null) {
+                doc(  
+                    db,  
+                    "turmas",  
+                    turma.id,  
+                    "alunos",  
+                    aluno.id  
+                ),  
 
-                        return;
+                {  
 
-                    }
+                    nome: novoNome,  
 
+                    numero: novoNumero,  
 
-                    const novoSexo =
-                        prompt(
-                            "Sexo:",
-                            dados.sexo || ""
-                        );
+                    sexo: novoSexo,  
 
+                    dataNascimento: novaData  
 
-                    if (novoSexo === null) {
+                }  
 
-                        return;
+            );  
 
-                    }
 
+            alert("Aluno atualizado com sucesso");  
 
-                    const novaData =
-                        prompt(
-                            "Data de nascimento:",
-                            dados.dataNascimento || ""
-                        );
 
+            carregarAlunos();  
 
-                    if (novaData === null) {
 
-                        return;
+            return;  
 
-                    }
+        }  
 
+    }  
 
-                    await updateDoc(
+}
 
-                        doc(
-                            db,
-                            "turmas",
-                            turma.id,
-                            "alunos",
-                            aluno.id
-                        ),
+};
 
-                        {
+// =============================
+// APAGAR ALUNO (APENAS DUPLICADOS)
+// =============================
 
-                            nome:
-                                novoNome,
+window.apagarAluno = async function(codigo){
 
-                            numero:
-                                novoNumero,
+const confirmar = confirm(  
+    "Tem certeza que deseja remover este aluno?\n\nUse apenas para duplicados ou erros de cadastro."  
+);  
 
-                            sexo:
-                                novoSexo,
 
-                            dataNascimento:
-                                novaData
+if(!confirmar){  
 
-                        }
+    return;  
 
-                    );
+}  
 
 
-                    alert(
-                        "Aluno atualizado com sucesso."
-                    );
+const turmas = await getDocs(  
+    collection(db,"turmas")  
+);  
 
 
-                    carregarAlunos();
+for(const turma of turmas.docs){  
 
 
-                    return;
+    const alunos = await getDocs(  
+        collection(  
+            db,  
+            "turmas",  
+            turma.id,  
+            "alunos"  
+        )  
+    );  
 
-                }
 
-            }
+    for(const aluno of alunos.docs){  
 
-        }
 
-    };
+        const dados = aluno.data();  
 
 
-// =====================================================
-// APAGAR ALUNO
-// APENAS DUPLICADOS OU ERROS
-// =====================================================
+        if(dados.codigoAluno === codigo){  
 
-window.apagarAluno =
-    async function(codigo) {
 
-        const confirmar =
-            confirm(
+            await deleteDoc(  
 
-                "Tem certeza que deseja remover este aluno?\n\n" +
+                doc(  
+                    db,  
+                    "turmas",  
+                    turma.id,  
+                    "alunos",  
+                    aluno.id  
+                )  
 
-                "Use esta opção apenas para duplicados " +
-                "ou erros de cadastro."
+            );  
 
-            );
 
+            alert(  
+                "Aluno removido com sucesso"  
+            );  
 
-        if (!confirmar) {
 
-            return;
+            carregarAlunos();  
 
-        }
 
+            return;  
 
-        const turmas =
-            await getDocs(
+        }  
 
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
+    }  
 
-            );
+}
 
+};
 
-        for (
-            const turma of turmas.docs
-        ) {
-
-            const alunos =
-                await getDocs(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
-
-                );
-
-
-            for (
-                const aluno of alunos.docs
-            ) {
-
-                const dados =
-                    aluno.data();
-
-
-                if (
-                    dados.codigoAluno === codigo
-                ) {
-
-                    await deleteDoc(
-
-                        doc(
-                            db,
-                            "turmas",
-                            turma.id,
-                            "alunos",
-                            aluno.id
-                        )
-
-                    );
-
-
-                    alert(
-                        "Aluno removido com sucesso."
-                    );
-
-
-                    carregarAlunos();
-
-
-                    return;
-
-                }
-
-            }
-
-        }
-
-    };
-
-
-// =====================================================
-// INICIALIZAÇÃO
-// =====================================================
+alert("CHEGUEI AO FINAL DO FICHEIRO");
 
 carregarTurmas();
