@@ -196,8 +196,17 @@ if (info) {
 //
 // =====================================================
 
+const trimestreNormalizado =
+    String(trimestre || "")
+        .replace("º", "")
+        .replace("°", "")
+        .replace("ª", "")
+        .replace(" ", "")
+        .replace("Trimestre", "")
+        .trim();
+
 const idLancamento =
-    `${turmaId}_${disciplina}_${trimestre}`;
+    `${turmaId}_${disciplina}_${trimestreNormalizado}`;
 
 
 // =====================================================
@@ -210,7 +219,6 @@ const notaRef =
         "notas",
         idLancamento
     );
-
 
 // =====================================================
 // REFERÊNCIA DO CONTROLE
@@ -306,72 +314,141 @@ async function carregarControle() {
 
     try {
 
-        // =============================================
-        // VERIFICAR PRIMEIRO O DOCUMENTO "NOTAS"
-        // =============================================
+        sistemaAberto = false;
+        controleAlunos = {};
 
-        const notaSnap =
-            await getDoc(
-                notaRef
+
+        // =================================================
+        // 1. PROCURAR NO DOCUMENTO PRINCIPAL "notas"
+        // =================================================
+
+        const possiveisIds = [
+
+            // formato atual
+            `${turmaId}_${disciplina}_${trimestreNormalizado}`,
+
+            // caso o trimestre esteja como "1"
+            `${turmaId}_${disciplina}_${String(trimestreNormalizado)}`,
+
+            // compatibilidade com formato antigo
+            `${escolaId}_${turmaId}_${disciplina}_${trimestreNormalizado}`
+
+        ];
+
+
+        let dadosEncontrados = null;
+
+
+        for (
+            const id of possiveisIds
+        ) {
+
+            console.log(
+                "🔎 Procurando lançamento:",
+                id
             );
 
 
-        if (notaSnap.exists()) {
-
-            const dados =
-                notaSnap.data();
-
-
-            // =========================================
-            // SEGURANÇA DA ESCOLA
-            // =========================================
-
-            if (
-                dados.escolaId &&
-                String(dados.escolaId).trim() !==
-                String(escolaId).trim()
-            ) {
-
-                console.warn(
-                    "⚠️ Lançamento pertence a outra escola."
+            const referencia =
+                doc(
+                    db,
+                    "notas",
+                    id
                 );
 
-                sistemaAberto = false;
 
-                controleAlunos = {};
+            const snapshot =
+                await getDoc(
+                    referencia
+                );
 
-                atualizarEstadoVisual();
 
-                return;
+            if (
+                snapshot.exists()
+            ) {
+
+                const dados =
+                    snapshot.data();
+
+
+                // =========================================
+                // SEGURANÇA DA ESCOLA
+                // =========================================
+
+                if (
+                    dados.escolaId &&
+                    String(
+                        dados.escolaId
+                    ).trim() !==
+                    String(
+                        escolaId
+                    ).trim()
+                ) {
+
+                    console.warn(
+                        "⚠️ Documento pertence a outra escola:",
+                        id
+                    );
+
+                    continue;
+
+                }
+
+
+                dadosEncontrados =
+                    dados;
+
+
+                console.log(
+                    "✅ LANÇAMENTO ENCONTRADO:",
+                    id,
+                    dados
+                );
+
+
+                break;
+
+            }
+
+        }
+
+
+        // =================================================
+        // 2. SE ENCONTROU NO "notas"
+        // =================================================
+
+        if (
+            dadosEncontrados
+        ) {
+
+            sistemaAberto =
+                dadosEncontrados.abertoGeral === true;
+
+
+            controleAlunos =
+                dadosEncontrados.alunosAbertos ||
+                {};
+
+
+            // Compatibilidade
+            if (
+                !Object.keys(
+                    controleAlunos
+                ).length &&
+                dadosEncontrados.alunos
+            ) {
+
+                controleAlunos =
+                    dadosEncontrados.alunos;
 
             }
 
 
-            // =========================================
-            // ESTADO GERAL ABERTO/FECHADO
-            // =========================================
-
-            sistemaAberto =
-                dados.abertoGeral === true;
-
-
-            // =========================================
-            // CONTROLE INDIVIDUAL DOS ALUNOS
-            // =========================================
-
-            controleAlunos =
-                dados.alunosAbertos ||
-                {};
-
-
             console.log(
-                "🔐 ESTADO DO LANÇAMENTO:",
+                "🔐 RESULTADO DO CONTROLE:",
                 {
-                    idLancamento,
-                    abertoGeral:
-                        dados.abertoGeral,
-                    alunosAbertos:
-                        dados.alunosAbertos
+                    sistemaAberto,
+                    controleAlunos
                 }
             );
 
@@ -383,10 +460,9 @@ async function carregarControle() {
         }
 
 
-        // =============================================
-        // SE NÃO EXISTIR EM "NOTAS"
-        // TENTAR CONTROLE ANTIGO
-        // =============================================
+        // =================================================
+        // 3. PROCURAR NO CONTROLES-MINIPAUTAS
+        // =================================================
 
         const controleSnap =
             await getDoc(
@@ -398,43 +474,55 @@ async function carregarControle() {
             controleSnap.exists()
         ) {
 
-            const dadosControle =
+            const dados =
                 controleSnap.data();
 
 
-            sistemaAberto =
-                dadosControle.sistemaAberto === true;
-
-
-            controleAlunos =
-                dadosControle.alunos ||
-                {};
-
-
             console.log(
-                "🔐 CONTROLE ANTIGO:",
-                dadosControle
+                "🔐 CONTROLE MINI-PAUTA ENCONTRADO:",
+                dados
             );
 
-        }
-        else {
 
             sistemaAberto =
-                false;
+                dados.sistemaAberto === true ||
+                dados.abertoGeral === true ||
+                dados.aberto === true;
+
 
             controleAlunos =
+                dados.alunos ||
+                dados.alunosAbertos ||
                 {};
 
         }
 
 
+        // =================================================
+        // 4. ATUALIZAR INTERFACE
+        // =================================================
+
         atualizarEstadoVisual();
+
+
+        console.log(
+            "📊 ESTADO FINAL DA MINI-PAUTA:",
+            {
+                escolaId,
+                turmaId,
+                disciplina,
+                trimestre,
+                trimestreNormalizado,
+                sistemaAberto,
+                controleAlunos
+            }
+        );
 
     }
     catch (erro) {
 
         console.error(
-            "❌ Erro ao carregar controle:",
+            "❌ ERRO AO CARREGAR CONTROLE:",
             erro
         );
 
