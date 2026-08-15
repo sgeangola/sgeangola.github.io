@@ -28,14 +28,30 @@ import {
 const escolaId =
     sessionStorage.getItem("escolaId") ||
     localStorage.getItem("escolaId") ||
-    "YNY5XygXQqQfcPfIyK62";
+    "";
 
 
 console.log(
-    "ESCOLA ATUAL:",
+    "🏫 ESCOLA ATUAL:",
     escolaId
 );
 
+
+// =====================================================
+// VERIFICAR ESCOLA
+// =====================================================
+
+if (!escolaId) {
+
+    alert(
+        "❌ Escola atual não identificada. Entre novamente na escola."
+    );
+
+    throw new Error(
+        "escolaId não encontrado."
+    );
+
+    }
 
 // =====================================================
 // ELEMENTOS
