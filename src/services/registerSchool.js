@@ -715,6 +715,11 @@ const dadosEscola = {
                     escolaRef.id
                 );
 
+                localStorage.setItem(
+    "escolaId",
+    escolaRef.id
+);
+                
                 sessionStorage.setItem(
                     "nomeEscola",
                     nome
