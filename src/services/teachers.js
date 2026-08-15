@@ -20,7 +20,7 @@ import {
 
 
 // =====================================================
-// ID DA ESCOLA ATUAL
+// ESCOLA ATUAL
 // =====================================================
 
 const escolaId =
@@ -29,8 +29,14 @@ const escolaId =
     "YNY5XygXQqQfcPfIyK62";
 
 
+console.log(
+    "ESCOLA ATUAL:",
+    escolaId
+);
+
+
 // =====================================================
-// CAMPOS
+// ELEMENTOS
 // =====================================================
 
 const nomeProfessor =
@@ -56,35 +62,6 @@ const tabelaProfessores =
 
 
 // =====================================================
-// VERIFICAR ELEMENTOS
-// =====================================================
-
-if (!nomeProfessor) {
-    console.error("Campo nomeProfessor não encontrado.");
-}
-
-if (!nivelEnsino) {
-    console.error("Campo nivelEnsino não encontrado.");
-}
-
-if (!listaTurmas) {
-    console.error("Campo listaTurmas não encontrado.");
-}
-
-if (!listaAtribuicoes) {
-    console.error("Campo listaAtribuicoes não encontrado.");
-}
-
-if (!guardarProfessor) {
-    console.error("Botão guardarProfessor não encontrado.");
-}
-
-if (!tabelaProfessores) {
-    console.error("Tabela tabelaProfessores não encontrada.");
-}
-
-
-// =====================================================
 // VARIÁVEIS
 // =====================================================
 
@@ -92,9 +69,42 @@ let turmas = [];
 
 let atribuicoes = [];
 
+let ensinosDaEscola = [];
+
 
 // =====================================================
-// GERAR CÓDIGO DO PROFESSOR
+// NOMES DOS ENSINOS
+// =====================================================
+
+function nomeEnsino(ensino) {
+
+    if (
+        ensino ===
+        "ensinoPrimario"
+    ) {
+
+        return "Ensino Primário";
+
+    }
+
+
+    if (
+        ensino ===
+        "primeiroCiclo"
+    ) {
+
+        return "Primeiro Ciclo";
+
+    }
+
+
+    return ensino;
+
+}
+
+
+// =====================================================
+// GERAR CÓDIGO PROFESSOR
 // =====================================================
 
 function gerarCodigoProfessor(numero) {
@@ -116,14 +126,19 @@ function gerarSenha() {
 
     let senha = "";
 
-    for (let i = 0; i < 6; i++) {
+    for (
+        let i = 0;
+        i < 6;
+        i++
+    ) {
 
-        senha += caracteres.charAt(
-            Math.floor(
-                Math.random() *
-                caracteres.length
-            )
-        );
+        senha +=
+            caracteres.charAt(
+                Math.floor(
+                    Math.random() *
+                    caracteres.length
+                )
+            );
 
     }
 
@@ -133,40 +148,160 @@ function gerarSenha() {
 
 
 // =====================================================
-// LIMPAR FORMULÁRIO
+// CARREGAR ENSINOS DA ESCOLA
 // =====================================================
 
-function limparFormulario() {
+async function carregarEnsinosDaEscola() {
 
-    if (nomeProfessor) {
-        nomeProfessor.value = "";
+    try {
+
+        if (!nivelEnsino) {
+            return;
+        }
+
+
+        nivelEnsino.innerHTML = `
+
+            <option value="">
+                A carregar ensinos...
+            </option>
+
+        `;
+
+
+        const referencia =
+            doc(
+                db,
+                "escolas",
+                escolaId
+            );
+
+
+        const resultado =
+            await getDoc(
+                referencia
+            );
+
+
+        if (!resultado.exists()) {
+
+            nivelEnsino.innerHTML = `
+
+                <option value="">
+                    Escola não encontrada
+                </option>
+
+            `;
+
+            return;
+
+        }
+
+
+        const dados =
+            resultado.data();
+
+
+        ensinosDaEscola =
+            Array.isArray(
+                dados.ensinos
+            )
+                ? dados.ensinos
+                : [];
+
+
+        console.log(
+            "ENSINOS DA ESCOLA:",
+            ensinosDaEscola
+        );
+
+
+        // =============================================
+        // NENHUM ENSINO
+        // =============================================
+
+        if (
+            ensinosDaEscola.length === 0
+        ) {
+
+            nivelEnsino.innerHTML = `
+
+                <option value="">
+                    Nenhum ensino configurado
+                </option>
+
+            `;
+
+            return;
+
+        }
+
+
+        // =============================================
+        // PREENCHER SELECT
+        // =============================================
+
+        nivelEnsino.innerHTML = `
+
+            <option value="">
+                Selecionar ensino
+            </option>
+
+        `;
+
+
+        ensinosDaEscola.forEach(
+            ensino => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    ensino;
+
+
+                option.textContent =
+                    nomeEnsino(
+                        ensino
+                    );
+
+
+                nivelEnsino.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
     }
 
-    if (emailProfessor) {
-        emailProfessor.value = "";
-    }
+    catch (erro) {
 
-    if (nivelEnsino) {
-        nivelEnsino.value = "";
-    }
+        console.error(
+            "Erro ao carregar ensinos:",
+            erro
+        );
 
-    if (listaTurmas) {
-        listaTurmas.innerHTML =
-            "Selecione o nível";
-    }
 
-    if (listaAtribuicoes) {
-        listaAtribuicoes.innerHTML =
-            "Selecione uma turma";
-    }
+        nivelEnsino.innerHTML = `
 
-    atribuicoes = [];
+            <option value="">
+                Erro ao carregar ensino
+            </option>
+
+        `;
+
+    }
 
 }
 
 
 // =====================================================
-// CARREGAR TURMAS DO NÍVEL SELECIONADO
+// ALTERAR ENSINO
 // =====================================================
 
 if (nivelEnsino) {
@@ -174,6 +309,16 @@ if (nivelEnsino) {
     nivelEnsino.addEventListener(
         "change",
         async () => {
+
+            atribuicoes = [];
+
+            if (listaAtribuicoes) {
+
+                listaAtribuicoes.innerHTML =
+                    "Selecione uma turma.";
+
+            }
+
 
             await carregarTurmas();
 
@@ -193,34 +338,70 @@ async function carregarTurmas() {
         return;
     }
 
+
+    const ensino =
+        nivelEnsino.value;
+
+
     listaTurmas.innerHTML =
         "A carregar turmas...";
 
-    if (listaAtribuicoes) {
-
-        listaAtribuicoes.innerHTML =
-            "Selecione uma turma";
-
-    }
 
     turmas = [];
 
     atribuicoes = [];
 
 
+    if (!ensino) {
+
+        listaTurmas.innerHTML =
+            "Selecione o nível de ensino.";
+
+        return;
+
+    }
+
+
+    // =============================================
+    // SEGURANÇA
+    // =============================================
+
+    if (
+        !ensinosDaEscola.includes(
+            ensino
+        )
+    ) {
+
+        listaTurmas.innerHTML =
+            "Este ensino não pertence a esta escola.";
+
+        return;
+
+    }
+
+
     try {
 
         const consulta =
             query(
+
                 collection(
                     db,
                     "turmas"
                 ),
+
                 where(
                     "escolaId",
                     "==",
                     escolaId
+                ),
+
+                where(
+                    "ensino",
+                    "==",
+                    ensino
                 )
+
             );
 
 
@@ -233,42 +414,63 @@ async function carregarTurmas() {
         listaTurmas.innerHTML = "";
 
 
+        // =============================================
+        // TURMAS ENCONTRADAS
+        // =============================================
+
         snapshot.forEach(
-            docSnap => {
+            turmaDoc => {
 
                 const turma = {
 
-                    id: docSnap.id,
+                    id:
+                        turmaDoc.id,
 
-                    ...docSnap.data()
+                    ...turmaDoc.data()
 
                 };
 
 
-                if (
-                    turma.ensino ===
-                    nivelEnsino.value
-                ) {
-
-                    turmas.push(
-                        turma
-                    );
-
-                }
+                turmas.push(
+                    turma
+                );
 
             }
         );
 
 
-        if (turmas.length === 0) {
+        // =============================================
+        // NENHUMA TURMA
+        // =============================================
 
-            listaTurmas.innerHTML =
-                "Nenhuma turma encontrada.";
+        if (
+            turmas.length === 0
+        ) {
+
+            listaTurmas.innerHTML = `
+
+                <div
+                    style="
+                        padding:10px;
+                        color:#64748b;
+                    "
+                >
+
+                    Nenhuma turma encontrada
+                    para este ensino.
+
+                </div>
+
+            `;
 
             return;
 
         }
 
+
+        // =============================================
+        // MOSTRAR TURMAS
+        // =============================================
 
         turmas.forEach(
             turma => {
@@ -289,7 +491,13 @@ async function carregarTurmas() {
                                 ${turma.nome || ""}
                             </b>
 
-                            (${turma.classe || ""})
+                            ${
+                                turma.classe
+                                    ? " (" +
+                                      turma.classe +
+                                      ")"
+                                    : ""
+                            }
 
                         </label>
 
@@ -301,14 +509,18 @@ async function carregarTurmas() {
         );
 
 
+        // =============================================
+        // EVENTOS
+        // =============================================
+
         document
             .querySelectorAll(
                 ".turmaCheck"
             )
             .forEach(
-                check => {
+                checkbox => {
 
-                    check.addEventListener(
+                    checkbox.addEventListener(
                         "change",
                         carregarAtribuicoes
                     );
@@ -325,8 +537,20 @@ async function carregarTurmas() {
             erro
         );
 
-        listaTurmas.innerHTML =
-            "Erro ao carregar turmas.";
+
+        listaTurmas.innerHTML = `
+
+            <div
+                style="
+                    color:#dc2626;
+                "
+            >
+
+                Erro ao carregar turmas.
+
+            </div>
+
+        `;
 
     }
 
@@ -343,7 +567,10 @@ async function carregarAtribuicoes() {
         return;
     }
 
-    listaAtribuicoes.innerHTML = "";
+
+    listaAtribuicoes.innerHTML =
+        "A carregar disciplinas...";
+
 
     atribuicoes = [];
 
@@ -354,7 +581,9 @@ async function carregarAtribuicoes() {
         );
 
 
-    if (selecionadas.length === 0) {
+    if (
+        selecionadas.length === 0
+    ) {
 
         listaAtribuicoes.innerHTML =
             "Selecione uma turma.";
@@ -362,6 +591,9 @@ async function carregarAtribuicoes() {
         return;
 
     }
+
+
+    listaAtribuicoes.innerHTML = "";
 
 
     for (
@@ -373,38 +605,41 @@ async function carregarAtribuicoes() {
             check.value;
 
 
-        const turmaRef =
-            doc(
-                db,
-                "turmas",
-                turmaId
+        const turma =
+            turmas.find(
+                item =>
+                    item.id ===
+                    turmaId
             );
 
 
-        const turmaSnap =
-            await getDoc(
-                turmaRef
-            );
-
-
-        if (!turmaSnap.exists()) {
+        if (!turma) {
             continue;
         }
 
 
-        const turma =
-            turmaSnap.data();
+        // =============================================
+        // SEGURANÇA
+        // =============================================
+
+        if (
+            turma.escolaId !==
+            escolaId
+        ) {
+
+            continue;
+
+        }
 
 
-        listaAtribuicoes.innerHTML += `
+        if (
+            turma.ensino !==
+            nivelEnsino.value
+        ) {
 
-            <div class="section">
+            continue;
 
-                <h3>
-                    ${turma.nome || ""}
-                </h3>
-
-        `;
+        }
 
 
         const disciplinas =
@@ -415,18 +650,48 @@ async function carregarAtribuicoes() {
                 : [];
 
 
-        if (disciplinas.length === 0) {
+        listaAtribuicoes.innerHTML += `
+
+            <div
+                class="section"
+                style="
+                    margin-bottom:15px;
+                    padding:12px;
+                    border:1px solid #e2e8f0;
+                    border-radius:8px;
+                "
+            >
+
+                <h3>
+                    ${turma.nome || ""}
+                </h3>
+
+        `;
+
+
+        // =============================================
+        // SEM DISCIPLINAS
+        // =============================================
+
+        if (
+            disciplinas.length === 0
+        ) {
 
             listaAtribuicoes.innerHTML += `
 
                 <p>
-                    Nenhuma disciplina encontrada nesta turma.
+                    Nenhuma disciplina configurada
+                    nesta turma.
                 </p>
 
             `;
 
         }
 
+
+        // =============================================
+        // DISCIPLINAS
+        // =============================================
 
         disciplinas.forEach(
             disciplina => {
@@ -438,9 +703,13 @@ async function carregarAtribuicoes() {
                         <input
                             type="checkbox"
                             class="disciplinaCheck"
-                            data-turma="${turmaId}"
+
+                            data-turma="${turma.id}"
+
                             data-turmanome="${turma.nome || ""}"
+
                             data-classe="${turma.classe || ""}"
+
                             value="${disciplina}"
                         >
 
@@ -465,20 +734,27 @@ async function carregarAtribuicoes() {
     }
 
 
+    // =============================================
+    // EVENTOS DAS DISCIPLINAS
+    // =============================================
+
     document
         .querySelectorAll(
             ".disciplinaCheck"
         )
         .forEach(
-            item => {
+            checkbox => {
 
-                item.addEventListener(
+                checkbox.addEventListener(
                     "change",
                     atualizarAtribuicoes
                 );
 
             }
         );
+
+
+    atualizarAtribuicoes();
 
 }
 
@@ -497,21 +773,21 @@ function atualizarAtribuicoes() {
             ".disciplinaCheck:checked"
         )
         .forEach(
-            disciplina => {
+            checkbox => {
 
                 atribuicoes.push({
 
                     turmaId:
-                        disciplina.dataset.turma || "",
+                        checkbox.dataset.turma,
 
                     turmaNome:
-                        disciplina.dataset.turmanome || "",
+                        checkbox.dataset.turmanome,
 
                     classe:
-                        disciplina.dataset.classe || "",
+                        checkbox.dataset.classe,
 
                     disciplina:
-                        disciplina.value || ""
+                        checkbox.value
 
                 });
 
@@ -545,9 +821,9 @@ if (guardarProfessor) {
                 nivelEnsino.value;
 
 
-            // =========================================
-            // VALIDAÇÃO
-            // =========================================
+            // =============================================
+            // VALIDAÇÕES
+            // =============================================
 
             if (!nome) {
 
@@ -563,7 +839,26 @@ if (guardarProfessor) {
             if (!ensino) {
 
                 alert(
-                    "Selecione o nível de ensino."
+                    "Selecione o ensino."
+                );
+
+                return;
+
+            }
+
+
+            // =============================================
+            // GARANTIR QUE O ENSINO PERTENCE À ESCOLA
+            // =============================================
+
+            if (
+                !ensinosDaEscola.includes(
+                    ensino
+                )
+            ) {
+
+                alert(
+                    "O ensino selecionado não pertence a esta escola."
                 );
 
                 return;
@@ -597,21 +892,24 @@ if (guardarProfessor) {
                     "A guardar...";
 
 
-                // =====================================
-                // BUSCAR PROFESSORES DA ESCOLA
-                // =====================================
+                // =============================================
+                // PROFESSORES DA ESCOLA
+                // =============================================
 
                 const consulta =
                     query(
+
                         collection(
                             db,
                             "professores"
                         ),
+
                         where(
                             "escolaId",
                             "==",
                             escolaId
                         )
+
                     );
 
 
@@ -635,9 +933,9 @@ if (guardarProfessor) {
                     gerarSenha();
 
 
-                // =====================================
-                // DADOS DO PROFESSOR
-                // =====================================
+                // =============================================
+                // DADOS
+                // =============================================
 
                 const dadosProfessor = {
 
@@ -674,9 +972,9 @@ if (guardarProfessor) {
                 };
 
 
-                // =====================================
-                // GUARDAR
-                // =====================================
+                // =============================================
+                // GRAVAR
+                // =============================================
 
                 await addDoc(
 
@@ -740,7 +1038,55 @@ ${senha}`
 
 
 // =====================================================
-// LISTAR PROFESSORES DA ESCOLA
+// LIMPAR FORMULÁRIO
+// =====================================================
+
+function limparFormulario() {
+
+    if (nomeProfessor) {
+
+        nomeProfessor.value = "";
+
+    }
+
+
+    if (emailProfessor) {
+
+        emailProfessor.value = "";
+
+    }
+
+
+    if (nivelEnsino) {
+
+        nivelEnsino.value = "";
+
+    }
+
+
+    if (listaTurmas) {
+
+        listaTurmas.innerHTML =
+            "Selecione o ensino.";
+
+    }
+
+
+    if (listaAtribuicoes) {
+
+        listaAtribuicoes.innerHTML =
+            "Selecione uma turma.";
+
+    }
+
+
+    atribuicoes = [];
+
+}
+
+
+// =====================================================
+// LISTAR PROFESSORES
 // =====================================================
 
 async function carregarProfessores() {
@@ -755,7 +1101,9 @@ async function carregarProfessores() {
         <tr>
 
             <td colspan="7">
+
                 A carregar professores...
+
             </td>
 
         </tr>
@@ -767,15 +1115,18 @@ async function carregarProfessores() {
 
         const consulta =
             query(
+
                 collection(
                     db,
                     "professores"
                 ),
+
                 where(
                     "escolaId",
                     "==",
                     escolaId
                 )
+
             );
 
 
@@ -788,7 +1139,9 @@ async function carregarProfessores() {
         tabelaProfessores.innerHTML = "";
 
 
-        if (dados.empty) {
+        if (
+            dados.empty
+        ) {
 
             tabelaProfessores.innerHTML = `
 
@@ -829,10 +1182,10 @@ async function carregarProfessores() {
                     professor
                         .atribuicoes
                         .forEach(
-                            atribuicao => {
+                            a => {
 
                                 lista +=
-                                    `${atribuicao.turmaNome || ""} - ${atribuicao.disciplina || ""}<br>`;
+                                    `${a.turmaNome || ""} - ${a.disciplina || ""}<br>`;
 
                             }
                         );
@@ -857,7 +1210,9 @@ async function carregarProfessores() {
                         </td>
 
                         <td>
-                            ${professor.ensino || ""}
+                            ${nomeEnsino(
+                                professor.ensino
+                            )}
                         </td>
 
                         <td>
@@ -914,6 +1269,7 @@ async function carregarProfessores() {
                 <td colspan="7">
 
                     ❌ Erro ao carregar professores:
+
                     ${erro.message}
 
                 </td>
@@ -961,14 +1317,12 @@ window.verProfessor =
             }
 
 
-            const p =
+            const professor =
                 resultado.data();
 
 
-            // Segurança: professor pertence à escola atual
-
             if (
-                p.escolaId !==
+                professor.escolaId !==
                 escolaId
             ) {
 
@@ -984,22 +1338,24 @@ window.verProfessor =
             let texto =
 
 `Código:
-${p.codigoProfessor || ""}
+${professor.codigoProfessor || ""}
 
 Nome:
-${p.nome || ""}
+${professor.nome || ""}
 
 Email:
-${p.email || ""}
+${professor.email || ""}
 
 Ensino:
-${p.ensino || ""}
+${nomeEnsino(
+    professor.ensino
+)}
 
 Estado:
-${p.estado || "ativo"}
+${professor.estado || "ativo"}
 
 Senha:
-${p.senhaAcesso || ""}
+${professor.senhaAcesso || ""}
 
 Atribuições:
 `;
@@ -1007,11 +1363,12 @@ Atribuições:
 
             if (
                 Array.isArray(
-                    p.atribuicoes
+                    professor.atribuicoes
                 )
             ) {
 
-                p.atribuicoes
+                professor
+                    .atribuicoes
                     .forEach(
                         a => {
 
@@ -1033,6 +1390,7 @@ Atribuições:
             console.error(
                 erro
             );
+
 
             alert(
                 "Erro ao visualizar professor:\n\n" +
@@ -1259,5 +1617,7 @@ window.editarProfessor =
 // =====================================================
 // INICIAR
 // =====================================================
+
+carregarEnsinosDaEscola();
 
 carregarProfessores();
