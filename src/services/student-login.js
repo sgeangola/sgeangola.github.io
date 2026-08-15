@@ -376,11 +376,9 @@ form.addEventListener(
             // 6. ÁREA DO ALUNO
             // =================================================
 
-            window.location.href =
-                "/sgeangola/src/pages/student-area.html";
+            window.location.href = "../pages/student-area.html";
 
         }
-
 
         catch (error) {
 
