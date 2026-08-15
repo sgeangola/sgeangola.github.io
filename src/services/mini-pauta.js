@@ -24,11 +24,15 @@ import {
 // DADOS DA ESCOLA
 // =====================================================
 
-// Primeiro tenta a sessão atual
 let escolaId =
     sessionStorage.getItem("escolaId");
 
-// Se não encontrar, tenta o localStorage
+
+// =====================================================
+// SE NÃO EXISTIR NA SESSÃO,
+// TENTAR NO LOCALSTORAGE
+// =====================================================
+
 if (!escolaId) {
 
     escolaId =
@@ -36,34 +40,54 @@ if (!escolaId) {
 
 }
 
-// Limpar espaços
+
+// =====================================================
+// LIMPAR
+// =====================================================
+
 escolaId =
-    escolaId?.trim();
+    escolaId
+        ? String(escolaId).trim()
+        : "";
 
 
 // =====================================================
-// VERIFICAR ESCOLA
+// DEBUG
+// =====================================================
+
+console.log(
+    "🏫 escolaId encontrado na Mini-Pauta:",
+    escolaId
+);
+
+console.log(
+    "📦 sessionStorage:",
+    sessionStorage.getItem("escolaId")
+);
+
+console.log(
+    "💾 localStorage:",
+    localStorage.getItem("escolaId")
+);
+
+
+// =====================================================
+// VERIFICAR
 // =====================================================
 
 if (!escolaId) {
 
     alert(
-        "❌ Escola não identificada.\n\n" +
-        "O sistema não conseguiu identificar a escola " +
-        "que abriu esta Mini-Pauta."
+        "❌ ESCOLA NÃO IDENTIFICADA\n\n" +
+        "A Mini-Pauta foi aberta, mas o ID da escola " +
+        "não foi enviado para esta página."
     );
 
     throw new Error(
-        "escolaId não encontrado no sessionStorage nem no localStorage."
+        "escolaId não encontrado."
     );
 
 }
-
-
-console.log(
-    "🏫 ESCOLA DA MINI-PAUTA:",
-    escolaId
-);
 
 
 // =====================================================
