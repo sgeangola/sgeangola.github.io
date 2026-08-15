@@ -47,7 +47,7 @@ const SENHA_INICIAL =
 "123456";
 
 const DOCUMENTO_SENHA =
-"config/financeiro";
+    `${escolaId}_financeiro`;
 
 // =====================================================
 // ELEMENTOS
@@ -123,11 +123,11 @@ async function obterSenhaFinanceira() {
 try {
 
     const ref =
-        doc(
-            db,
-            "config",
-            "financeiro"
-        );
+    doc(
+        db,
+        "config",
+        `${escolaId}_financeiro`
+    );
 
 
     const resultado =
@@ -847,6 +847,16 @@ lista.appendChild(tr);
 }
 
 // =====================================================
+// ID FINANCEIRO DO ALUNO POR ESCOLA
+// =====================================================
+
+function obterIdFinanceiro(alunoId){
+
+    return `${escolaId}_${alunoId}`;
+
+}
+
+// =====================================================
 // BUSCAR FINANCEIRO
 // =====================================================
 
@@ -857,12 +867,15 @@ aluno
 
 try {
 
-    const ref =
-        doc(
-            db,
-            "financeiro",
-            alunoId
-        );
+const financeiroId =
+    obterIdFinanceiro(alunoId);
+
+const ref =
+    doc(
+        db,
+        "financeiro",
+        financeiroId
+    );
 
 
     const resultado =
@@ -1022,12 +1035,15 @@ if (!financeiroAutorizado) {
 
 try {
 
-    const ref =
-        doc(
-            db,
-            "financeiro",
-            alunoId
-        );
+    const financeiroId =
+    obterIdFinanceiro(alunoId);
+
+const ref =
+    doc(
+        db,
+        "financeiro",
+        financeiroId
+    );
 
 
     const resultado =
@@ -1196,12 +1212,15 @@ try {
         campo.value.trim();
 
 
-    const ref =
-        doc(
-            db,
-            "financeiro",
-            alunoId
-        );
+    const financeiroId =
+    obterIdFinanceiro(alunoId);
+
+const ref =
+    doc(
+        db,
+        "financeiro",
+        financeiroId
+    );
 
 
     await setDoc(
@@ -1396,13 +1415,12 @@ guardarSenhaBtn.addEventListener(
 
             }
 
-
-            const ref =
-                doc(
-                    db,
-                    "config",
-                    "financeiro"
-                );
+const ref =
+    doc(
+        db,
+        "config",
+        `${escolaId}_financeiro`
+    );
 
 
             await setDoc(
