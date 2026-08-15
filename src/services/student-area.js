@@ -1,4 +1,4 @@
-alert("ÁREA DO ALUNO TARREGADA ✅");
+alert("ÁREA DO ALUNO CARREGADA DG ✅");
 
 import { db } from "./firebase.js";
 
@@ -312,10 +312,6 @@ function calcularMediaAnual(notas) {
    TESTE INICIAL
 ===================================================== */
 
-alert(
-    "student-area.js inicializado corretamente ✅"
-);
-
 console.log("✅ student-area.js passou pela inicialização");
 
 /* =====================================================
@@ -454,22 +450,23 @@ window.verNotas = async function () {
 
 
         for (
-            const notaDoc
-            of notasSnapshot.docs
-        ) {
+    const notaDoc
+    of notasSnapshot.docs
+) {
 
-            /* Somente notas da turma */
+    const dadosNota =
+        notaDoc.data();
 
-            if (
-                String(
-                    dadosNota.turmaId || ""
-                ).trim()
-                !== turmaId
-            ) {
+    if (
+        String(
+            dadosNota.turmaId || ""
+        ).trim()
+        !== turmaId
+    ) {
 
-                continue;
+        continue;
 
-            }
+}
 
 
             const disciplina =
