@@ -3,6 +3,8 @@
 // SGE ANGOLA
 // =====================================================
 
+alert("GESTÃO DE PROFESSORES CARREGADO");
+
 import { db } from "./firebase.js";
 
 import {
