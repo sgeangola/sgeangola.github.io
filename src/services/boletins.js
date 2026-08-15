@@ -2,18 +2,25 @@
 // BOLETINS.JS
 // =====================================================
 
-alert("✅ BOLETINS.JS CARREGOU!");
+alert("✅ BOLETINS CARREGADO");
 
 import {
     collection,
     getDocs,
     doc,
-    getDoc
+    getDoc,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 import { db } from "./firebase.js";
 
+const escolaId = sessionStorage.getItem("escolaId");
 
+if (!escolaId) {
+    alert("Escola não identificada. Faça login novamente.");
+    throw new Error("escolaId não encontrado.");
+}
 // =====================================================
 // ELEMENTOS
 // =====================================================
@@ -163,12 +170,12 @@ async function carregarTurmas(){
     try{
 
         const resultado =
-            await getDocs(
-                collection(
-                    db,
-                    "turmas"
-                )
-            );
+    await getDocs(
+        query(
+            collection(db, "turmas"),
+            where("escolaId", "==", escolaId)
+        )
+    );
 
 
         alert(
@@ -273,12 +280,12 @@ async function carregarClasses(){
 
 
         const resultado =
-            await getDocs(
-                collection(
-                    db,
-                    "turmas"
-                )
-            );
+    await getDocs(
+        query(
+            collection(db, "turmas"),
+            where("escolaId", "==", escolaId)
+        )
+    );
 
 
         // =============================================
@@ -466,12 +473,12 @@ classeSelect.addEventListener(
             // =========================================
 
             const resultado =
-                await getDocs(
-                    collection(
-                        db,
-                        "turmas"
-                    )
-                );
+    await getDocs(
+        query(
+            collection(db, "turmas"),
+            where("escolaId", "==", escolaId)
+        )
+    );
 
 
             let total = 0;
@@ -603,15 +610,15 @@ async function carregarAlunosDaTurma(turmaId){
 
     try{
 
-        const resultado =
-            await getDocs(
-                collection(
-                    db,
-                    "turmas",
-                    turmaId,
-                    "alunos"
-                )
-            );
+const resultado =
+    await getDocs(
+        collection(
+            db,
+            "turmas",
+            turmaId,
+            "alunos"
+        )
+    );
 
 
         alert(
