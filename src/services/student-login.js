@@ -377,7 +377,7 @@ form.addEventListener(
             // =================================================
 
             window.location.href =
-                "/Complexo-Escolar-n-89M-Eduardo-Domingos-Sukuete-/src/pages/student-area.html";
+                "/sgeangola/src/pages/student-area.html";
 
         }
 
