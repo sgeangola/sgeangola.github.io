@@ -3,6 +3,8 @@
 // SGE ANGOLA
 // =====================================================
 
+alert("GESTÃO DE ALUNOS CARREGADO");
+
 import { app } from "./firebase.js";
 
 import { lerPDF } from "./pdf-reader.js";
