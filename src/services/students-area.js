@@ -1,4 +1,4 @@
-alert("ÁREA DO ALUNO CARREGADA DG ✅");
+alert("ÁREA DO ALUNO CARREGADA ✅");
 
 import { db } from "./firebase.js";
 
@@ -445,6 +445,50 @@ window.verNotas = async function () {
                 )
             );
 
+        console.log(
+    "================================"
+);
+
+console.log(
+    "ALUNO LOGADO:",
+    aluno
+);
+
+console.log(
+    "TURMA ID DO ALUNO:",
+    aluno.turmaId
+);
+
+console.log(
+    "NÚMERO DO ALUNO:",
+    aluno.numero
+);
+
+console.log(
+    "NOME DO ALUNO:",
+    aluno.nome
+);
+
+console.log(
+    "DOCUMENTOS DE NOTAS:",
+    notasSnapshot.size
+);
+
+notasSnapshot.forEach(
+    docNota => {
+
+        console.log(
+            "NOTA FIREBASE:",
+            docNota.id,
+            docNota.data()
+        );
+
+    }
+);
+
+console.log(
+    "================================"
+);
 
         const notasAluno = {};
 
