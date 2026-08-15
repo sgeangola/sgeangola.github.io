@@ -14,10 +14,27 @@ collection,
 getDocs,
 doc,
 getDoc,
-setDoc
+setDoc,
+query,
+where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 const db = getFirestore(app);
+
+const escolaId =
+    sessionStorage.getItem("escolaId");
+
+if (!escolaId) {
+
+    alert(
+        "Escola não identificada. Faça login novamente."
+    );
+
+    throw new Error(
+        "escolaId não encontrado."
+    );
+
+}
 
 // =====================================================
 // CONFIGURAÇÃO DA SENHA
@@ -336,13 +353,12 @@ async function carregarTurmas() {
 try {
 
     const snapshot =
-        await getDocs(
-            collection(
-                db,
-                "turmas"
-            )
-        );
-
+    await getDocs(
+        query(
+            collection(db, "turmas"),
+            where("escolaId", "==", escolaId)
+        )
+    );
 
     turmaSelect.innerHTML = `
 
