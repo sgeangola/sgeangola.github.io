@@ -461,7 +461,16 @@ window.verNotas = async function () {
             const dadosNota =
                 notaDoc.data();
 
-
+alert(
+    "📋 DOCUMENTO DE NOTAS\n\n" +
+    "ID: " + notaDoc.id + "\n\n" +
+    JSON.stringify(
+        dadosNota,
+        null,
+        2
+    )
+);
+            
             /* Somente notas da turma */
 
             if (
