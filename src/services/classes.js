@@ -117,7 +117,27 @@ const classesPorEnsino = {
 // ID DA ESCOLA
 // =====================================================
 
-const escolaId = "YNY5XygXQqQfcPfIyK62";
+let escolaId =
+    sessionStorage.getItem("escolaId");
+
+if (!escolaId) {
+    escolaId =
+        localStorage.getItem("escolaId");
+}
+
+escolaId = escolaId
+    ? String(escolaId).trim()
+    : "";
+
+if (!escolaId) {
+    alert("❌ Escola não identificada.");
+    throw new Error("escolaId não encontrado.");
+}
+
+console.log(
+    "🏫 Escola atual:",
+    escolaId
+);
 
 async function carregarEnsinosDaEscola() {
 
