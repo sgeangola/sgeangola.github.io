@@ -197,7 +197,7 @@ if (info) {
 // =====================================================
 
 const idLancamento =
-    `${escolaId}_${turmaId}_${disciplina}_${trimestre}`;
+    `${turmaId}_${disciplina}_${trimestre}`;
 
 
 // =====================================================
@@ -306,25 +306,75 @@ async function carregarControle() {
 
     try {
 
-        const controleSnap =
+        // =============================================
+        // VERIFICAR PRIMEIRO O DOCUMENTO "NOTAS"
+        // =============================================
+
+        const notaSnap =
             await getDoc(
-                controleRef
+                notaRef
             );
 
 
-        // ---------------------------------------------
-        // SE NÃO EXISTIR
-        // ---------------------------------------------
+        if (notaSnap.exists()) {
 
-        if (
-            !controleSnap.exists()
-        ) {
+            const dados =
+                notaSnap.data();
+
+
+            // =========================================
+            // SEGURANÇA DA ESCOLA
+            // =========================================
+
+            if (
+                dados.escolaId &&
+                String(dados.escolaId).trim() !==
+                String(escolaId).trim()
+            ) {
+
+                console.warn(
+                    "⚠️ Lançamento pertence a outra escola."
+                );
+
+                sistemaAberto = false;
+
+                controleAlunos = {};
+
+                atualizarEstadoVisual();
+
+                return;
+
+            }
+
+
+            // =========================================
+            // ESTADO GERAL ABERTO/FECHADO
+            // =========================================
 
             sistemaAberto =
-                false;
+                dados.abertoGeral === true;
+
+
+            // =========================================
+            // CONTROLE INDIVIDUAL DOS ALUNOS
+            // =========================================
 
             controleAlunos =
+                dados.alunosAbertos ||
                 {};
+
+
+            console.log(
+                "🔐 ESTADO DO LANÇAMENTO:",
+                {
+                    idLancamento,
+                    abertoGeral:
+                        dados.abertoGeral,
+                    alunosAbertos:
+                        dados.alunosAbertos
+                }
+            );
+
 
             atualizarEstadoVisual();
 
@@ -333,22 +383,49 @@ async function carregarControle() {
         }
 
 
-        const dados =
-            controleSnap.data();
+        // =============================================
+        // SE NÃO EXISTIR EM "NOTAS"
+        // TENTAR CONTROLE ANTIGO
+        // =============================================
+
+        const controleSnap =
+            await getDoc(
+                controleRef
+            );
 
 
-        sistemaAberto =
-            dados.sistemaAberto === true;
+        if (
+            controleSnap.exists()
+        ) {
+
+            const dadosControle =
+                controleSnap.data();
 
 
-        controleAlunos =
-            dados.alunos || {};
+            sistemaAberto =
+                dadosControle.sistemaAberto === true;
 
 
-        console.log(
-            "🔐 CONTROLE DA MINI-PAUTA:",
-            dados
-        );
+            controleAlunos =
+                dadosControle.alunos ||
+                {};
+
+
+            console.log(
+                "🔐 CONTROLE ANTIGO:",
+                dadosControle
+            );
+
+        }
+        else {
+
+            sistemaAberto =
+                false;
+
+            controleAlunos =
+                {};
+
+        }
 
 
         atualizarEstadoVisual();
@@ -357,9 +434,10 @@ async function carregarControle() {
     catch (erro) {
 
         console.error(
-            "Erro ao carregar controle:",
+            "❌ Erro ao carregar controle:",
             erro
         );
+
 
         sistemaAberto =
             false;
@@ -367,12 +445,12 @@ async function carregarControle() {
         controleAlunos =
             {};
 
+
         atualizarEstadoVisual();
 
     }
 
-}
-
+    }
 
 // =====================================================
 // VERIFICAR SE ALUNO PODE SER EDITADO
