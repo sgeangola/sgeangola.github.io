@@ -316,6 +316,8 @@ alert(
     "student-area.js inicializado corretamente ✅"
 );
 
+console.log("✅ student-area.js passou pela inicialização");
+
 /* =====================================================
    CARREGAR PAGAMENTOS DO ALUNO
 ===================================================== */
