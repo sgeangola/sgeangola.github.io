@@ -6,7 +6,7 @@
 // Separação por escola
 // =====================================================
 
-alert("MINI-PAUTA.JS CARREGADO ✅");
+alert("MINI-PAUTA.JS CARREGADO DG ✅");
 
 import { db } from "./firebase.js";
 
