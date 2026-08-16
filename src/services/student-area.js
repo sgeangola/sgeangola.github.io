@@ -1,1 +1,1 @@
-alert("🔴 STUDENT-AREA.JS FUNCIONA");
+alert("🟢 NOVA ÁREA DO ALUNO CARREGADA");
