@@ -1595,6 +1595,25 @@ if (guardarNotas) {
                     controle.sistemaAberto === true;
 
 
+                alert(
+    "DEBUG DO CONTROLE AO GUARDAR\n\n" +
+
+    "ID DA MINI-PAUTA:\n" +
+    idLancamento +
+
+    "\n\nDocumento existe:\n" +
+    controleAtual.exists() +
+
+    "\n\nsistemaAberto:\n" +
+    controle.sistemaAberto +
+
+    "\n\nabertoGeral:\n" +
+    controle.abertoGeral +
+
+    "\n\naberto:\n" +
+    controle.aberto
+);
+                
                 const controlesAtuais =
                     controle.alunos || {};
 
