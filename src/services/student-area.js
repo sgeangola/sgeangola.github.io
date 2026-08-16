@@ -543,7 +543,31 @@ window.verNotas = async function () {
                 ? dadosNota.alunos
                 : [];
 
+           alert(
+    "DOCUMENTO\n\n" +
 
+    "Disciplina: " +
+    (dadosNota.disciplina || "—") +
+
+    "\n\nTrimestre: " +
+    (dadosNota.trimestre || "—") +
+
+    "\n\nQuantidade de alunos: " +
+    listaAlunos.length +
+
+    "\n\nPrimeiro aluno:\n" +
+
+    (
+        listaAlunos.length > 0
+            ? JSON.stringify(
+                listaAlunos[0],
+                null,
+                2
+              )
+            : "NENHUM ALUNO"
+    )
+);
+           
             let encontrouNumero = false;
 
             let encontrouNome = false;
