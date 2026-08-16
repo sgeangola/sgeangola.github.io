@@ -219,3 +219,262 @@ console.log(
 alert(
     "🎓 Área do Aluno carregada com sucesso!"
 );
+
+/* =====================================================
+   SGE — ÁREA DO ALUNO
+   BLOCO 2 — BOTÕES E SESSÃO
+===================================================== */
+
+
+/* =====================================================
+   VER DADOS
+===================================================== */
+
+window.verDados = function () {
+
+    console.log(
+        "👤 Abrindo dados do aluno..."
+    );
+
+    const dadosExistentes =
+        document.getElementById(
+            "janelaDadosAluno"
+        );
+
+    if (dadosExistentes) {
+
+        dadosExistentes.remove();
+
+    }
+
+
+    const html = `
+
+        <div
+            id="janelaDadosAluno"
+            style="
+                position:fixed;
+                inset:0;
+                z-index:99999;
+                background:#f1f5f9;
+                overflow-y:auto;
+                padding:20px;
+            "
+        >
+
+            <div
+                style="
+                    max-width:600px;
+                    margin:20px auto;
+                    background:white;
+                    border-radius:16px;
+                    padding:25px;
+                    box-shadow:0 4px 15px rgba(0,0,0,.15);
+                "
+            >
+
+                <div
+                    style="
+                        text-align:center;
+                        font-size:55px;
+                    "
+                >
+                    👤
+                </div>
+
+                <h2
+                    style="
+                        text-align:center;
+                        color:#1e3a8a;
+                        margin-bottom:25px;
+                    "
+                >
+                    Meus Dados
+                </h2>
+
+
+                <div
+                    style="
+                        line-height:2;
+                        color:#334155;
+                    "
+                >
+
+                    <p>
+                        <strong>Nome:</strong><br>
+                        ${aluno.nome || "—"}
+                    </p>
+
+                    <p>
+                        <strong>Código do aluno:</strong><br>
+                        ${aluno.codigoAluno || "—"}
+                    </p>
+
+                    <p>
+                        <strong>Número:</strong><br>
+                        ${aluno.numero || "—"}
+                    </p>
+
+                    <p>
+                        <strong>Turma:</strong><br>
+                        ${aluno.turmaNome || "—"}
+                    </p>
+
+                    <p>
+                        <strong>Estado:</strong><br>
+                        ${aluno.estado || "ativo"}
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="fecharDadosAluno"
+                    style="
+                        width:100%;
+                        padding:14px;
+                        margin-top:20px;
+                        border:none;
+                        border-radius:10px;
+                        background:#1e3a8a;
+                        color:white;
+                        font-size:16px;
+                        cursor:pointer;
+                    "
+                >
+                    ← Voltar
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        html
+    );
+
+
+    const fechar =
+        document.getElementById(
+            "fecharDadosAluno"
+        );
+
+
+    if (fechar) {
+
+        fechar.onclick =
+            function () {
+
+                const janela =
+                    document.getElementById(
+                        "janelaDadosAluno"
+                    );
+
+                if (janela) {
+
+                    janela.remove();
+
+                }
+
+            };
+
+    }
+
+};
+
+
+/* =====================================================
+   ALTERAR SENHA
+===================================================== */
+
+window.alterarSenha = function () {
+
+    console.log(
+        "🔐 Alterar senha selecionado"
+    );
+
+
+    alert(
+        "A função de alteração de senha será ativada na próxima etapa."
+    );
+
+};
+
+
+/* =====================================================
+   SAIR DA CONTA
+===================================================== */
+
+window.sairAluno = function () {
+
+    const confirmar =
+        confirm(
+            "Deseja realmente sair da Área do Aluno?"
+        );
+
+
+    if (!confirmar) {
+
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+        "alunoLogado"
+    );
+
+
+    console.log(
+        "🚪 Sessão do aluno encerrada."
+    );
+
+
+    window.location.href =
+        "student-login.html";
+
+};
+
+
+/* =====================================================
+   VER BOLETIM — TEMPORÁRIO
+===================================================== */
+
+window.verBoletim = function () {
+
+    console.log(
+        "📄 Ver boletim selecionado"
+    );
+
+
+    alert(
+        "📄 Sistema de boletim será carregado na próxima etapa."
+    );
+
+};
+
+
+/* =====================================================
+   VER NOTAS — TEMPORÁRIO
+===================================================== */
+
+window.verNotas = function () {
+
+    console.log(
+        "📊 Ver notas selecionado"
+    );
+
+
+    alert(
+        "📊 Sistema de notas será carregado na próxima etapa."
+    );
+
+};
+
+
+console.log(
+    "✅ BLOCO 2 — BOTÕES DA ÁREA DO ALUNO ATIVOS"
+);
