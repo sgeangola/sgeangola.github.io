@@ -540,57 +540,20 @@ window.verNotas = async function () {
                 notasRef
             );
 
-console.log(
-    "================================"
-);
+alert(
+    "DEBUG NOTAS\n\n" +
 
-console.log(
-    "🔎 DEBUG DAS NOTAS"
-);
+    "Aluno: " +
+    (aluno.nome || "—") +
 
-console.log(
-    "Aluno logado:",
-    aluno
-);
+    "\n\nTurma ID: " +
+    (aluno.turmaId || "—") +
 
-console.log(
-    "Turma do aluno:",
-    aluno.turmaId
-);
+    "\n\nNúmero: " +
+    (aluno.numero || "—") +
 
-console.log(
-    "Número do aluno:",
-    aluno.numero
-);
-
-console.log(
-    "Nome do aluno:",
-    aluno.nome
-);
-
-console.log(
-    "Quantidade de documentos:",
+    "\n\nDocumentos de notas encontrados: " +
     snapshot.size
-);
-
-snapshot.forEach(
-    documento => {
-
-        console.log(
-            "📄 DOCUMENTO:",
-            documento.id
-        );
-
-        console.log(
-            "📦 DADOS:",
-            documento.data()
-        );
-
-    }
-);
-
-console.log(
-    "================================"
 );
        
         console.log(
