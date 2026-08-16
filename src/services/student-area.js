@@ -555,6 +555,54 @@ alert(
     "\n\nDocumentos de notas encontrados: " +
     snapshot.size
 );
+
+       let resumoNotas = "";
+
+snapshot.forEach(
+    documento => {
+
+        const dadosNota =
+            documento.data();
+
+        resumoNotas +=
+            "\n\nDOCUMENTO: " +
+            documento.id +
+
+            "\nTurma ID: " +
+            (
+                dadosNota.turmaId ||
+                "—"
+            ) +
+
+            "\nDisciplina: " +
+            (
+                dadosNota.disciplina ||
+                "—"
+            ) +
+
+            "\nTrimestre: " +
+            (
+                dadosNota.trimestre ||
+                "—"
+            ) +
+
+            "\nAlunos: " +
+            (
+                Array.isArray(
+                    dadosNota.alunos
+                )
+                    ? dadosNota.alunos.length
+                    : "não é array"
+            );
+
+    }
+);
+
+
+alert(
+    "ESTRUTURA DAS NOTAS:" +
+    resumoNotas
+);
        
         console.log(
             "Quantidade de documentos de notas:",
