@@ -456,11 +456,6 @@ window.verBoletim = function () {
 
 };
 
-
-/* =====================================================
-   VER NOTAS — TEMPORÁRIO
-===================================================== */
-
 /* =====================================================
    SGE — ÁREA DO ALUNO
    BLOCO 3 — SISTEMA DE NOTAS
@@ -545,7 +540,59 @@ window.verNotas = async function () {
                 notasRef
             );
 
+console.log(
+    "================================"
+);
 
+console.log(
+    "🔎 DEBUG DAS NOTAS"
+);
+
+console.log(
+    "Aluno logado:",
+    aluno
+);
+
+console.log(
+    "Turma do aluno:",
+    aluno.turmaId
+);
+
+console.log(
+    "Número do aluno:",
+    aluno.numero
+);
+
+console.log(
+    "Nome do aluno:",
+    aluno.nome
+);
+
+console.log(
+    "Quantidade de documentos:",
+    snapshot.size
+);
+
+snapshot.forEach(
+    documento => {
+
+        console.log(
+            "📄 DOCUMENTO:",
+            documento.id
+        );
+
+        console.log(
+            "📦 DADOS:",
+            documento.data()
+        );
+
+    }
+);
+
+console.log(
+    "================================"
+);
+       
         console.log(
             "Quantidade de documentos de notas:",
             snapshot.size
