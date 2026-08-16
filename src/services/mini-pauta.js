@@ -6,7 +6,7 @@
 // Separação por escola
 // =====================================================
 
-alert("MINI-PAUTA.JS CARREGADO DG ✅");
+alert("MINI-PAUTA.JS CARREGADO G ✅");
 
 import { db } from "./firebase.js";
 
@@ -1043,35 +1043,31 @@ async function carregarAlunos() {
             alunosRef
         );
 
-    alert(
-    "DEBUG ALUNOS DA TURMA\n\n" +
-
-    "Turma ID:\n" +
-    turmaId +
-
-    "\n\nQuantidade de alunos encontrados:\n" +
-    resultado.size
-);
-    
-    const alunos = [];
-
-
-    resultado.forEach(
-        documento => {
-
-            alunos.push({
-
-                id:
-                    documento.id,
-
-                ...documento.data()
-
-            });
-
-        }
+const controleAtual =
+    await getDoc(
+        controleRef
     );
 
+const controle =
+    controleAtual.exists()
+        ? controleAtual.data()
+        : {};
 
+alert(
+    "DADOS DO CONTROLE\n\n" +
+    JSON.stringify(
+        controle,
+        null,
+        2
+    )
+);
+
+const sistemaContinuaAberto =
+    controle.sistemaAberto === true;
+
+const controlesAtuais =
+    controle.alunos || {};
+    
     alunos.sort(
         (a, b) =>
             Number(a.numero) -
