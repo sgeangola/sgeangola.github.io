@@ -1624,7 +1624,40 @@ if (guardarNotas) {
 
                 }
 
+                // -------------------------------------
+// DEBUG FINAL ANTES DE GUARDAR
+// -------------------------------------
 
+alert(
+    "DEBUG ANTES DE GUARDAR\n\n" +
+
+    "Turma ID:\n" +
+    turmaId +
+
+    "\n\nDisciplina:\n" +
+    disciplina +
+
+    "\n\nTrimestre:\n" +
+    trimestre +
+
+    "\n\nQuantidade de alunos na lista:\n" +
+    alunos.length +
+
+    "\n\nQuantidade em notasFinais:\n" +
+    notasFinais.length
+);
+
+
+// -------------------------------------
+// GUARDAR
+// -------------------------------------
+
+await setDoc(
+
+    notaRef,
+
+    {
+        
                 // -------------------------------------
                 // GUARDAR
                 // -------------------------------------
