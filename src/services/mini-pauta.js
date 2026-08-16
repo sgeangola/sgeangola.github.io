@@ -1584,6 +1584,15 @@ if (guardarNotas) {
                         controleRef
                     );
 
+                alert(
+    "DADOS DO CONTROLE\n\n" +
+    JSON.stringify(
+        controle,
+        null,
+        2
+    )
+);
+                
 
                 const controle =
                     controleAtual.exists()
