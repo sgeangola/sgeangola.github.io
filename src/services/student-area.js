@@ -463,141 +463,139 @@ window.verBoletim = function () {
 
 window.verNotas = async function () {
 
-    console.log(
-        "📊 A carregar notas do aluno..."
-    );
-
-
-    /* =================================================
-       VERIFICAR DADOS DO ALUNO
-    ================================================= */
-
-    const turmaId =
-        String(
-            aluno.turmaId || ""
-        ).trim();
-
-
-    const numeroAluno =
-        String(
-            aluno.numero || ""
-        ).trim();
-
-
-    const nomeAluno =
-        String(
-            aluno.nome || ""
-        ).trim();
-
-
-    console.log(
-        "ALUNO:",
-        aluno
-    );
-
-    console.log(
-        "TURMA ID:",
-        turmaId
-    );
-
-    console.log(
-        "NÚMERO:",
-        numeroAluno
-    );
-
-    console.log(
-        "NOME:",
-        nomeAluno
-    );
-
-
-    if (!turmaId) {
-
-        alert(
-            "Não foi possível identificar a turma deste aluno."
-        );
-
-        return;
-
-    }
-
-
     try {
 
-        /* =============================================
-           BUSCAR COLEÇÃO DE NOTAS
-        ============================================= */
+        const turmaId =
+            String(
+                aluno.turmaId || ""
+            ).trim();
 
-        const notasRef =
-            collection(
-                db,
-                "notas"
-            );
+        const numeroAluno =
+            String(
+                aluno.numero || ""
+            ).trim();
+
+        const nomeAluno =
+            String(
+                aluno.nome || ""
+            ).trim();
 
 
-        const snapshot =
+        alert(
+            "DEBUG DO ALUNO\n\n" +
+
+            "Nome: " +
+            nomeAluno +
+
+            "\n\nTurma ID:\n" +
+            turmaId +
+
+            "\n\nNúmero:\n" +
+            numeroAluno
+        );
+
+
+        const notasSnapshot =
             await getDocs(
-                notasRef
-            );
-
-alert(
-    "DEBUG NOTAS\n\n" +
-
-    "Aluno: " +
-    (aluno.nome || "—") +
-
-    "\n\nTurma ID: " +
-    (aluno.turmaId || "—") +
-
-    "\n\nNúmero: " +
-    (aluno.numero || "—") +
-
-    "\n\nDocumentos de notas encontrados: " +
-    snapshot.size
-);
-
-       let resumoNotas = "";
-
-snapshot.forEach(
-    documento => {
-
-        const dadosNota =
-            documento.data();
-
-        resumoNotas +=
-            "\n\nDOCUMENTO: " +
-            documento.id +
-
-            "\nTurma ID: " +
-            (
-                dadosNota.turmaId ||
-                "—"
-            ) +
-
-            "\nDisciplina: " +
-            (
-                dadosNota.disciplina ||
-                "—"
-            ) +
-
-            "\nTrimestre: " +
-            (
-                dadosNota.trimestre ||
-                "—"
-            ) +
-
-            "\nAlunos: " +
-            (
-                Array.isArray(
-                    dadosNota.alunos
+                collection(
+                    db,
+                    "notas"
                 )
-                    ? dadosNota.alunos.length
-                    : "não é array"
             );
+
+
+        alert(
+            "Documentos de notas encontrados: " +
+            notasSnapshot.size
+        );
+
+
+        let encontrados = 0;
+
+
+        for (
+            const notaDoc
+            of notasSnapshot.docs
+        ) {
+
+            const dadosNota =
+                notaDoc.data();
+
+
+            const idTurmaNota =
+                String(
+                    dadosNota.turmaId || ""
+                ).trim();
+
+
+            if (
+                idTurmaNota === turmaId
+            ) {
+
+                encontrados++;
+
+
+                const alunos =
+                    Array.isArray(
+                        dadosNota.alunos
+                    )
+                    ? dadosNota.alunos
+                    : [];
+
+
+                alert(
+                    "NOTA ENCONTRADA\n\n" +
+
+                    "Documento:\n" +
+                    notaDoc.id +
+
+                    "\n\nDisciplina:\n" +
+                    (
+                        dadosNota.disciplina ||
+                        "—"
+                    ) +
+
+                    "\n\nTrimestre:\n" +
+                    (
+                        dadosNota.trimestre ||
+                        "—"
+                    ) +
+
+                    "\n\nAlunos no documento: " +
+                    alunos.length
+                );
+
+            }
+
+        }
+
+
+        alert(
+            "RESULTADO FINAL\n\n" +
+
+            "Turma do aluno:\n" +
+            turmaId +
+
+            "\n\nDocumentos da mesma turma: " +
+            encontrados
+        );
+
 
     }
-);
+    catch (error) {
 
+        alert(
+            "ERRO\n\n" +
+            error.message
+        );
+
+        console.error(
+            error
+        );
+
+    }
+
+};
 
 alert(
     "ESTRUTURA DAS NOTAS:" +
