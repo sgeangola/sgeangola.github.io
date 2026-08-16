@@ -482,16 +482,16 @@ window.verNotas = async function () {
 
 
         alert(
-            "DEBUG DO ALUNO\n\n" +
+            "DADOS DO ALUNO\n\n" +
 
-            "Nome: " +
+            "Nome:\n" +
             nomeAluno +
 
-            "\n\nTurma ID:\n" +
-            turmaId +
-
             "\n\nNúmero:\n" +
-            numeroAluno
+            numeroAluno +
+
+            "\n\nTurma ID:\n" +
+            turmaId
         );
 
 
@@ -504,13 +504,9 @@ window.verNotas = async function () {
             );
 
 
-        alert(
-            "Documentos de notas encontrados: " +
-            notasSnapshot.size
-        );
+        let documentosTurma = 0;
 
-
-        let encontrados = 0;
+        let alunoEncontrado = false;
 
 
         for (
@@ -529,41 +525,109 @@ window.verNotas = async function () {
 
 
             if (
-                idTurmaNota === turmaId
+                idTurmaNota !== turmaId
             ) {
 
-                encontrados++;
+                continue;
+
+            }
 
 
-                const alunos =
-                    Array.isArray(
-                        dadosNota.alunos
-                    )
-                    ? dadosNota.alunos
-                    : [];
+            documentosTurma++;
 
 
-                alert(
-                    "NOTA ENCONTRADA\n\n" +
+            const listaAlunos =
+                Array.isArray(
+                    dadosNota.alunos
+                )
+                ? dadosNota.alunos
+                : [];
 
-                    "Documento:\n" +
-                    notaDoc.id +
 
-                    "\n\nDisciplina:\n" +
-                    (
-                        dadosNota.disciplina ||
-                        "—"
-                    ) +
+            let encontrouNumero = false;
 
-                    "\n\nTrimestre:\n" +
-                    (
-                        dadosNota.trimestre ||
-                        "—"
-                    ) +
+            let encontrouNome = false;
 
-                    "\n\nAlunos no documento: " +
-                    alunos.length
-                );
+
+            for (
+                const alunoNota
+                of listaAlunos
+            ) {
+
+                const numeroNota =
+                    String(
+                        alunoNota.numero || ""
+                    ).trim();
+
+
+                const nomeNota =
+                    String(
+                        alunoNota.nome || ""
+                    ).trim();
+
+
+                if (
+                    numeroNota ===
+                    numeroAluno
+                ) {
+
+                    encontrouNumero = true;
+
+                }
+
+
+                if (
+                    nomeNota ===
+                    nomeAluno
+                ) {
+
+                    encontrouNome = true;
+
+                }
+
+            }
+
+
+            alert(
+                "DOCUMENTO DE NOTAS\n\n" +
+
+                "Disciplina:\n" +
+                (
+                    dadosNota.disciplina ||
+                    "—"
+                ) +
+
+                "\n\nTrimestre:\n" +
+                (
+                    dadosNota.trimestre ||
+                    "—"
+                ) +
+
+                "\n\nQuantidade de alunos:\n" +
+                listaAlunos.length +
+
+                "\n\nNúmero do aluno encontrado:\n" +
+                (
+                    encontrouNumero
+                        ? "SIM ✅"
+                        : "NÃO ❌"
+                ) +
+
+                "\n\nNome do aluno encontrado:\n" +
+                (
+                    encontrouNome
+                        ? "SIM ✅"
+                        : "NÃO ❌"
+                )
+            );
+
+
+            if (
+                encontrouNumero ||
+                encontrouNome
+            ) {
+
+                alunoEncontrado = true;
 
             }
 
@@ -573,11 +637,15 @@ window.verNotas = async function () {
         alert(
             "RESULTADO FINAL\n\n" +
 
-            "Turma do aluno:\n" +
-            turmaId +
+            "Documentos da turma:\n" +
+            documentosTurma +
 
-            "\n\nDocumentos da mesma turma: " +
-            encontrados
+            "\n\nAluno encontrado nas notas:\n" +
+            (
+                alunoEncontrado
+                    ? "SIM ✅"
+                    : "NÃO ❌"
+            )
         );
 
 
