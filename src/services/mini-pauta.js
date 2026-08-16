@@ -1043,7 +1043,16 @@ async function carregarAlunos() {
             alunosRef
         );
 
+    alert(
+    "DEBUG ALUNOS DA TURMA\n\n" +
 
+    "Turma ID:\n" +
+    turmaId +
+
+    "\n\nQuantidade de alunos encontrados:\n" +
+    resultado.size
+);
+    
     const alunos = [];
 
 
@@ -1647,17 +1656,6 @@ alert(
     notasFinais.length
 );
 
-
-// -------------------------------------
-// GUARDAR
-// -------------------------------------
-
-await setDoc(
-
-    notaRef,
-
-    {
-        
                 // -------------------------------------
                 // GUARDAR
                 // -------------------------------------
