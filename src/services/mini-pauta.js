@@ -205,9 +205,14 @@ const trimestreNormalizado =
         .replace("Trimestre", "")
         .trim();
 
-const idLancamento =
-    `${turmaId}_${disciplina}_${trimestreNormalizado}`;
+const disciplinaNormalizada =
+    String(disciplina || "")
+        .replace(/\//g, "-")
+        .replace(/\s+/g, "_");
 
+
+const idLancamento =
+    `${turmaId}_${disciplinaNormalizada}_${trimestreNormalizado}`;
 
 // =====================================================
 // REFERÊNCIA DA MINI-PAUTA
@@ -308,6 +313,7 @@ async function carregarEnsino() {
 
 // =====================================================
 // CARREGAR CONTROLE DA MINI-PAUTA
+// MESMO ID USADO PELO ADMINISTRADOR
 // =====================================================
 
 async function carregarControle() {
@@ -319,137 +325,64 @@ async function carregarControle() {
 
 
         // =================================================
-        // 1. PROCURAR NO DOCUMENTO PRINCIPAL "notas"
+        // CRIAR EXATAMENTE O MESMO ID DO ADMINISTRADOR
         // =================================================
 
-        const possiveisIds = [
-
-            // formato atual
-            `${turmaId}_${disciplina}_${trimestreNormalizado}`,
-
-            // caso o trimestre esteja como "1"
-            `${turmaId}_${disciplina}_${String(trimestreNormalizado)}`,
-
-            // compatibilidade com formato antigo
-            `${escolaId}_${turmaId}_${disciplina}_${trimestreNormalizado}`
-
-        ];
+        const disciplinaNormalizada =
+            String(disciplina || "")
+                .replace(/\//g, "-")
+                .replace(/\s+/g, "_");
 
 
-        let dadosEncontrados = null;
+        const idControle =
+            turmaId +
+            "_" +
+            disciplinaNormalizada +
+            "_" +
+            trimestreNormalizado;
 
 
-        for (
-            const id of possiveisIds
-        ) {
+        console.log(
+            "🔎 MINI-PAUTA — ID PROCURADO:",
+            idControle
+        );
 
-            console.log(
-                "🔎 Procurando lançamento:",
-                id
+
+        // =================================================
+        // PROCURAR NO DOCUMENTO "notas"
+        // =================================================
+
+        const referencia =
+            doc(
+                db,
+                "notas",
+                idControle
             );
 
 
-            const referencia =
-                doc(
-                    db,
-                    "notas",
-                    id
-                );
+        const snapshot =
+            await getDoc(
+                referencia
+            );
 
 
-            const snapshot =
-                await getDoc(
-                    referencia
-                );
-
-
-            if (
-                snapshot.exists()
-            ) {
-
-                const dados =
-                    snapshot.data();
-
-
-                // =========================================
-                // SEGURANÇA DA ESCOLA
-                // =========================================
-
-                if (
-                    dados.escolaId &&
-                    String(
-                        dados.escolaId
-                    ).trim() !==
-                    String(
-                        escolaId
-                    ).trim()
-                ) {
-
-                    console.warn(
-                        "⚠️ Documento pertence a outra escola:",
-                        id
-                    );
-
-                    continue;
-
-                }
-
-
-                dadosEncontrados =
-                    dados;
-
-
-                console.log(
-                    "✅ LANÇAMENTO ENCONTRADO:",
-                    id,
-                    dados
-                );
-
-
-                break;
-
+        console.log(
+            "📋 DOCUMENTO DA MINI-PAUTA:",
+            {
+                id: idControle,
+                existe: snapshot.exists()
             }
-
-        }
+        );
 
 
         // =================================================
-        // 2. SE ENCONTROU NO "notas"
+        // DOCUMENTO NÃO EXISTE
         // =================================================
 
-        if (
-            dadosEncontrados
-        ) {
+        if (!snapshot.exists()) {
 
-            sistemaAberto =
-                dadosEncontrados.abertoGeral === true;
-
-
-            controleAlunos =
-                dadosEncontrados.alunosAbertos ||
-                {};
-
-
-            // Compatibilidade
-            if (
-                !Object.keys(
-                    controleAlunos
-                ).length &&
-                dadosEncontrados.alunos
-            ) {
-
-                controleAlunos =
-                    dadosEncontrados.alunos;
-
-            }
-
-
-            console.log(
-                "🔐 RESULTADO DO CONTROLE:",
-                {
-                    sistemaAberto,
-                    controleAlunos
-                }
+            console.warn(
+                "⚠️ Documento de lançamento ainda não existe."
             );
 
 
@@ -458,6 +391,107 @@ async function carregarControle() {
             return;
 
         }
+
+
+        // =================================================
+        // DADOS
+        // =================================================
+
+        const dados =
+            snapshot.data();
+
+
+        console.log(
+            "📦 DADOS DO LANÇAMENTO:",
+            dados
+        );
+
+
+        // =================================================
+        // SEGURANÇA DA ESCOLA
+        // =================================================
+
+        if (
+            dados.escolaId &&
+            String(dados.escolaId).trim() !==
+            String(escolaId).trim()
+        ) {
+
+            console.error(
+                "❌ O lançamento pertence a outra escola."
+            );
+
+
+            sistemaAberto = false;
+            controleAlunos = {};
+
+
+            atualizarEstadoVisual();
+
+            return;
+
+        }
+
+
+        // =================================================
+        // ESTADO GERAL
+        // =================================================
+
+        sistemaAberto =
+            dados.abertoGeral === true;
+
+
+        // =================================================
+        // CONTROLE INDIVIDUAL
+        // =================================================
+
+        controleAlunos =
+            dados.alunosAbertos ||
+            dados.alunos ||
+            {};
+
+
+        // =================================================
+        // DEBUG
+        // =================================================
+
+        console.log(
+            "🔐 ESTADO RECEBIDO PELO PROFESSOR:",
+            {
+                id: idControle,
+                abertoGeral: dados.abertoGeral,
+                sistemaAberto: sistemaAberto,
+                alunosAbertos: controleAlunos
+            }
+        );
+
+
+        // =================================================
+        // ATUALIZAR INTERFACE
+        // =================================================
+
+        atualizarEstadoVisual();
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO AO CARREGAR CONTROLE:",
+            erro
+        );
+
+
+        sistemaAberto = false;
+
+        controleAlunos = {};
+
+
+        atualizarEstadoVisual();
+
+    }
+
+}
 
 
         // =================================================
