@@ -1673,6 +1673,12 @@ async function obterDadosMiniPauta() {
             dados.trimestre ||
             "—",
 
+        ensino:
+    notas.ensino ||
+    dados.ensino ||
+    localStorage.getItem("ensino") ||
+    "",
+        
         alunos:
             Array.isArray(
                 notas.alunos
@@ -1696,6 +1702,387 @@ function construirMiniPautaHTML(
     const alunos =
         dados.alunos || [];
 
+    // =====================================================
+// ESTATÍSTICAS DA MINI-PAUTA
+// =====================================================
+
+const ensino =
+    String(
+        dados.ensino || ""
+    ).trim();
+
+const primeiroCiclo =
+    ensino.toLowerCase().includes("primeirociclo") ||
+    ensino.toLowerCase().includes("primeiro ciclo");
+
+
+// -----------------------------------------------------
+// ESCALA DE CLASSIFICAÇÃO
+// -----------------------------------------------------
+
+const classificacoes =
+    primeiroCiclo
+
+        ? [
+            {
+                nome: "Mau",
+                min: 0,
+                max: 4
+            },
+            {
+                nome: "Medíocre",
+                min: 5,
+                max: 9
+            },
+            {
+                nome: "Suficiente",
+                min: 10,
+                max: 13
+            },
+            {
+                nome: "Bom",
+                min: 14,
+                max: 16
+            },
+            {
+                nome: "Muito Bom",
+                min: 17,
+                max: 20
+            }
+        ]
+
+        : [
+            {
+                nome: "Mau",
+                min: 0,
+                max: 2
+            },
+            {
+                nome: "Medíocre",
+                min: 3,
+                max: 4
+            },
+            {
+                nome: "Suficiente",
+                min: 5,
+                max: 6
+            },
+            {
+                nome: "Bom",
+                min: 7,
+                max: 8
+            },
+            {
+                nome: "Muito Bom",
+                min: 9,
+                max: 10
+            }
+        ];
+
+
+// -----------------------------------------------------
+// CRIAR CONTADORES
+// -----------------------------------------------------
+
+const estatisticas =
+    classificacoes.map(
+        item => ({
+            ...item,
+            M: 0,
+            F: 0,
+            total: 0
+        })
+    );
+
+
+// -----------------------------------------------------
+// CONTAR ALUNOS
+// -----------------------------------------------------
+
+alunos.forEach(
+    aluno => {
+
+        const mf =
+            Number(aluno.MF);
+
+        if (
+            !Number.isFinite(mf)
+        ) {
+            return;
+        }
+
+
+        const sexo =
+            String(
+                aluno.sexo || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const classificacao =
+            estatisticas.find(
+                item =>
+                    mf >= item.min &&
+                    mf <= item.max
+            );
+
+
+        if (!classificacao) {
+            return;
+        }
+
+
+        if (
+            sexo === "M" ||
+            sexo === "MASCULINO"
+        ) {
+
+            classificacao.M++;
+
+        }
+
+
+        else if (
+            sexo === "F" ||
+            sexo === "FEMININO"
+        ) {
+
+            classificacao.F++;
+
+        }
+
+
+        classificacao.total++;
+
+    }
+);
+
+
+// -----------------------------------------------------
+// TOTAIS
+// -----------------------------------------------------
+
+const totalM =
+    estatisticas.reduce(
+        (soma, item) =>
+            soma + item.M,
+        0
+    );
+
+
+const totalF =
+    estatisticas.reduce(
+        (soma, item) =>
+            soma + item.F,
+        0
+    );
+
+
+const totalAlunos =
+    estatisticas.reduce(
+        (soma, item) =>
+            soma + item.total,
+        0
+    );
+
+
+// -----------------------------------------------------
+// BOM APROVEITAMENTO
+// SUFICIENTE + BOM + MUITO BOM
+// -----------------------------------------------------
+
+const bomAproveitamento =
+    estatisticas
+        .filter(
+            item =>
+                item.nome === "Suficiente" ||
+                item.nome === "Bom" ||
+                item.nome === "Muito Bom"
+        )
+        .reduce(
+            (soma, item) =>
+                soma + item.total,
+            0
+        );
+
+
+const semBomAproveitamento =
+    estatisticas
+        .filter(
+            item =>
+                item.nome === "Mau" ||
+                item.nome === "Medíocre"
+        )
+        .reduce(
+            (soma, item) =>
+                soma + item.total,
+            0
+        );
+
+
+const percentualBom =
+    totalAlunos > 0
+        ? (
+            bomAproveitamento /
+            totalAlunos *
+            100
+        ).toFixed(1)
+        : "0.0";
+
+
+const percentualSemBom =
+    totalAlunos > 0
+        ? (
+            semBomAproveitamento /
+            totalAlunos *
+            100
+        ).toFixed(1)
+        : "0.0";
+
+
+// -----------------------------------------------------
+// LINHAS DA TABELA ESTATÍSTICA
+// -----------------------------------------------------
+
+let linhasEstatisticas =
+    "";
+
+
+estatisticas.forEach(
+    item => {
+
+        linhasEstatisticas += `
+
+            <tr>
+
+                <td>
+                    ${item.nome}
+                    (${item.min}-${item.max})
+                </td>
+
+                <td>
+                    ${item.M}
+                </td>
+
+                <td>
+                    ${item.F}
+                </td>
+
+                <td>
+                    ${item.total}
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+);
+
+
+linhasEstatisticas += `
+
+    <tr class="linha-total">
+
+        <td>
+            <strong>Total</strong>
+        </td>
+
+        <td>
+            <strong>${totalM}</strong>
+        </td>
+
+        <td>
+            <strong>${totalF}</strong>
+        </td>
+
+        <td>
+            <strong>${totalAlunos}</strong>
+        </td>
+
+    </tr>
+
+`;
+
+
+// -----------------------------------------------------
+// TABELA DE ESTATÍSTICAS
+// -----------------------------------------------------
+
+const estatisticasHTML = `
+
+    <div class="estatisticas">
+
+        <h3>
+            Estatística do Aproveitamento
+        </h3>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Classificação
+                    </th>
+
+                    <th>
+                        M
+                    </th>
+
+                    <th>
+                        F
+                    </th>
+
+                    <th>
+                        Total
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                ${linhasEstatisticas}
+
+            </tbody>
+
+        </table>
+
+
+        <div class="resumo-aproveitamento">
+
+            <div>
+                <strong>
+                    Bom aproveitamento:
+                </strong>
+
+                ${bomAproveitamento}
+                aluno(s)
+                — ${percentualBom}%
+            </div>
+
+
+            <div>
+                <strong>
+                    Sem bom aproveitamento:
+                </strong>
+
+                ${semBomAproveitamento}
+                aluno(s)
+                — ${percentualSemBom}%
+            </div>
+
+        </div>
+
+    </div>
+
+`;
 
     let linhas =
         "";
@@ -2034,6 +2421,69 @@ td.classificacao{
 
 }
 
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+/* estilos que já existem... */
+
+
+/* COLOCA O CSS DAS ESTATÍSTICAS AQUI */
+
+.estatisticas {
+    margin-top: 25px;
+}
+
+.estatisticas h3 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.estatisticas table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.estatisticas th,
+.estatisticas td {
+    border: 1px solid #222;
+    padding: 6px;
+    text-align: center;
+}
+
+.estatisticas th {
+    background: #e5e7eb;
+}
+
+.estatisticas .linha-total {
+    background: #f1f5f9;
+}
+
+.resumo-aproveitamento {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.resumo-aproveitamento div {
+    border: 1px solid #aaa;
+    padding: 8px;
+}
+
+@media(max-width:600px) {
+
+    .resumo-aproveitamento {
+        grid-template-columns: 1fr;
+    }
+
+}
 
 </style>
 
@@ -2160,12 +2610,19 @@ td.classificacao{
 
         </tbody>
 
-    </table>
+   </table>
 
 
-    <!-- =========================================
-         ASSINATURA
-    ========================================== -->
+<!-- =========================================
+     ESTATÍSTICA
+========================================= -->
+
+${estatisticasHTML}
+
+
+<!-- =========================================
+     ASSINATURA
+========================================= -->
 
     <div class="assinatura">
 
