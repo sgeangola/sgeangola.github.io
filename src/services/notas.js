@@ -1194,6 +1194,88 @@ function botaoAcaoLancamento() {
 
 }
 
+// =====================================================
+// ATUALIZAR BOTÃO PRINCIPAL DO SISTEMA
+// =====================================================
+
+function atualizarBotaoSistema() {
+
+    if (!botaoSistema || !estadoSistema) {
+        return;
+    }
+
+
+    // ---------------------------------------------
+    // NENHUM LANÇAMENTO SELECIONADO
+    // ---------------------------------------------
+
+    if (!lancamentoSelecionado) {
+
+        estadoSistema.textContent =
+            "🔴 Fechado";
+
+        estadoSistema.className =
+            "sistema-fechado";
+
+        botaoSistema.textContent =
+            "🔓 Abrir sistema";
+
+        botaoSistema.className =
+            "botao-sistema botao-abrir";
+
+        return;
+    }
+
+
+    // ---------------------------------------------
+    // VERIFICAR ESTADO
+    // ---------------------------------------------
+
+    const aberto =
+        lancamentoSelecionado.estado?.abertoGeral === true;
+
+
+    // ---------------------------------------------
+    // ABERTO
+    // ---------------------------------------------
+
+    if (aberto) {
+
+        estadoSistema.textContent =
+            "🟢 Aberto";
+
+        estadoSistema.className =
+            "sistema-aberto";
+
+        botaoSistema.textContent =
+            "🔒 Fechar sistema";
+
+        botaoSistema.className =
+            "botao-sistema botao-fechar";
+
+    }
+
+    // ---------------------------------------------
+    // FECHADO
+    // ---------------------------------------------
+
+    else {
+
+        estadoSistema.textContent =
+            "🔴 Fechado";
+
+        estadoSistema.className =
+            "sistema-fechado";
+
+        botaoSistema.textContent =
+            "🔓 Abrir sistema";
+
+        botaoSistema.className =
+            "botao-sistema botao-abrir";
+
+    }
+
+}
 
 // =====================================================
 // BOTÃO PRINCIPAL
