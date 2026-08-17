@@ -1500,8 +1500,9 @@ botaoSistema?.addEventListener(
 // ALTERNAR LANÇAMENTO
 // =====================================================
 
-window.alternarLancamento =
-    async function () {
+window.alternarLancamento = async function () {
+
+    alert("🔥 CLIQUE NO BOTÃO FOI DETECTADO!");
 
         if (
             !lancamentoSelecionado
