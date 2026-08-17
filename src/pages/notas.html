@@ -10,9 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Gestão de Notas — Administrador
-    </title>
+    <title>Gestão de Notas — Administrador</title>
 
     <link
         rel="stylesheet"
@@ -32,14 +30,18 @@
             color: #1e293b;
         }
 
+        /* =====================================================
+           ESTRUTURA PRINCIPAL
+        ===================================================== */
+
         .main {
             width: 100%;
             padding: 25px;
         }
 
-        /* =========================================
+        /* =====================================================
            CABEÇALHO
-        ========================================= */
+        ===================================================== */
 
         .cabecalho {
             background: linear-gradient(
@@ -49,11 +51,8 @@
             );
 
             color: white;
-
             padding: 25px;
-
             border-radius: 18px;
-
             margin-bottom: 20px;
 
             box-shadow:
@@ -71,17 +70,14 @@
             opacity: .9;
         }
 
-        /* =========================================
-           CARTÃO
-        ========================================= */
+        /* =====================================================
+           CARTÕES
+        ===================================================== */
 
         .section {
             background: white;
-
             padding: 20px;
-
             border-radius: 16px;
-
             margin-bottom: 20px;
 
             box-shadow:
@@ -91,15 +87,13 @@
 
         .section h2 {
             margin-top: 0;
-
             color: #1e3a8a;
-
             font-size: 20px;
         }
 
-        /* =========================================
+        /* =====================================================
            FILTROS
-        ========================================= */
+        ===================================================== */
 
         .filtros {
             display: grid;
@@ -115,21 +109,17 @@
 
         .campo {
             display: flex;
-
             flex-direction: column;
-
             gap: 7px;
         }
 
         .campo label {
             font-weight: bold;
-
             color: #1e3a8a;
         }
 
         select {
             width: 100%;
-
             padding: 12px;
 
             border:
@@ -141,28 +131,29 @@
             background: white;
 
             font-size: 15px;
-
             color: #1e293b;
         }
 
         select:focus {
             outline: none;
 
-            border-color: #2563eb;
+            border-color:
+                #2563eb;
 
             box-shadow:
                 0 0 0 2px
                 rgba(37,99,235,.12);
         }
 
-        /* =========================================
+        /* =====================================================
            ESTADO DO SISTEMA
-        ========================================= */
+        ===================================================== */
 
         .estado-sistema {
             display: flex;
 
-            justify-content: space-between;
+            justify-content:
+                space-between;
 
             align-items: center;
 
@@ -185,13 +176,11 @@
 
         .sistema-aberto {
             color: #15803d;
-
             font-weight: bold;
         }
 
         .sistema-fechado {
             color: #dc2626;
-
             font-weight: bold;
         }
 
@@ -200,7 +189,8 @@
 
             border-radius: 9px;
 
-            padding: 11px 18px;
+            padding:
+                11px 18px;
 
             cursor: pointer;
 
@@ -217,27 +207,23 @@
             background: #dc2626;
         }
 
-        /* =========================================
+        /* =====================================================
            TABELA
-        ========================================= */
+        ===================================================== */
 
         .tabela-container {
             width: 100%;
-
             overflow-x: auto;
         }
 
         table {
             width: 100%;
-
             min-width: 850px;
-
             border-collapse: collapse;
         }
 
         th {
             background: #1e3a8a;
-
             color: white;
 
             padding: 11px;
@@ -261,54 +247,20 @@
 
         td.nome {
             text-align: left;
-
             font-weight: bold;
         }
 
-        /* =========================================
-           ESTADOS
-        ========================================= */
-
-        .estado-nota {
-            display: inline-block;
-
-            padding: 5px 9px;
-
-            border-radius: 20px;
-
-            font-size: 12px;
-
-            font-weight: bold;
-        }
-
-        .pendente {
-            background: #fef3c7;
-
-            color: #92400e;
-        }
-
-        .lancado {
-            background: #dcfce7;
-
-            color: #166534;
-        }
-
-        .fechado {
-            background: #ede9fe;
-
-            color: #6d28d9;
-        }
-
-        /* =========================================
-           BOTÃO CONTROLAR
-        ========================================= */
+        /* =====================================================
+           BOTÕES
+        ===================================================== */
 
         .botao-controlar {
             border: 0;
 
             border-radius: 7px;
 
-            padding: 8px 12px;
+            padding:
+                8px 12px;
 
             background: #2563eb;
 
@@ -323,9 +275,9 @@
             background: #1d4ed8;
         }
 
-        /* =========================================
+        /* =====================================================
            MENSAGENS
-        ========================================= */
+        ===================================================== */
 
         .mensagem {
             padding: 15px;
@@ -345,38 +297,34 @@
 
         .mensagem.erro {
             background: #fef2f2;
-
             color: #b91c1c;
         }
 
         .mensagem.sucesso {
             background: #f0fdf4;
-
             color: #166534;
         }
 
         .mensagem.aviso {
             background: #fffbeb;
-
             color: #92400e;
         }
 
         .carregando {
             text-align: center;
-
             padding: 25px;
-
             color: #64748b;
         }
 
-        /* =========================================
+        /* =====================================================
            RESPONSIVO
-        ========================================= */
+        ===================================================== */
 
         @media(max-width: 900px) {
 
             .filtros {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns:
+                    1fr 1fr;
             }
 
         }
@@ -396,7 +344,8 @@
             }
 
             .filtros {
-                grid-template-columns: 1fr;
+                grid-template-columns:
+                    1fr;
             }
 
         }
@@ -409,12 +358,17 @@
 <body>
 
 
+<!-- =====================================================
+     CONTEÚDO PRINCIPAL
+     A BARRA LATERAL É CARREGADA PELO DASHBOARD
+===================================================== -->
+
 <div class="main">
 
 
-    <!-- =========================================
+    <!-- =================================================
          CABEÇALHO
-    ========================================== -->
+    ================================================== -->
 
     <div class="cabecalho">
 
@@ -430,10 +384,9 @@
     </div>
 
 
-
-    <!-- =========================================
+    <!-- =================================================
          CONTROLO DO SISTEMA
-    ========================================== -->
+    ================================================== -->
 
     <div class="section">
 
@@ -477,10 +430,9 @@
     </div>
 
 
-
-    <!-- =========================================
+    <!-- =================================================
          FILTROS
-    ========================================== -->
+    ================================================== -->
 
     <div class="section">
 
@@ -503,9 +455,7 @@
             <div class="campo">
 
                 <label for="filtroProfessor">
-
                     Professor
-
                 </label>
 
 
@@ -514,9 +464,7 @@
                 >
 
                     <option value="">
-
                         Selecionar professor
-
                     </option>
 
                 </select>
@@ -524,15 +472,12 @@
             </div>
 
 
-
             <!-- CLASSE -->
 
             <div class="campo">
 
                 <label for="filtroClasse">
-
                     Classe
-
                 </label>
 
 
@@ -542,10 +487,8 @@
                 >
 
                     <option value="">
-
                         Primeiro selecione
                         o professor
-
                     </option>
 
                 </select>
@@ -553,15 +496,12 @@
             </div>
 
 
-
             <!-- TURMA -->
 
             <div class="campo">
 
                 <label for="filtroTurma">
-
                     Turma
-
                 </label>
 
 
@@ -571,9 +511,7 @@
                 >
 
                     <option value="">
-
                         Selecione a classe
-
                     </option>
 
                 </select>
@@ -581,15 +519,12 @@
             </div>
 
 
-
             <!-- DISCIPLINA -->
 
             <div class="campo">
 
                 <label for="filtroDisciplina">
-
                     Disciplina
-
                 </label>
 
 
@@ -599,9 +534,7 @@
                 >
 
                     <option value="">
-
                         Selecione a turma
-
                     </option>
 
                 </select>
@@ -609,15 +542,12 @@
             </div>
 
 
-
             <!-- TRIMESTRE -->
 
             <div class="campo">
 
                 <label for="filtroTrimestre">
-
                     Trimestre
-
                 </label>
 
 
@@ -626,30 +556,19 @@
                 >
 
                     <option value="">
-
                         Todos os trimestres
-
                     </option>
-
 
                     <option value="1">
-
                         1.º Trimestre
-
                     </option>
-
 
                     <option value="2">
-
                         2.º Trimestre
-
                     </option>
 
-
                     <option value="3">
-
                         3.º Trimestre
-
                     </option>
 
                 </select>
@@ -662,10 +581,9 @@
     </div>
 
 
-
-    <!-- =========================================
-         MINI-PAUTAS / LANÇAMENTOS
-    ========================================== -->
+    <!-- =================================================
+         LANÇAMENTOS
+    ================================================== -->
 
     <div class="section">
 
@@ -676,7 +594,9 @@
 
         <div class="tabela-container">
 
+
             <table>
+
 
                 <thead>
 
@@ -728,10 +648,8 @@
                             class="carregando"
                         >
 
-                            ⏳
-                            Selecione um professor
-                            para visualizar
-                            os lançamentos.
+                            ⏳ Selecione um professor
+                            para visualizar os lançamentos.
 
                         </td>
 
@@ -739,7 +657,9 @@
 
                 </tbody>
 
+
             </table>
+
 
         </div>
 
@@ -749,18 +669,16 @@
 </div>
 
 
-
-<!-- =========================================
+<!-- =====================================================
      JAVASCRIPT
-========================================== -->
+====================================================== -->
 
 <script
     type="module"
     src="../services/notas.js?v=100">
-
-    </script>
+</script>
 
 
 </body>
 
-    </html>
+</html>
