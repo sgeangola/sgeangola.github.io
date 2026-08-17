@@ -469,6 +469,15 @@ async function carregarControle() {
                 controleRef
             );
 
+        alert(
+    "DEBUG ABERTURA DA MINI-PAUTA\n\n" +
+
+    "ID:\n" +
+    idLancamento +
+
+    "\n\nDocumento existe:\n" +
+    controleSnap.exists()
+);
 
         if (
             controleSnap.exists()
@@ -477,6 +486,14 @@ async function carregarControle() {
             const dados =
                 controleSnap.data();
 
+            alert(
+    "DADOS DO CONTROLE\n\n" +
+    JSON.stringify(
+        dados,
+        null,
+        2
+    )
+);
 
             console.log(
                 "🔐 CONTROLE MINI-PAUTA ENCONTRADO:",
