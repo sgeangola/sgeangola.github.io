@@ -1,9 +1,7 @@
 // =====================================================
 // MINI-PAUTA.JS
-// SGE
+// SGE ANGOLA
 // Sistema de lançamento de notas
-// Controle geral + controle individual
-// Separação por escola
 // =====================================================
 
 alert("MINI-PAUTA.JS CARREGADO ✅");
@@ -21,66 +19,28 @@ import {
 
 
 // =====================================================
-// DADOS DA ESCOLA
+// ESCOLA
 // =====================================================
 
 let escolaId =
-    sessionStorage.getItem("escolaId");
-
-
-// =====================================================
-// SE NÃO EXISTIR NA SESSÃO,
-// TENTAR NO LOCALSTORAGE
-// =====================================================
-
-if (!escolaId) {
-
-    escolaId =
-        localStorage.getItem("escolaId");
-
-}
-
-
-// =====================================================
-// LIMPAR
-// =====================================================
+    sessionStorage.getItem("escolaId") ||
+    localStorage.getItem("escolaId") ||
+    "";
 
 escolaId =
-    escolaId
-        ? String(escolaId).trim()
-        : "";
+    String(escolaId).trim();
 
-
-// =====================================================
-// DEBUG
-// =====================================================
 
 console.log(
-    "🏫 escolaId encontrado na Mini-Pauta:",
+    "🏫 escolaId:",
     escolaId
 );
 
-console.log(
-    "📦 sessionStorage:",
-    sessionStorage.getItem("escolaId")
-);
-
-console.log(
-    "💾 localStorage:",
-    localStorage.getItem("escolaId")
-);
-
-
-// =====================================================
-// VERIFICAR
-// =====================================================
 
 if (!escolaId) {
 
     alert(
-        "❌ ESCOLA NÃO IDENTIFICADA\n\n" +
-        "A Mini-Pauta foi aberta, mas o ID da escola " +
-        "não foi enviado para esta página."
+        "❌ Escola não identificada."
     );
 
     throw new Error(
@@ -98,7 +58,7 @@ const turmaId =
     localStorage.getItem("turmaId");
 
 const turmaNome =
-    localStorage.getItem("turmaNome");
+    localStorage.getItem("turmaNome") || "";
 
 const disciplina =
     localStorage.getItem("disciplina");
@@ -118,7 +78,7 @@ if (
     );
 
     throw new Error(
-        "turmaId, disciplina ou trimestre não encontrado."
+        "turmaId, disciplina ou trimestre não encontrados."
     );
 
 }
@@ -160,6 +120,135 @@ let sistemaAberto =
 let pautaExiste =
     false;
 
+let alunos =
+    [];
+
+
+// =====================================================
+// NORMALIZAR TRIMESTRE
+// =====================================================
+
+const trimestreNormalizado =
+    String(trimestre || "")
+        .replace("º", "")
+        .replace("°", "")
+        .replace("ª", "")
+        .replace(" ", "")
+        .replace("Trimestre", "")
+        .trim();
+
+
+// =====================================================
+// NORMALIZAR DISCIPLINA
+// =====================================================
+
+const disciplinaNormalizada =
+    String(disciplina || "")
+        .replace(/\//g, "-")
+        .replace(/\s+/g, "_")
+        .trim();
+
+
+// =====================================================
+// ID ÚNICO
+// MESMO PADRÃO DO NOTAS.JS
+// =====================================================
+
+const idLancamento =
+    `${turmaId}_${disciplinaNormalizada}_${trimestreNormalizado}`;
+
+
+console.log(
+    "======================================"
+);
+
+console.log(
+    "📋 MINI-PAUTA"
+);
+
+console.log(
+    "Turma:",
+    turmaNome
+);
+
+console.log(
+    "Turma ID:",
+    turmaId
+);
+
+console.log(
+    "Disciplina:",
+    disciplina
+);
+
+console.log(
+    "Disciplina normalizada:",
+    disciplinaNormalizada
+);
+
+console.log(
+    "Trimestre:",
+    trimestreNormalizado
+);
+
+console.log(
+    "ID lançamento:",
+    idLancamento
+);
+
+console.log(
+    "======================================"
+);
+
+
+// =====================================================
+// REFERÊNCIA DAS NOTAS
+// =====================================================
+
+const notaRef =
+    doc(
+        db,
+        "notas",
+        idLancamento
+    );
+
+
+// =====================================================
+// PROFESSOR LOGADO
+// =====================================================
+
+function obterProfessorLogado() {
+
+    try {
+
+        const dados =
+            localStorage.getItem(
+                "professorLogado"
+            );
+
+        if (!dados) {
+
+            return null;
+
+        }
+
+        return JSON.parse(dados);
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao ler professor:",
+            erro
+        );
+
+        return null;
+
+    }
+
+}
+
 
 // =====================================================
 // INFORMAÇÕES
@@ -173,7 +262,7 @@ if (info) {
 
         Disciplina: ${disciplina || "—"}<br>
 
-        Trimestre: ${trimestre}º
+        Trimestre: ${trimestreNormalizado}º
 
     `;
 
@@ -181,101 +270,7 @@ if (info) {
 
 
 // =====================================================
-// ID ÚNICO DA MINI-PAUTA
-// =====================================================
-//
-// Agora a escola também faz parte do ID.
-//
-// Assim:
-//
-// Escola A + Turma 7A + Matemática + 1
-//
-// nunca será confundida com:
-//
-// Escola B + Turma 7A + Matemática + 1
-//
-// =====================================================
-
-const trimestreNormalizado =
-    String(trimestre || "")
-        .replace("º", "")
-        .replace("°", "")
-        .replace("ª", "")
-        .replace(" ", "")
-        .replace("Trimestre", "")
-        .trim();
-
-const disciplinaNormalizada =
-    String(disciplina || "")
-        .replace(/\//g, "-")
-        .replace(/\s+/g, "_");
-
-
-const idLancamento =
-    `${turmaId}_${disciplinaNormalizada}_${trimestreNormalizado}`;
-
-// =====================================================
-// REFERÊNCIA DA MINI-PAUTA
-// =====================================================
-
-const notaRef =
-    doc(
-        db,
-        "notas",
-        idLancamento
-    );
-
-// =====================================================
-// REFERÊNCIA DO CONTROLE
-// =====================================================
-//
-// Este documento controla:
-//
-// sistemaAberto
-//
-// e a abertura individual dos alunos.
-//
-// =====================================================
-
-const controleRef =
-    doc(
-        db,
-        "controlesMiniPautas",
-        idLancamento
-    );
-
-
-// =====================================================
-// PROFESSOR LOGADO
-// =====================================================
-
-function obterProfessorLogado() {
-
-    try {
-
-        return JSON.parse(
-            localStorage.getItem(
-                "professorLogado"
-            )
-        ) || null;
-
-    }
-    catch (erro) {
-
-        console.error(
-            "Erro ao ler professor:",
-            erro
-        );
-
-        return null;
-
-    }
-
-}
-
-
-// =====================================================
-// ENSINO
+// CARREGAR ENSINO
 // =====================================================
 
 async function carregarEnsino() {
@@ -294,9 +289,7 @@ async function carregarEnsino() {
         );
 
 
-    if (
-        turmaSnap.exists()
-    ) {
+    if (turmaSnap.exists()) {
 
         const dados =
             turmaSnap.data();
@@ -308,55 +301,127 @@ async function carregarEnsino() {
 
     }
 
+
+    console.log(
+        "📚 Ensino:",
+        ensino
+    );
+
 }
 
 
 // =====================================================
-// CARREGAR CONTROLE DA MINI-PAUTA
-// MESMO ID USADO PELO ADMINISTRADOR
+// CARREGAR NOTAS EXISTENTES
+// =====================================================
+
+async function carregarNotas() {
+
+    notasGuardadas = {};
+
+    pautaExiste = false;
+
+
+    const snapshot =
+        await getDoc(
+            notaRef
+        );
+
+
+    console.log(
+        "📒 DOCUMENTO DAS NOTAS:",
+        {
+            id: idLancamento,
+            existe: snapshot.exists()
+        }
+    );
+
+
+    if (!snapshot.exists()) {
+
+        return;
+
+    }
+
+
+    const dados =
+        snapshot.data();
+
+
+    // ---------------------------------------------
+    // SEGURANÇA DA ESCOLA
+    // ---------------------------------------------
+
+    if (
+        dados.escolaId &&
+        String(dados.escolaId).trim() !==
+        String(escolaId).trim()
+    ) {
+
+        throw new Error(
+            "Esta Mini-Pauta pertence a outra escola."
+        );
+
+    }
+
+
+    pautaExiste = true;
+
+
+    // ---------------------------------------------
+    // NOTAS
+    // ---------------------------------------------
+
+    if (
+        Array.isArray(
+            dados.alunos
+        )
+    ) {
+
+        dados.alunos.forEach(
+            aluno => {
+
+                notasGuardadas[
+                    aluno.numero
+                ] = aluno;
+
+            }
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// CARREGAR CONTROLE
+// LÊ O MESMO DOCUMENTO "notas"
+// USADO PELO ADMINISTRADOR
 // =====================================================
 
 async function carregarControle() {
 
+    sistemaAberto = false;
+
+    controleAlunos = {};
+
+
     try {
 
-        sistemaAberto = false;
-        controleAlunos = {};
-
-
-        // =================================================
-        // CRIAR EXATAMENTE O MESMO ID DO ADMINISTRADOR
-        // =================================================
-
-        const disciplinaNormalizada =
-            String(disciplina || "")
-                .replace(/\//g, "-")
-                .replace(/\s+/g, "_");
-
-
-        const idControle =
-            turmaId +
-            "_" +
-            disciplinaNormalizada +
-            "_" +
-            trimestreNormalizado;
-
-
         console.log(
-            "🔎 MINI-PAUTA — ID PROCURADO:",
-            idControle
+            "🔎 Procurando controle:"
         );
 
+        console.log(
+            "ID:",
+            idLancamento
+        );
 
-        // =================================================
-        // PROCURAR NO DOCUMENTO "notas"
-        // =================================================
 
         const referencia =
             doc(
                 db,
                 "notas",
-                idControle
+                idLancamento
             );
 
 
@@ -367,24 +432,16 @@ async function carregarControle() {
 
 
         console.log(
-            "📋 DOCUMENTO DA MINI-PAUTA:",
-            {
-                id: idControle,
-                existe: snapshot.exists()
-            }
+            "📋 Documento existe:",
+            snapshot.exists()
         );
 
 
-        // =================================================
-        // DOCUMENTO NÃO EXISTE
-        // =================================================
+        // ---------------------------------------------
+        // NÃO EXISTE
+        // ---------------------------------------------
 
         if (!snapshot.exists()) {
-
-            console.warn(
-                "⚠️ Documento de lançamento ainda não existe."
-            );
-
 
             atualizarEstadoVisual();
 
@@ -393,23 +450,19 @@ async function carregarControle() {
         }
 
 
-        // =================================================
-        // DADOS
-        // =================================================
-
         const dados =
             snapshot.data();
 
 
         console.log(
-            "📦 DADOS DO LANÇAMENTO:",
+            "📦 Dados encontrados:",
             dados
         );
 
 
-        // =================================================
+        // ---------------------------------------------
         // SEGURANÇA DA ESCOLA
-        // =================================================
+        // ---------------------------------------------
 
         if (
             dados.escolaId &&
@@ -418,12 +471,8 @@ async function carregarControle() {
         ) {
 
             console.error(
-                "❌ O lançamento pertence a outra escola."
+                "❌ Documento pertence a outra escola."
             );
-
-
-            sistemaAberto = false;
-            controleAlunos = {};
 
 
             atualizarEstadoVisual();
@@ -433,17 +482,17 @@ async function carregarControle() {
         }
 
 
-        // =================================================
-        // ESTADO GERAL
-        // =================================================
+        // ---------------------------------------------
+        // ABERTURA GERAL
+        // ---------------------------------------------
 
         sistemaAberto =
             dados.abertoGeral === true;
 
 
-        // =================================================
-        // CONTROLE INDIVIDUAL
-        // =================================================
+        // ---------------------------------------------
+        // ABERTURA INDIVIDUAL
+        // ---------------------------------------------
 
         controleAlunos =
             dados.alunosAbertos ||
@@ -451,24 +500,16 @@ async function carregarControle() {
             {};
 
 
-        // =================================================
-        // DEBUG
-        // =================================================
-
         console.log(
-            "🔐 ESTADO RECEBIDO PELO PROFESSOR:",
+            "🔐 CONTROLE RECEBIDO:",
             {
-                id: idControle,
+                id: idLancamento,
                 abertoGeral: dados.abertoGeral,
-                sistemaAberto: sistemaAberto,
+                sistemaAberto,
                 alunosAbertos: controleAlunos
             }
         );
 
-
-        // =================================================
-        // ATUALIZAR INTERFACE
-        // =================================================
 
         atualizarEstadoVisual();
 
@@ -494,115 +535,8 @@ async function carregarControle() {
 }
 
 
-        // =================================================
-        // 3. PROCURAR NO CONTROLES-MINIPAUTAS
-        // =================================================
-
-        const controleSnap =
-            await getDoc(
-                controleRef
-            );
-
-        alert(
-    "DEBUG ABERTURA DA MINI-PAUTA\n\n" +
-
-    "ID:\n" +
-    idLancamento +
-
-    "\n\nDocumento existe:\n" +
-    controleSnap.exists()
-);
-
-        if (
-            controleSnap.exists()
-        ) {
-
-            const dados =
-                controleSnap.data();
-
-            alert(
-    "DADOS DO CONTROLE\n\n" +
-    JSON.stringify(
-        dados,
-        null,
-        2
-    )
-);
-
-            console.log(
-                "🔐 CONTROLE MINI-PAUTA ENCONTRADO:",
-                dados
-            );
-
-
-            sistemaAberto =
-                dados.sistemaAberto === true ||
-                dados.abertoGeral === true ||
-                dados.aberto === true;
-
-
-            controleAlunos =
-                dados.alunos ||
-                dados.alunosAbertos ||
-                {};
-
-        }
-
-
-        // =================================================
-        // 4. ATUALIZAR INTERFACE
-        // =================================================
-
-        atualizarEstadoVisual();
-
-
-        console.log(
-            "📊 ESTADO FINAL DA MINI-PAUTA:",
-            {
-                escolaId,
-                turmaId,
-                disciplina,
-                trimestre,
-                trimestreNormalizado,
-                sistemaAberto,
-                controleAlunos
-            }
-        );
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ ERRO AO CARREGAR CONTROLE:",
-            erro
-        );
-
-
-        sistemaAberto =
-            false;
-
-        controleAlunos =
-            {};
-
-
-        atualizarEstadoVisual();
-
-    }
-
-    }
-
 // =====================================================
-// VERIFICAR SE ALUNO PODE SER EDITADO
-// =====================================================
-//
-// Regra:
-//
-// Geral aberto
-//      → todos podem editar
-//
-// Geral fechado
-//      → somente aluno individualmente aberto
-//
+// VERIFICAR SE ALUNO PODE EDITAR
 // =====================================================
 
 function alunoPodeEditar(
@@ -624,17 +558,17 @@ function alunoPodeEditar(
 
 
     // ---------------------------------------------
-    // SISTEMA GERAL FECHADO
+    // CONTROLE PELO ID
     // ---------------------------------------------
 
-    const controle =
+    const controleId =
         controleAlunos?.[
             alunoId
         ];
 
 
     if (
-        controle?.edicaoAberta === true
+        controleId?.edicaoAberta === true
     ) {
 
         return true;
@@ -643,7 +577,7 @@ function alunoPodeEditar(
 
 
     // ---------------------------------------------
-    // COMPATIBILIDADE PELO NÚMERO
+    // CONTROLE PELO NÚMERO
     // ---------------------------------------------
 
     const controleNumero =
@@ -667,17 +601,20 @@ function alunoPodeEditar(
 
 
 // =====================================================
-// ESTADO VISUAL DA PAUTA
+// ATUALIZAR ESTADO VISUAL
 // =====================================================
 
 function atualizarEstadoVisual() {
 
-    if (!estadoPauta)
+    if (!estadoPauta) {
+
         return;
+
+    }
 
 
     if (
-        sistemaAberto
+        sistemaAberto === true
     ) {
 
         estadoPauta.innerHTML =
@@ -686,125 +623,85 @@ function atualizarEstadoVisual() {
         estadoPauta.style.color =
             "green";
 
-        return;
-
     }
 
-
-    // ---------------------------------------------
-    // VERIFICAR SE EXISTEM ALUNOS ABERTOS
-    // ---------------------------------------------
-
-    const existemIndividuais =
-        Object.values(
-            controleAlunos || {}
-        ).some(
-            controle =>
-                controle?.edicaoAberta === true
-        );
-
-
-    if (
-        existemIndividuais
-    ) {
-
-        estadoPauta.innerHTML =
-            "🟡 Sistema fechado — existem alunos autorizados individualmente";
-
-        estadoPauta.style.color =
-            "#d97706";
-
-    }
     else {
 
-        estadoPauta.innerHTML =
-            "🔴 Sistema fechado — lançamento bloqueado";
+        const individuais =
+            Object.values(
+                controleAlunos || {}
+            ).some(
+                item =>
+                    item?.edicaoAberta === true
+            );
 
-        estadoPauta.style.color =
-            "red";
+
+        if (individuais) {
+
+            estadoPauta.innerHTML =
+                "🟡 Sistema fechado — existem alunos autorizados individualmente";
+
+            estadoPauta.style.color =
+                "#d97706";
+
+        }
+
+        else {
+
+            estadoPauta.innerHTML =
+                "🔴 Sistema fechado — lançamento bloqueado";
+
+            estadoPauta.style.color =
+                "red";
+
+        }
 
     }
+
+
+    atualizarBotaoGuardar();
 
 }
 
 
 // =====================================================
-// CARREGAR NOTAS EXISTENTES
+// BOTÃO GUARDAR
 // =====================================================
 
-async function carregarNotas() {
+function atualizarBotaoGuardar() {
 
-    try {
+    if (!guardarNotas) {
 
-        const notaSnap =
-            await getDoc(
-                notaRef
-            );
-
-
-        if (
-            notaSnap.exists()
-        ) {
-
-            pautaExiste =
-                true;
-
-
-            const dados =
-                notaSnap.data();
-
-
-            // -----------------------------------------
-            // GARANTIR QUE É DA ESCOLA
-            // -----------------------------------------
-
-            if (
-                dados.escolaId &&
-                dados.escolaId !== escolaId
-            ) {
-
-                throw new Error(
-                    "Esta Mini-Pauta pertence a outra escola."
-                );
-
-            }
-
-
-            // -----------------------------------------
-            // CARREGAR ALUNOS
-            // -----------------------------------------
-
-            if (
-                Array.isArray(
-                    dados.alunos
-                )
-            ) {
-
-                dados.alunos.forEach(
-                    aluno => {
-
-                        notasGuardadas[
-                            aluno.numero
-                        ] = aluno;
-
-                    }
-                );
-
-            }
-
-
-        }
-
+        return;
 
     }
-    catch (erro) {
 
-        console.error(
-            "Erro ao carregar notas:",
-            erro
+
+    const podeGuardar =
+        alunos.some(
+            aluno =>
+                alunoPodeEditar(
+                    aluno.id,
+                    aluno.numero
+                )
         );
 
-        throw erro;
+
+    guardarNotas.disabled =
+        !podeGuardar;
+
+
+    if (podeGuardar) {
+
+        guardarNotas.title =
+            "Guardar lançamentos";
+
+    }
+
+    else {
+
+        guardarNotas.title =
+            "Sistema fechado";
 
     }
 
@@ -877,13 +774,20 @@ function(input) {
         input.closest("tr");
 
 
+    if (!linha) {
+
+        return;
+
+    }
+
+
     const macInput =
         linha.querySelector(".mac");
 
     const nptInput =
         linha.querySelector(".npt");
 
-    const mf =
+    const mfInput =
         linha.querySelector(".mf");
 
     const classificacao =
@@ -895,7 +799,7 @@ function(input) {
     if (
         !macInput ||
         !nptInput ||
-        !mf ||
+        !mfInput ||
         !classificacao
     ) {
 
@@ -909,7 +813,7 @@ function(input) {
         nptInput.value === ""
     ) {
 
-        mf.value = "";
+        mfInput.value = "";
 
         classificacao.innerHTML = "";
 
@@ -935,25 +839,14 @@ function(input) {
         ).toFixed(1);
 
 
-    mf.value =
+    mfInput.value =
         media;
 
 
-    const resultado =
+    classificacao.innerHTML =
         classificarNota(
             media
         );
-
-
-    classificacao.innerHTML =
-        resultado;
-
-
-    mf.style.color =
-        "";
-
-    classificacao.style.color =
-        "";
 
 
     const limite =
@@ -963,132 +856,72 @@ function(input) {
             : 10;
 
 
-    if (
-        Number(media) < limite
-    ) {
-
-        mf.style.color =
-            "red";
-
-        classificacao.style.color =
-            "red";
-
-    }
-
-
-    if (
+    macInput.style.color =
         mac < limite
-    ) {
+            ? "red"
+            : "";
 
-        macInput.style.color =
-            "red";
-
-    }
-    else {
-
-        macInput.style.color =
-            "";
-
-    }
-
-
-    if (
+    nptInput.style.color =
         npt < limite
-    ) {
+            ? "red"
+            : "";
 
-        nptInput.style.color =
-            "red";
+    mfInput.style.color =
+        Number(media) < limite
+            ? "red"
+            : "";
 
-    }
-    else {
-
-        nptInput.style.color =
-            "";
-
-    }
+    classificacao.style.color =
+        Number(media) < limite
+            ? "red"
+            : "";
 
 };
 
 
 // =====================================================
-// BLOQUEAR / LIBERTAR LINHA
-// =====================================================
-
-function aplicarEstadoEdicao(
-    linha,
-    podeEditar
-) {
-
-    const inputs =
-        linha.querySelectorAll(
-            ".mac, .npt"
-        );
-
-
-    inputs.forEach(
-        input => {
-
-            input.readOnly =
-                !podeEditar;
-
-        }
-    );
-
-
-    const botao =
-        linha.querySelector(
-            ".estado-edicao"
-        );
-
-
-    if (botao) {
-
-        if (podeEditar) {
-
-            botao.innerHTML =
-                "🔓 Aberto";
-
-            botao.style.color =
-                "green";
-
-        }
-        else {
-
-            botao.innerHTML =
-                "🔒 Fechado";
-
-            botao.style.color =
-                "red";
-
-        }
-
-    }
-
-}
-
-
-// =====================================================
-// CARREGAR ALUNOS DA TURMA
+// CARREGAR ALUNOS
 // =====================================================
 
 async function carregarAlunos() {
 
     try {
 
-        // =================================================
-        // 1. CARREGAR CONFIGURAÇÕES
-        // =================================================
+        console.log(
+            "🚀 INICIANDO CARREGAMENTO DA MINI-PAUTA..."
+        );
+
+
+        // ---------------------------------------------
+        // ENSINO
+        // ---------------------------------------------
 
         await carregarEnsino();
 
+
+        // ---------------------------------------------
+        // NOTAS
+        // ---------------------------------------------
+
         await carregarNotas();
+
+
+        // ---------------------------------------------
+        // CONTROLE
+        // ---------------------------------------------
 
         await carregarControle();
 
 
-        // =================================================
-        // 2. BUSCAR ALUNOS DA TURMA
-        // =================================================
+        // ---------------------------------------------
+        // BUSCAR ALUNOS
+        // ---------------------------------------------
+
+        console.log(
+            "👨‍🎓 Procurando alunos da turma:",
+            turmaId
+        );
+
 
         const alunosRef =
             collection(
@@ -1105,11 +938,7 @@ async function carregarAlunos() {
             );
 
 
-        // =================================================
-        // 3. CRIAR LISTA DE ALUNOS
-        // =================================================
-
-        const alunos = [];
+        alunos = [];
 
 
         resultado.forEach(
@@ -1128,9 +957,15 @@ async function carregarAlunos() {
         );
 
 
-        // =================================================
-        // 4. DEBUG
-        // =================================================
+        console.log(
+            "📊 ALUNOS ENCONTRADOS:",
+            alunos.length
+        );
+
+
+        // ---------------------------------------------
+        // DEBUG
+        // ---------------------------------------------
 
         alert(
             "DEBUG ALUNOS DA TURMA\n\n" +
@@ -1143,15 +978,9 @@ async function carregarAlunos() {
         );
 
 
-        console.log(
-            "ALUNOS ENCONTRADOS:",
-            alunos
-        );
-
-
-        // =================================================
-        // 5. ORDENAR POR NÚMERO
-        // =================================================
+        // ---------------------------------------------
+        // ORDENAR
+        // ---------------------------------------------
 
         alunos.sort(
             (a, b) =>
@@ -1160,38 +989,64 @@ async function carregarAlunos() {
         );
 
 
-        // =================================================
-        // 6. LIMPAR TABELA
-        // =================================================
+        // ---------------------------------------------
+        // LIMPAR TABELA
+        // ---------------------------------------------
 
         if (lista) {
 
-            lista.innerHTML =
-                "";
+            lista.innerHTML = "";
 
         }
 
 
-        // =================================================
-        // 7. MOSTRAR ALUNOS
-        // =================================================
+        // ---------------------------------------------
+        // SEM ALUNOS
+        // ---------------------------------------------
+
+        if (
+            alunos.length === 0
+        ) {
+
+            if (lista) {
+
+                lista.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            ⚠️ Nenhum aluno encontrado
+                            nesta turma.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+
+            atualizarBotaoGuardar();
+
+            return;
+
+        }
+
+
+// ---------------------------------------------
+        // CRIAR LINHAS
+        // ---------------------------------------------
 
         alunos.forEach(
             aluno => {
-
-                // -----------------------------------------
-                // NOTA EXISTENTE
-                // -----------------------------------------
 
                 const nota =
                     notasGuardadas[
                         aluno.numero
                     ] || {};
 
-
-                // -----------------------------------------
-                // VERIFICAR PERMISSÃO
-                // -----------------------------------------
 
                 const podeEditar =
                     alunoPodeEditar(
@@ -1200,173 +1055,159 @@ async function carregarAlunos() {
                     );
 
 
-                // -----------------------------------------
-                // LINHA
-                // -----------------------------------------
+                const maxNota =
+                    ensino ===
+                    "ensinoPrimario"
+                        ? 10
+                        : 20;
+
+
+                if (!lista) {
+
+                    return;
+
+                }
+
 
                 lista.innerHTML += `
 
-<tr data-aluno-id="${aluno.id}">
+                    <tr
+                        data-aluno-id="${aluno.id}"
+                    >
 
-    <td>
-        ${aluno.numero || ""}
-    </td>
-
-
-    <td style="text-align:left">
-        ${aluno.nome || ""}
-    </td>
+                        <td>
+                            ${aluno.numero || ""}
+                        </td>
 
 
-    <td>
-        ${aluno.sexo || ""}
-    </td>
+                        <td
+                            style="text-align:left"
+                        >
+                            ${aluno.nome || ""}
+                        </td>
 
 
-    <td>
-
-        <input
-            class="mac"
-            type="number"
-            min="0"
-            max="${
-                ensino === "ensinoPrimario"
-                    ? 10
-                    : 20
-            }"
-            value="${nota.MAC ?? ""}"
-            oninput="calcularMF(this)"
-            ${podeEditar ? "" : "readonly"}
-        >
-
-    </td>
+                        <td>
+                            ${aluno.sexo || ""}
+                        </td>
 
 
-    <td>
+                        <td>
 
-        <input
-            class="npt"
-            type="number"
-            min="0"
-            max="${
-                ensino === "ensinoPrimario"
-                    ? 10
-                    : 20
-            }"
-            value="${nota.NPT ?? ""}"
-            oninput="calcularMF(this)"
-            ${podeEditar ? "" : "readonly"}
-        >
+                            <input
+                                class="mac"
+                                type="number"
+                                min="0"
+                                max="${maxNota}"
+                                step="0.1"
+                                value="${nota.MAC ?? ""}"
+                                oninput="calcularMF(this)"
+                                ${podeEditar ? "" : "readonly"}
+                            >
 
-    </td>
+                        </td>
 
 
-    <td>
+                        <td>
 
-        <input
-            class="mf"
-            type="text"
-            readonly
-            value="${nota.MF ?? ""}"
-        >
+                            <input
+                                class="npt"
+                                type="number"
+                                min="0"
+                                max="${maxNota}"
+                                step="0.1"
+                                value="${nota.NPT ?? ""}"
+                                oninput="calcularMF(this)"
+                                ${podeEditar ? "" : "readonly"}
+                            >
 
-    </td>
-
-
-    <td class="classificacao">
-
-        ${nota.classificacao || ""}
-
-    </td>
+                        </td>
 
 
-    <td>
+                        <td>
 
-        <span
-            class="estado-edicao"
-            style="
-                font-weight:bold;
-                ${
-                    podeEditar
-                        ? "color:green;"
-                        : "color:red;"
-                }
-            "
-        >
+                            <input
+                                class="mf"
+                                readonly
+                                value="${nota.MF ?? ""}"
+                            >
 
-            ${
-                podeEditar
-                    ? "🔓 Aberto"
-                    : "🔒 Fechado"
-            }
+                        </td>
 
-        </span>
 
-    </td>
+                        <td
+                            class="classificacao"
+                        >
+                            ${nota.classificacao || ""}
+                        </td>
 
-</tr>
+
+                        <td>
+
+                            <span
+                                class="estado-edicao"
+                                style="
+                                    font-weight:bold;
+                                    color:${
+                                        podeEditar
+                                            ? "green"
+                                            : "red"
+                                    };
+                                "
+                            >
+                                ${
+                                    podeEditar
+                                        ? "🔓 Aberto"
+                                        : "🔒 Fechado"
+                                }
+                            </span>
+
+                        </td>
+
+                    </tr>
 
                 `;
+
+
+                // -----------------------------------------
+                // CALCULAR MF SE JÁ EXISTIREM NOTAS
+                // -----------------------------------------
+
+                const linha =
+                    lista.lastElementChild;
+
+
+                if (
+                    nota.MAC !== undefined &&
+                    nota.MAC !== null &&
+                    nota.NPT !== undefined &&
+                    nota.NPT !== null
+                ) {
+
+                    const mac =
+                        linha.querySelector(
+                            ".mac"
+                        );
+
+                    if (mac) {
+
+                        window.calcularMF(
+                            mac
+                        );
+
+                    }
+
+                }
 
             }
         );
 
 
-        // =================================================
-        // 8. VERIFICAR BOTÃO GUARDAR
-        // =================================================
+        atualizarBotaoGuardar();
 
-        if (guardarNotas) {
-
-            const algumaLinhaEditavel =
-                alunos.some(
-                    aluno =>
-                        alunoPodeEditar(
-                            aluno.id,
-                            aluno.numero
-                        )
-                );
-
-
-            guardarNotas.disabled =
-                !algumaLinhaEditavel;
-
-
-            if (
-                algumaLinhaEditavel
-            ) {
-
-                guardarNotas.title =
-                    "Guardar lançamentos";
-
-            }
-            else {
-
-                guardarNotas.title =
-                    "Sistema fechado";
-
-            }
-
-        }
-
-
-        // =================================================
-        // 9. DEBUG FINAL
-        // =================================================
 
         console.log(
-            "MINI-PAUTA CARREGADA:",
-            {
-                turmaId,
-                turmaNome,
-                disciplina,
-                trimestre,
-                ensino,
-                quantidadeAlunos:
-                    alunos.length,
-                sistemaAberto,
-                controleAlunos
-            }
+            "✅ MINI-PAUTA CARREGADA COM SUCESSO."
         );
 
     }
@@ -1379,10 +1220,29 @@ async function carregarAlunos() {
         );
 
 
-        alert(
-            "❌ ERRO AO CARREGAR MINI-PAUTA\n\n" +
-            erro.message
-        );
+        if (lista) {
+
+            lista.innerHTML = `
+
+                <tr>
+
+                    <td colspan="8"
+                        style="color:red">
+
+                        ❌ Erro ao carregar
+                        Mini-Pauta.
+
+                        <br><br>
+
+                        ${erro.message}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
 
 
         if (estadoPauta) {
@@ -1399,21 +1259,22 @@ async function carregarAlunos() {
 
 }
 
+
 // =====================================================
-// GUARDAR / ATUALIZAR
+// GUARDAR NOTAS
 // =====================================================
 
 if (guardarNotas) {
 
     guardarNotas.addEventListener(
         "click",
-        async () => {
+        async function () {
 
             try {
 
-                // -------------------------------------
+                // -----------------------------------------
                 // PROFESSOR
-                // -------------------------------------
+                // -----------------------------------------
 
                 const professor =
                     obterProfessorLogado();
@@ -1430,182 +1291,22 @@ if (guardarNotas) {
                 }
 
 
-                // -------------------------------------
-                // RECARREGAR CONTROLE
-                // -------------------------------------
+                // -----------------------------------------
+                // VERIFICAR AUTORIZAÇÃO
+                // -----------------------------------------
 
-                await carregarControle();
-
-
-                // -------------------------------------
-                // BUSCAR ALUNOS
-                // -------------------------------------
-
-                const alunosSnapshot =
-                    await getDocs(
-                        collection(
-                            db,
-                            "turmas",
-                            turmaId,
-                            "alunos"
-                        )
+                const controleSnapshot =
+                    await getDoc(
+                        notaRef
                     );
 
-
-                const alunosFirebase =
-                    {};
-
-
-                alunosSnapshot.forEach(
-                    documento => {
-
-                        alunosFirebase[
-                            documento.id
-                        ] = documento.data();
-
-                    }
-                );
-
-
-                const alunos =
-                    [];
-
-
-                // -------------------------------------
-                // LER A TABELA
-                // -------------------------------------
-
-                document
-                    .querySelectorAll(
-                        "#listaAlunos tr"
-                    )
-                    .forEach(
-                        linha => {
-
-                            const alunoId =
-                                linha.dataset.alunoId;
-
-
-                            const alunoFirebase =
-                                alunosFirebase[
-                                    alunoId
-                                ];
-
-
-                            if (!alunoFirebase)
-                                return;
-
-
-                            const podeEditar =
-                                alunoPodeEditar(
-                                    alunoId,
-                                    alunoFirebase.numero
-                                );
-
-
-                            // --------------------------------
-                            // SE ESTIVER FECHADO, IGNORAR
-                            // --------------------------------
-
-                        
-                            if (!podeEditar) {
-
-                                return;
-
-                            }
-
-
-                            const macInput =
-                                linha.querySelector(
-                                    ".mac"
-                                );
-
-                            const nptInput =
-                                linha.querySelector(
-                                    ".npt"
-                                );
-
-                            const mfInput =
-                                linha.querySelector(
-                                    ".mf"
-                                );
-
-                            const classificacao =
-                                linha.querySelector(
-                                    ".classificacao"
-                                );
-
-
-                            const mac =
-                                macInput.value === ""
-                                    ? null
-                                    : Number(
-                                        macInput.value
-                                    );
-
-
-                            const npt =
-                                nptInput.value === ""
-                                    ? null
-                                    : Number(
-                                        nptInput.value
-                                    );
-
-
-                            const mf =
-                                mfInput.value === ""
-                                    ? null
-                                    : Number(
-                                        mfInput.value
-                                    );
-
-
-                            alunos.push({
-
-                                id:
-                                    alunoId,
-
-                                nome:
-                                    alunoFirebase.nome ||
-                                    "",
-
-                                numero:
-                                    alunoFirebase.numero ||
-                                    "",
-
-                                sexo:
-                                    alunoFirebase.sexo ||
-                                    "",
-
-                                MAC:
-                                    mac,
-
-                                NPT:
-                                    npt,
-
-                                MF:
-                                    mf,
-
-                                classificacao:
-                                    classificacao?.innerText ||
-                                    ""
-
-                            });
-
-                        }
-                    );
-
-
-                // -------------------------------------
-                // VERIFICAR SE EXISTE ALGO PARA GUARDAR
-                // -------------------------------------
 
                 if (
-                    !alunos.length
+                    !controleSnapshot.exists()
                 ) {
 
                     alert(
-                        "🔒 Nenhum aluno está autorizado para edição."
+                        "🔒 O lançamento ainda não foi aberto pelo administrador."
                     );
 
                     return;
@@ -1613,185 +1314,32 @@ if (guardarNotas) {
                 }
 
 
-                // -------------------------------------
-                // PRESERVAR NOTAS DOS ALUNOS FECHADOS
-                // -------------------------------------
-
-                const notasFinais =
-                    [];
-
-
-                alunosFirebase &&
-                Object.entries(
-                    alunosFirebase
-                );
-
-
-                const alunosTabela =
-                    document.querySelectorAll(
-                        "#listaAlunos tr"
-                    );
-
-
-                alunosTabela.forEach(
-                    linha => {
-
-                        const alunoId =
-                            linha.dataset.alunoId;
-
-
-                        const alunoFirebase =
-                            alunosFirebase[
-                                alunoId
-                            ];
-
-
-                        if (!alunoFirebase)
-                            return;
-
-
-                        const podeEditar =
-                            alunoPodeEditar(
-                                alunoId,
-                                alunoFirebase.numero
-                            );
-
-
-                        if (
-                            podeEditar
-                        ) {
-
-                            const existente =
-                                alunos.find(
-                                    item =>
-                                        item.id ===
-                                        alunoId
-                                );
-
-
-                            if (existente) {
-
-                                notasFinais.push(
-                                    existente
-                                );
-
-                            }
-
-                        }
-                        else {
-
-                            const notaAntiga =
-                                notasGuardadas[
-                                    alunoFirebase.numero
-                                ];
-
-
-                            notasFinais.push({
-
-                                id:
-                                    alunoId,
-
-                                nome:
-                                    alunoFirebase.nome ||
-                                    "",
-
-                                numero:
-                                    alunoFirebase.numero ||
-                                    "",
-
-                                sexo:
-                                    alunoFirebase.sexo ||
-                                    "",
-
-                                MAC:
-                                    notaAntiga?.MAC ??
-                                    null,
-
-                                NPT:
-                                    notaAntiga?.NPT ??
-                                    null,
-
-                                MF:
-                                    notaAntiga?.MF ??
-                                    null,
-
-                                classificacao:
-                                    notaAntiga?.classificacao ||
-                                    ""
-
-                            });
-
-                        }
-
-                    }
-                );
-
-
-                // -------------------------------------
-                // VERIFICAR NOVAMENTE O CONTROLE
-                // -------------------------------------
-
-                const controleAtual =
-                    await getDoc(
-                        controleRef
-                    );
-
-                alert(
-    "DADOS DO CONTROLE\n\n" +
-    JSON.stringify(
-        controle,
-        null,
-        2
-    )
-);
-                
-
                 const controle =
-                    controleAtual.exists()
-                        ? controleAtual.data()
-                        : {};
+                    controleSnapshot.data();
 
 
-                const sistemaContinuaAberto =
-                    controle.sistemaAberto === true;
+                const sistemaAtualAberto =
+                    controle.abertoGeral === true;
 
 
-                alert(
-    "DEBUG DO CONTROLE AO GUARDAR\n\n" +
-
-    "ID DA MINI-PAUTA:\n" +
-    idLancamento +
-
-    "\n\nDocumento existe:\n" +
-    controleAtual.exists() +
-
-    "\n\nsistemaAberto:\n" +
-    controle.sistemaAberto +
-
-    "\n\nabertoGeral:\n" +
-    controle.abertoGeral +
-
-    "\n\naberto:\n" +
-    controle.aberto
-);
-                
-                const controlesAtuais =
-                    controle.alunos || {};
+                const alunosAbertos =
+                    controle.alunosAbertos ||
+                    {};
 
 
-                // -------------------------------------
-                // VALIDAR AUTORIZAÇÃO
-                // -------------------------------------
+                // -----------------------------------------
+                // VERIFICAR NOVAMENTE
+                // -----------------------------------------
 
-                let existeAutorizacao =
-                    sistemaContinuaAberto;
+                let autorizado =
+                    sistemaAtualAberto;
 
 
-                if (!existeAutorizacao) {
+                if (!autorizado) {
 
-                    existeAutorizacao =
+                    autorizado =
                         Object.values(
-                            controlesAtuais
+                            alunosAbertos
                         ).some(
                             item =>
                                 item?.edicaoAberta === true
@@ -1800,12 +1348,13 @@ if (guardarNotas) {
                 }
 
 
-                if (!existeAutorizacao) {
+                if (!autorizado) {
 
                     alert(
                         "🔒 O sistema foi fechado. " +
                         "As alterações não foram guardadas."
                     );
+
 
                     await carregarAlunos();
 
@@ -1813,32 +1362,109 @@ if (guardarNotas) {
 
                 }
 
-                // -------------------------------------
-// DEBUG FINAL ANTES DE GUARDAR
-// -------------------------------------
 
-alert(
-    "DEBUG ANTES DE GUARDAR\n\n" +
+                // -----------------------------------------
+                // CONSTRUIR NOTAS
+                // -----------------------------------------
 
-    "Turma ID:\n" +
-    turmaId +
+                const notasFinais = [];
 
-    "\n\nDisciplina:\n" +
-    disciplina +
 
-    "\n\nTrimestre:\n" +
-    trimestre +
+                alunos.forEach(
+                    aluno => {
 
-    "\n\nQuantidade de alunos na lista:\n" +
-    alunos.length +
+                        const linha =
+                            lista?.querySelector(
+                                `tr[data-aluno-id="${aluno.id}"]`
+                            );
 
-    "\n\nQuantidade em notasFinais:\n" +
-    notasFinais.length
-);
 
-                // -------------------------------------
+                        if (!linha) {
+
+                            return;
+
+                        }
+
+
+                        const macInput =
+                            linha.querySelector(
+                                ".mac"
+                            );
+
+                        const nptInput =
+                            linha.querySelector(
+                                ".npt"
+                            );
+
+                        const mfInput =
+                            linha.querySelector(
+                                ".mf"
+                            );
+
+                        const classificacao =
+                            linha.querySelector(
+                                ".classificacao"
+                            );
+
+
+                        const notaAntiga =
+                            notasGuardadas[
+                                aluno.numero
+                            ] || {};
+
+
+                        notasFinais.push({
+
+                            id:
+                                aluno.id,
+
+                            numero:
+                                aluno.numero,
+
+                            nome:
+                                aluno.nome || "",
+
+                            sexo:
+                                aluno.sexo || "",
+
+                            MAC:
+                                macInput?.value !== ""
+                                    ? Number(
+                                        macInput.value
+                                    )
+                                    : null,
+
+                            NPT:
+                                nptInput?.value !== ""
+                                    ? Number(
+                                        nptInput.value
+                                    )
+                                    : null,
+
+                            MF:
+                                mfInput?.value !== ""
+                                    ? Number(
+                                        mfInput.value
+                                    )
+                                    : (
+                                        notaAntiga.MF ??
+                                        null
+                                    ),
+
+                            classificacao:
+                                classificacao?.textContent ||
+                                notaAntiga.classificacao ||
+                                ""
+
+                        });
+
+                    }
+                );
+
+
+                // -----------------------------------------
                 // GUARDAR
-                // -------------------------------------
+                // -----------------------------------------
 
                 await setDoc(
 
@@ -1846,26 +1472,40 @@ alert(
 
                     {
 
-                        escolaId,
+                        escolaId:
 
-                        turmaId,
+                            escolaId,
 
-                        turmaNome,
+                        turmaId:
 
-                        disciplina,
+                            turmaId,
 
-                        trimestre,
+                        turmaNome:
+
+                            turmaNome,
+
+                        disciplina:
+
+                            disciplina,
+
+                        trimestre:
+
+                            trimestreNormalizado,
 
                         professorId:
-                            professor?.id || "",
+
+                            professor.id || "",
 
                         professorNome:
-                            professor?.nome || "",
+
+                            professor.nome || "",
 
                         alunos:
+
                             notasFinais,
 
                         atualizadoEm:
+
                             serverTimestamp(),
 
                         ...(pautaExiste
@@ -1885,16 +1525,14 @@ alert(
                 );
 
 
-                pautaExiste =
-                    true;
+                pautaExiste = true;
 
 
-                // -------------------------------------
+                // -----------------------------------------
                 // ATUALIZAR CACHE
-                // -------------------------------------
+                // -----------------------------------------
 
-                notasGuardadas =
-                    {};
+                notasGuardadas = {};
 
 
                 notasFinais.forEach(
@@ -1908,21 +1546,19 @@ alert(
                 );
 
 
-                atualizarEstadoVisual();
-
-
                 alert(
-                    "Notas guardadas com sucesso ✅"
+                    "✅ Notas guardadas com sucesso!"
                 );
 
 
-                // -------------------------------------
+                // -----------------------------------------
                 // RECARREGAR
-                // -------------------------------------
+                // -----------------------------------------
 
                 await carregarAlunos();
 
             }
+
             catch (erro) {
 
                 console.error(
@@ -1945,27 +1581,12 @@ alert(
 
 
 // =====================================================
-// INICIAR
+// INICIAR MINI-PAUTA
 // =====================================================
 
-carregarAlunos()
-    .catch(
-        erro => {
+console.log(
+    "🚀 A iniciar Mini-Pauta..."
+);
 
-            console.error(
-                "Erro ao iniciar Mini-Pauta:",
-                erro
-            );
 
-            if (estadoPauta) {
-
-                estadoPauta.innerHTML =
-                    "❌ Erro ao carregar Mini-Pauta";
-
-                estadoPauta.style.color =
-                    "red";
-
-            }
-
-        }
-    );
+carregarAlunos();
