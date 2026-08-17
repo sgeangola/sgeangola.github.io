@@ -1,13 +1,24 @@
 // =====================================================
 // NOTAS.JS — ADMINISTRADOR
 // SGE ANGOLA
-// BLOCO 1/2
+// Versão limpa
 //
+// Fluxo:
 // Professor → Classe → Turma → Disciplina → Trimestre
-// Controle de abertura/fecho pelo Administrador
+//
+// Controle:
+// 🔓 Abrir lançamento
+// 🔒 Fechar lançamento
+//
+// ID:
+// turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS ADMINISTRADOR CARREGADO!");
+alert("🔥 NOTAS.JS CARREGADO!");
+
+// =====================================================
+// FIREBASE
+// =====================================================
 
 import { db } from "./firebase.js";
 
@@ -24,7 +35,7 @@ import {
 
 
 // =====================================================
-// ESCOLA ATUAL
+// ESCOLA
 // =====================================================
 
 const escolaId =
@@ -34,7 +45,7 @@ const escolaId =
 if (!escolaId) {
 
     alert(
-        "❌ Escola não identificada.\n\n" +
+        "❌ ESCOLA NÃO IDENTIFICADA.\n\n" +
         "Faça login novamente."
     );
 
@@ -82,6 +93,7 @@ const botaoSistema =
 // =====================================================
 
 let professores = [];
+
 let turmas = [];
 
 let professorSelecionado = null;
@@ -93,11 +105,16 @@ let lancamentoSelecionado = null;
 // MENSAGEM
 // =====================================================
 
-function mostrarMensagem(texto, tipo = "aviso") {
+function mostrarMensagem(
+    texto,
+    tipo = "aviso"
+) {
 
-    if (!mensagem) return;
+    if (!mensagem)
+        return;
 
-    mensagem.textContent = texto;
+    mensagem.textContent =
+        texto;
 
     mensagem.className =
         "mensagem visivel " + tipo;
@@ -105,61 +122,74 @@ function mostrarMensagem(texto, tipo = "aviso") {
 }
 
 
-// =====================================================
-// ESCONDER MENSAGEM
-// =====================================================
-
 function esconderMensagem() {
 
-    if (!mensagem) return;
+    if (!mensagem)
+        return;
 
-    mensagem.textContent = "";
+    mensagem.textContent =
+        "";
 
-    mensagem.className = "mensagem";
+    mensagem.className =
+        "mensagem";
 
 }
 
 
 // =====================================================
-// INICIAR
+// CRIAR ID DO LANÇAMENTO
+// =====================================================
+//
+// Esta função é usada SEMPRE.
+//
+// Exemplo:
+//
+// turma ABC
+// E.M.P
+// trimestre 1
+//
+// ABC_E.M.P_1
+//
 // =====================================================
 
-async function iniciarNotas() {
+function criarIdLancamento(
+    turmaId,
+    disciplina,
+    trimestre
+) {
 
-    try {
+    const turma =
+        String(
+            turmaId || ""
+        )
+        .trim();
 
-        mostrarMensagem(
-            "⏳ A carregar dados da escola..."
-        );
+    const materia =
+        String(
+            disciplina || ""
+        )
+        .trim()
+        .replace(/\//g, "-")
+        .replace(/\s+/g, "_");
 
-        await carregarProfessores();
+    const tri =
+        String(
+            trimestre || ""
+        )
+        .replace("º", "")
+        .replace("°", "")
+        .replace("ª", "")
+        .replace("Trimestre", "")
+        .replace(/\s+/g, "")
+        .trim();
 
-        await carregarTurmas();
-
-        preencherProfessores();
-
-        prepararFiltros();
-
-        mostrarMensagem(
-            "👨‍🏫 Selecione um professor para começar.",
-            "aviso"
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "❌ ERRO AO INICIAR NOTAS:",
-            erro
-        );
-
-        mostrarMensagem(
-            "❌ Erro ao carregar os dados.",
-            "erro"
-        );
-
-    }
+    return (
+        turma +
+        "_" +
+        materia +
+        "_" +
+        tri
+    );
 
 }
 
@@ -209,6 +239,7 @@ async function carregarProfessores() {
 
     professores.sort(
         (a, b) =>
+
             String(
                 a.nome || ""
             ).localeCompare(
@@ -217,12 +248,7 @@ async function carregarProfessores() {
                 ),
                 "pt"
             )
-    );
 
-
-    console.log(
-        "👨‍🏫 PROFESSORES:",
-        professores
     );
 
 }
@@ -270,12 +296,6 @@ async function carregarTurmas() {
         }
     );
 
-
-    console.log(
-        "🏫 TURMAS:",
-        turmas
-    );
-
 }
 
 
@@ -285,7 +305,9 @@ async function carregarTurmas() {
 
 function preencherProfessores() {
 
-    if (!filtroProfessor) return;
+    if (!filtroProfessor)
+        return;
+
 
     filtroProfessor.innerHTML = `
 
@@ -311,11 +333,11 @@ function preencherProfessores() {
 
             option.textContent =
                 professor.codigoProfessor
-                    ? professor.codigoProfessor +
-                      " — " +
-                      professor.nome
-                    : professor.nome ||
-                      "Professor sem nome";
+                    ? `${professor.codigoProfessor} — ${professor.nome}`
+                    : (
+                        professor.nome ||
+                        "Professor sem nome"
+                    );
 
 
             filtroProfessor.appendChild(
@@ -344,7 +366,8 @@ function prepararFiltros() {
 
         `;
 
-        filtroClasse.disabled = true;
+        filtroClasse.disabled =
+            true;
 
     }
 
@@ -359,7 +382,8 @@ function prepararFiltros() {
 
         `;
 
-        filtroTurma.disabled = true;
+        filtroTurma.disabled =
+            true;
 
     }
 
@@ -374,7 +398,8 @@ function prepararFiltros() {
 
         `;
 
-        filtroDisciplina.disabled = true;
+        filtroDisciplina.disabled =
+            true;
 
     }
 
@@ -414,7 +439,9 @@ function carregarClassesDoProfessor(
     professorId
 ) {
 
-    if (!filtroClasse) return;
+    if (!filtroClasse)
+        return;
+
 
     filtroClasse.innerHTML = `
 
@@ -424,7 +451,8 @@ function carregarClassesDoProfessor(
 
     `;
 
-    filtroClasse.disabled = true;
+    filtroClasse.disabled =
+        true;
 
 
     professorSelecionado =
@@ -435,11 +463,8 @@ function carregarClassesDoProfessor(
         ) || null;
 
 
-    if (!professorSelecionado) {
-
+    if (!professorSelecionado)
         return;
-
-    }
 
 
     const atribuicoes =
@@ -450,7 +475,8 @@ function carregarClassesDoProfessor(
             : [];
 
 
-    const classes = new Map();
+    const classes =
+        new Map();
 
 
     atribuicoes.forEach(
@@ -462,7 +488,8 @@ function carregarClassesDoProfessor(
                 ).trim();
 
 
-            if (!classe) return;
+            if (!classe)
+                return;
 
 
             const chave =
@@ -494,7 +521,6 @@ function carregarClassesDoProfessor(
             option.value =
                 classe;
 
-
             option.textContent =
                 classe;
 
@@ -521,7 +547,8 @@ function carregarTurmasDaClasse(
     classe
 ) {
 
-    if (!filtroTurma) return;
+    if (!filtroTurma)
+        return;
 
 
     filtroTurma.innerHTML = `
@@ -532,14 +559,14 @@ function carregarTurmasDaClasse(
 
     `;
 
-    filtroTurma.disabled = true;
+    filtroTurma.disabled =
+        true;
 
 
-    const professor =
-        professorSelecionado;
-
-
-    if (!professor || !classe) {
+    if (
+        !professorSelecionado ||
+        !classe
+    ) {
 
         return;
 
@@ -548,18 +575,20 @@ function carregarTurmasDaClasse(
 
     const atribuicoes =
         Array.isArray(
-            professor.atribuicoes
+            professorSelecionado.atribuicoes
         )
-            ? professor.atribuicoes
+            ? professorSelecionado.atribuicoes
             : [];
 
 
     const idsTurmas = [
+
         ...new Set(
 
             atribuicoes
                 .filter(
                     atribuicao =>
+
                         String(
                             atribuicao.classe || ""
                         ).trim() ===
@@ -574,6 +603,7 @@ function carregarTurmasDaClasse(
                 .filter(Boolean)
 
         )
+
     ];
 
 
@@ -630,7 +660,8 @@ function carregarDisciplinasDaTurma(
     turmaId
 ) {
 
-    if (!filtroDisciplina) return;
+    if (!filtroDisciplina)
+        return;
 
 
     filtroDisciplina.innerHTML = `
@@ -641,7 +672,8 @@ function carregarDisciplinasDaTurma(
 
     `;
 
-    filtroDisciplina.disabled = true;
+    filtroDisciplina.disabled =
+        true;
 
 
     if (
@@ -662,7 +694,8 @@ function carregarDisciplinasDaTurma(
             : [];
 
 
-    const disciplinas = new Set();
+    const disciplinas =
+        new Set();
 
 
     atribuicoes.forEach(
@@ -712,7 +745,6 @@ function carregarDisciplinasDaTurma(
             option.value =
                 disciplina;
 
-
             option.textContent =
                 disciplina;
 
@@ -732,191 +764,7 @@ function carregarDisciplinasDaTurma(
 
 
 // =====================================================
-// EVENTO PROFESSOR
-// =====================================================
-
-filtroProfessor?.addEventListener(
-    "change",
-    function () {
-
-        carregarClassesDoProfessor(
-            this.value
-        );
-
-
-        filtroTurma.innerHTML = `
-
-            <option value="">
-                Selecione primeiro a classe
-            </option>
-
-        `;
-
-        filtroTurma.disabled = true;
-
-
-        filtroDisciplina.innerHTML = `
-
-            <option value="">
-                Selecione primeiro a turma
-            </option>
-
-        `;
-
-        filtroDisciplina.disabled = true;
-
-
-        notasLista.innerHTML = `
-
-            <tr>
-
-                <td colspan="8"
-                    class="carregando">
-
-                    Selecione a classe,
-                    turma e disciplina.
-
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-);
-
-
-// =====================================================
-// EVENTO CLASSE
-// =====================================================
-
-filtroClasse?.addEventListener(
-    "change",
-    function () {
-
-        carregarTurmasDaClasse(
-            this.value
-        );
-
-
-        filtroDisciplina.innerHTML = `
-
-            <option value="">
-                Selecione primeiro a turma
-            </option>
-
-        `;
-
-        filtroDisciplina.disabled = true;
-
-    }
-);
-
-
-// =====================================================
-// EVENTO TURMA
-// =====================================================
-
-filtroTurma?.addEventListener(
-    "change",
-    function () {
-
-        carregarDisciplinasDaTurma(
-            this.value
-        );
-
-    }
-);
-
-
-// =====================================================
-// EVENTO DISCIPLINA
-// =====================================================
-
-filtroDisciplina?.addEventListener(
-    "change",
-    async function () {
-
-        if (!this.value) return;
-
-        await mostrarLancamentoSelecionado();
-
-    }
-);
-
-
-// =====================================================
-// EVENTO TRIMESTRE
-// =====================================================
-
-filtroTrimestre?.addEventListener(
-    "change",
-    async function () {
-
-        await mostrarLancamentoSelecionado();
-
-    }
-);
-
-
-// =====================================================
-// INICIAR
-// =====================================================
-
-iniciarNotas();
-
-// =====================================================
-// NOTAS.JS — ADMINISTRADOR
-// BLOCO 2/2
-//
-// Estados
-// Abrir / Fechar
-// Tabela
-// Ver
-// Imprimir
-// =====================================================
-
-
-// =====================================================
-// CRIAR ID DO LANÇAMENTO
-// =====================================================
-
-function criarIdLancamento(
-    turmaId,
-    disciplina,
-    trimestre
-) {
-
-    return (
-        String(turmaId || "").trim() +
-        "_" +
-        String(disciplina || "")
-            .trim()
-            .replace(/\//g, "-")
-            .replace(/\s+/g, "_") +
-        "_" +
-        String(trimestre || "")
-            .replace("º", "")
-            .replace("°", "")
-            .replace("ª", "")
-            .replace(" ", "")
-            .replace("Trimestre", "")
-            .trim()
-    );
-
-}
-
-
-const idLancamento =
-    criarIdLancamento(
-        turmaId,
-        disciplina,
-        trimestre
-    );
-
-
-// =====================================================
-// OBTER ESTADO
+// OBTER ESTADO DO LANÇAMENTO
 // =====================================================
 
 async function obterEstadoLancamento(
@@ -949,15 +797,20 @@ async function obterEstadoLancamento(
             );
 
 
-        if (!resultado.exists()) {
+        if (
+            !resultado.exists()
+        ) {
 
             return {
 
-                existe: false,
+                existe:
+                    false,
 
-                abertoGeral: false,
+                abertoGeral:
+                    false,
 
-                dados: {}
+                dados:
+                    {}
 
             };
 
@@ -970,16 +823,24 @@ async function obterEstadoLancamento(
 
         if (
             dados.escolaId &&
-            dados.escolaId !== escolaId
+            String(
+                dados.escolaId
+            ).trim() !==
+            String(
+                escolaId
+            ).trim()
         ) {
 
             return {
 
-                existe: false,
+                existe:
+                    false,
 
-                abertoGeral: false,
+                abertoGeral:
+                    false,
 
-                dados: {}
+                dados:
+                    {}
 
             };
 
@@ -988,7 +849,8 @@ async function obterEstadoLancamento(
 
         return {
 
-            existe: true,
+            existe:
+                true,
 
             abertoGeral:
                 dados.abertoGeral === true,
@@ -1003,18 +865,20 @@ async function obterEstadoLancamento(
     catch (erro) {
 
         console.error(
-            "Erro ao obter estado:",
             erro
         );
 
 
         return {
 
-            existe: false,
+            existe:
+                false,
 
-            abertoGeral: false,
+            abertoGeral:
+                false,
 
-            dados: {}
+            dados:
+                {}
 
         };
 
@@ -1024,7 +888,7 @@ async function obterEstadoLancamento(
 
 
 // =====================================================
-// MOSTRAR LANÇAMENTO SELECIONADO
+// MOSTRAR LANÇAMENTO
 // =====================================================
 
 async function mostrarLancamentoSelecionado() {
@@ -1057,14 +921,16 @@ async function mostrarLancamentoSelecionado() {
     const professor =
         professores.find(
             item =>
-                item.id === professorId
+                item.id ===
+                professorId
         );
 
 
     const turma =
         turmas.find(
             item =>
-                item.id === turmaId
+                item.id ===
+                turmaId
         );
 
 
@@ -1078,26 +944,43 @@ async function mostrarLancamentoSelecionado() {
     }
 
 
-    const trimestres =
-        filtroTrimestre?.value
-            ? [
-                filtroTrimestre.value
-              ]
-            : [
-                "1",
-                "2",
-                "3"
-              ];
+    const trimestre =
+        filtroTrimestre?.value;
+
+
+    if (!trimestre) {
+
+        lancamentoSelecionado =
+            null;
+
+        notasLista.innerHTML = `
+
+            <tr>
+
+                <td colspan="8">
+
+                    Selecione um trimestre.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        atualizarBotaoSistema();
+
+        return;
+
+    }
 
 
     notasLista.innerHTML = `
 
         <tr>
 
-            <td colspan="8"
-                class="carregando">
+            <td colspan="8">
 
-                ⏳ A verificar lançamentos...
+                ⏳ A verificar lançamento...
 
             </td>
 
@@ -1106,113 +989,49 @@ async function mostrarLancamentoSelecionado() {
     `;
 
 
-    const estados = {};
-
-
-    for (
-        const trimestre
-        of trimestres
-    ) {
-
-        estados[trimestre] =
-            await obterEstadoLancamento(
-                turmaId,
-                disciplina,
-                trimestre
-            );
-
-    }
-
-
-    // =============================================
-    // SE FOI ESCOLHIDO UM TRIMESTRE
-    // =============================================
-
-    if (
-        filtroTrimestre?.value
-    ) {
-
-        const trimestre =
-            filtroTrimestre.value;
-
-
-        const estado =
-            estados[trimestre];
-
-
-        lancamentoSelecionado = {
-
-            professorId:
-                professor.id,
-
-            professorNome:
-                professor.nome,
-
-            classe:
-                classe,
-
-            turmaId:
-                turma.id,
-
-            turmaNome:
-                turma.nome,
-
-            disciplina:
-                disciplina,
-
-            trimestre:
-                trimestre,
-
-            estado:
-                estado
-
-        };
-
-    }
-
-    else {
-
-        lancamentoSelecionado = null;
-
-    }
-
-
-    // =============================================
-    // TABELA
-    // =============================================
-
-    const estado1 =
-        estados["1"] ||
+    const estado =
         await obterEstadoLancamento(
             turmaId,
             disciplina,
-            "1"
+            trimestre
         );
 
 
-    const estado2 =
-        estados["2"] ||
-        await obterEstadoLancamento(
-            turmaId,
+    lancamentoSelecionado = {
+
+        professorId:
+            professor.id,
+
+        professorNome:
+            professor.nome,
+
+        classe:
+            classe,
+
+        turmaId:
+            turma.id,
+
+        turmaNome:
+            turma.nome ||
+            turma.turma,
+
+        disciplina:
             disciplina,
-            "2"
-        );
 
+        trimestre:
+            trimestre,
 
-    const estado3 =
-        estados["3"] ||
-        await obterEstadoLancamento(
-            turmaId,
-            disciplina,
-            "3"
-        );
+        estado:
+            estado
+
+    };
 
 
     notasLista.innerHTML = `
 
         <tr>
 
-            <td class="nome">
+            <td>
                 ${professor.nome || "—"}
             </td>
 
@@ -1221,7 +1040,11 @@ async function mostrarLancamentoSelecionado() {
             </td>
 
             <td>
-                ${turma.nome || "—"}
+                ${
+                    turma.nome ||
+                    turma.turma ||
+                    "—"
+                }
             </td>
 
             <td>
@@ -1229,15 +1052,19 @@ async function mostrarLancamentoSelecionado() {
             </td>
 
             <td>
-                ${mostrarEstadoTabela(estado1)}
+                ${
+                    mostrarEstadoTabela(
+                        estado
+                    )
+                }
             </td>
 
             <td>
-                ${mostrarEstadoTabela(estado2)}
+                —
             </td>
 
             <td>
-                ${mostrarEstadoTabela(estado3)}
+                —
             </td>
 
             <td>
@@ -1257,23 +1084,19 @@ async function mostrarLancamentoSelecionado() {
 
 
 // =====================================================
-// MOSTRAR ESTADO NA TABELA
+// ESTADO DA TABELA
 // =====================================================
 
 function mostrarEstadoTabela(
     estado
 ) {
 
-    if (!estado.existe) {
+    if (
+        !estado.existe
+    ) {
 
         return `
-
-            <span class="estado-nota fechado">
-
-                🔒 Fechado
-
-            </span>
-
+            🔒 Fechado
         `;
 
     }
@@ -1284,142 +1107,30 @@ function mostrarEstadoTabela(
     ) {
 
         return `
-
-            <span class="estado-nota lancado">
-
-                🟢 Aberto
-
-            </span>
-
+            🟢 Aberto
         `;
 
     }
 
 
     return `
-
-        <span class="estado-nota fechado">
-
-            🔒 Fechado
-
-        </span>
-
+        🔒 Fechado
     `;
 
 }
 
 
 // =====================================================
-// BOTÃO DA TABELA
+// BOTÕES
 // =====================================================
 
 function botaoAcaoLancamento() {
 
     if (
-        !filtroTrimestre?.value
-    ) {
-
-        return `
-
-            <span style="
-                color:#64748b;
-                font-size:13px;
-            ">
-
-                Selecione o trimestre
-
-            </span>
-
-        `;
-
-    }
-
-
-    const estado =
-        lancamentoSelecionado?.estado;
-
-
-    const aberto =
-        estado?.abertoGeral === true;
-
-
-    return `
-
-        <div style="
-            display:flex;
-            gap:6px;
-            justify-content:center;
-            flex-wrap:wrap;
-        ">
-
-            <button
-                type="button"
-                class="botao-controlar"
-                onclick="verLancamento()"
-            >
-                👁️ Ver
-            </button>
-
-            <button
-                type="button"
-                class="botao-controlar"
-                onclick="imprimirLancamento()"
-            >
-                🖨️ Imprimir
-            </button>
-
-            <button
-                type="button"
-                class="botao-controlar"
-                style="
-                    background:${aberto ? "#dc2626" : "#16a34a"};
-                "
-                onclick="alternarLancamento()"
-            >
-                ${aberto ? "🔒 Fechar" : "🔓 Abrir"}
-            </button>
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// ATUALIZAR BOTÃO DO SISTEMA
-// =====================================================
-
-async function atualizarBotaoSistema() {
-
-    if (
-        !botaoSistema ||
-        !estadoSistema
-    ) {
-
-        return;
-
-    }
-
-
-    if (
         !lancamentoSelecionado
     ) {
 
-        estadoSistema.textContent =
-            "🔴 Fechado";
-
-        estadoSistema.className =
-            "sistema-fechado";
-
-
-        botaoSistema.textContent =
-            "🔓 Abrir sistema";
-
-        botaoSistema.className =
-            "botao-sistema botao-abrir";
-
-        return;
+        return "";
 
     }
 
@@ -1430,50 +1141,72 @@ async function atualizarBotaoSistema() {
             .abertoGeral === true;
 
 
-    if (aberto) {
+    return `
 
-        estadoSistema.textContent =
-            "🟢 Aberto";
+        <div style="
+            display:flex;
+            gap:6px;
+            flex-wrap:wrap;
+            justify-content:center;
+        ">
 
-        estadoSistema.className =
-            "sistema-aberto";
-
-
-        botaoSistema.textContent =
-            "🔒 Fechar sistema";
-
-        botaoSistema.className =
-            "botao-sistema botao-fechar";
-
-    }
-
-    else {
-
-        estadoSistema.textContent =
-            "🔴 Fechado";
-
-        estadoSistema.className =
-            "sistema-fechado";
+            <button
+                type="button"
+                class="botao-controlar"
+                onclick="verLancamento()"
+            >
+                👁️ Ver
+            </button>
 
 
-        botaoSistema.textContent =
-            "🔓 Abrir sistema";
+            <button
+                type="button"
+                class="botao-controlar"
+                onclick="imprimirLancamento()"
+            >
+                🖨️ Imprimir
+            </button>
 
-        botaoSistema.className =
-            "botao-sistema botao-abrir";
 
-    }
+            <button
+                type="button"
+                class="botao-controlar"
+                style="
+                    background:${
+                        aberto
+                            ? "#dc2626"
+                            : "#16a34a"
+                    };
+                    color:white;
+                "
+                onclick="alternarLancamento()"
+            >
+                ${
+                    aberto
+                        ? "🔒 Fechar"
+                        : "🔓 Abrir"
+                }
+            </button>
+
+        </div>
+
+    `;
 
 }
 
 
 // =====================================================
-// ABRIR / FECHAR PELO BOTÃO PRINCIPAL
+// BOTÃO PRINCIPAL
 // =====================================================
 
 botaoSistema?.addEventListener(
     "click",
     async function () {
+
+        alert(
+            "🔘 BOTÃO DO SISTEMA CLICADO"
+        );
+
 
         if (
             !lancamentoSelecionado
@@ -1497,19 +1230,23 @@ botaoSistema?.addEventListener(
 
 
 // =====================================================
-// ALTERNAR LANÇAMENTO
+// ABRIR / FECHAR
 // =====================================================
 
-window.alternarLancamento = async function () {
+window.alternarLancamento =
+    async function () {
 
-    alert("🔥 CLIQUE NO BOTÃO FOI DETECTADO!");
+        alert(
+            "🔥 ALTERNAR LANÇAMENTO EXECUTADO"
+        );
+
 
         if (
             !lancamentoSelecionado
         ) {
 
             alert(
-                "⚠️ Selecione um lançamento primeiro."
+                "⚠️ Nenhum lançamento selecionado."
             );
 
             return;
@@ -1538,61 +1275,42 @@ window.alternarLancamento = async function () {
             );
 
 
+        alert(
+            "DEBUG DA ABERTURA\n\n" +
+
+            "ID:\n" +
+            id +
+
+            "\n\nTurma ID:\n" +
+            dados.turmaId +
+
+            "\n\nDisciplina:\n" +
+            dados.disciplina +
+
+            "\n\nTrimestre:\n" +
+            dados.trimestre +
+
+            "\n\nNovo estado:\n" +
+            novoEstado
+        );
+
+
         try {
 
-            if (novoEstado) {
+            const confirmar =
+                confirm(
 
-                const confirmar =
-                    confirm(
+                    novoEstado
 
-                        "🔓 Abrir lançamento?\n\n" +
+                        ? "🔓 Abrir este lançamento?"
 
-                        "Professor: " +
-                        dados.professorNome +
+                        : "🔒 Fechar este lançamento?"
 
-                        "\nClasse: " +
-                        dados.classe +
-
-                        "\nTurma: " +
-                        dados.turmaNome +
-
-                        "\nDisciplina: " +
-                        dados.disciplina +
-
-                        "\nTrimestre: " +
-                        dados.trimestre
-
-                    );
+                );
 
 
-                if (!confirmar) {
-
-                    return;
-
-                }
-
-            }
-
-            else {
-
-                const confirmar =
-                    confirm(
-
-                        "🔒 Fechar este lançamento?\n\n" +
-
-                        "O professor deixará " +
-                        "de poder lançar notas."
-
-                    );
-
-
-                if (!confirmar) {
-
-                    return;
-
-                }
-
-            }
+            if (!confirmar)
+                return;
 
 
             await setDoc(
@@ -1641,9 +1359,17 @@ window.alternarLancamento = async function () {
                 },
 
                 {
-                    merge: true
+                    merge:
+                        true
                 }
 
+            );
+
+
+            alert(
+                "✅ DOCUMENTO GUARDADO NO FIRESTORE\n\n" +
+                "ID:\n" +
+                id
             );
 
 
@@ -1659,9 +1385,13 @@ window.alternarLancamento = async function () {
 
 
             alert(
+
                 novoEstado
-                    ? "✅ Lançamento aberto com sucesso!"
-                    : "🔒 Lançamento fechado com sucesso!"
+
+                    ? "🟢 LANÇAMENTO ABERTO COM SUCESSO!"
+
+                    : "🔒 LANÇAMENTO FECHADO COM SUCESSO!"
+
             );
 
         }
@@ -1669,13 +1399,13 @@ window.alternarLancamento = async function () {
         catch (erro) {
 
             console.error(
-                "Erro ao alterar lançamento:",
+                "❌ ERRO:",
                 erro
             );
 
 
             alert(
-                "❌ Não foi possível alterar o estado.\n\n" +
+                "❌ ERRO AO ABRIR/FECHAR\n\n" +
                 erro.message
             );
 
@@ -1685,7 +1415,7 @@ window.alternarLancamento = async function () {
 
 
 // =====================================================
-// VER LANÇAMENTO
+// VER
 // =====================================================
 
 window.verLancamento =
@@ -1696,7 +1426,7 @@ window.verLancamento =
         ) {
 
             alert(
-                "⚠️ Selecione um lançamento."
+                "⚠️ Nenhum lançamento selecionado."
             );
 
             return;
@@ -1752,7 +1482,7 @@ window.imprimirLancamento =
         ) {
 
             alert(
-                "⚠️ Selecione um lançamento."
+                "⚠️ Nenhum lançamento selecionado."
             );
 
             return;
@@ -1780,7 +1510,7 @@ window.imprimirLancamento =
         if (!janela) {
 
             alert(
-                "⚠️ O navegador bloqueou a janela de impressão."
+                "⚠️ O navegador bloqueou a impressão."
             );
 
             return;
@@ -1809,24 +1539,19 @@ window.imprimirLancamento =
                         padding: 30px;
                     }
 
-                    h1 {
-                        color: #1e3a8a;
-                    }
-
                     table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 25px;
+                        width:100%;
+                        border-collapse:collapse;
                     }
 
-                    th,
-                    td {
-                        border: 1px solid #999;
-                        padding: 10px;
+                    td,
+                    th {
+                        border:1px solid #999;
+                        padding:10px;
                     }
 
                     th {
-                        background: #eee;
+                        background:#eee;
                     }
 
                 </style>
@@ -1872,7 +1597,7 @@ window.imprimirLancamento =
                     <tr>
                         <th>Trimestre</th>
                         <td>
-                            ${dados.trimestre}º Trimestre
+                            ${dados.trimestre}
                         </td>
                     </tr>
 
@@ -1902,7 +1627,182 @@ window.imprimirLancamento =
 
 
 // =====================================================
-// PRIMEIRA ATUALIZAÇÃO DO BOTÃO
+// EVENTOS DOS FILTROS
 // =====================================================
 
-atualizarBotaoSistema();
+filtroProfessor?.addEventListener(
+    "change",
+    function () {
+
+        carregarClassesDoProfessor(
+            this.value
+        );
+
+
+        filtroTurma.innerHTML = `
+
+            <option value="">
+                Selecione primeiro a classe
+            </option>
+
+        `;
+
+        filtroTurma.disabled =
+            true;
+
+
+        filtroDisciplina.innerHTML = `
+
+            <option value="">
+                Selecione primeiro a turma
+            </option>
+
+        `;
+
+        filtroDisciplina.disabled =
+            true;
+
+
+        lancamentoSelecionado =
+            null;
+
+        atualizarBotaoSistema();
+
+    }
+);
+
+
+filtroClasse?.addEventListener(
+    "change",
+    function () {
+
+        carregarTurmasDaClasse(
+            this.value
+        );
+
+
+        filtroDisciplina.innerHTML = `
+
+            <option value="">
+                Selecione primeiro a turma
+            </option>
+
+        `;
+
+        filtroDisciplina.disabled =
+            true;
+
+
+        lancamentoSelecionado =
+            null;
+
+        atualizarBotaoSistema();
+
+    }
+);
+
+
+filtroTurma?.addEventListener(
+    "change",
+    function () {
+
+        carregarDisciplinasDaTurma(
+            this.value
+        );
+
+
+        lancamentoSelecionado =
+            null;
+
+        atualizarBotaoSistema();
+
+    }
+);
+
+
+filtroDisciplina?.addEventListener(
+    "change",
+    async function () {
+
+        if (!this.value)
+            return;
+
+
+        await mostrarLancamentoSelecionado();
+
+    }
+);
+
+
+filtroTrimestre?.addEventListener(
+    "change",
+    async function () {
+
+        await mostrarLancamentoSelecionado();
+
+    }
+);
+
+
+// =====================================================
+// INICIAR
+// =====================================================
+
+async function iniciarNotas() {
+
+    try {
+
+        alert(
+            "⏳ A CARREGAR NOTAS..."
+        );
+
+
+        await carregarProfessores();
+
+        await carregarTurmas();
+
+        preencherProfessores();
+
+        prepararFiltros();
+
+
+        mostrarMensagem(
+            "👨‍🏫 Selecione um professor.",
+            "aviso"
+        );
+
+
+        alert(
+            "✅ NOTAS.JS PRONTO!"
+        );
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        alert(
+            "❌ ERRO AO INICIAR\n\n" +
+            erro.message
+        );
+
+
+        mostrarMensagem(
+            "❌ Erro ao carregar dados.",
+            "erro"
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// INICIAR SISTEMA
+// =====================================================
+
+iniciarNotas();
