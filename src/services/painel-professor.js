@@ -575,10 +575,49 @@ if (abrirMiniPauta) {
             // GUARDAR DADOS DA MINI-PAUTA
             // =================================================
 
-            localStorage.setItem(
-                "turmaId",
-                turmaId
-            );
+          localStorage.setItem(
+    "trimestre",
+    trimestre
+);
+
+
+// =====================================================
+// ID ÚNICO DO LANÇAMENTO
+// MESMA REGRA DO ADMINISTRADOR
+// =====================================================
+
+const disciplinaNormalizada =
+    String(disciplina)
+        .replace(/\//g, "-")
+        .replace(/\s+/g, "_");
+
+const trimestreNormalizado =
+    String(trimestre)
+        .replace("º", "")
+        .replace("°", "")
+        .replace("ª", "")
+        .replace(" ", "")
+        .replace("Trimestre", "")
+        .trim();
+
+const idLancamento =
+    turmaId +
+    "_" +
+    disciplinaNormalizada +
+    "_" +
+    trimestreNormalizado;
+
+
+localStorage.setItem(
+    "idLancamento",
+    idLancamento
+);
+
+
+console.log(
+    "🔑 ID DO LANÇAMENTO:",
+    idLancamento
+);
 
 
             localStorage.setItem(
