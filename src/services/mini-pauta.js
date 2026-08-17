@@ -1017,85 +1017,143 @@ function aplicarEstadoEdicao(
 
 
 // =====================================================
-// CARREGAR ALUNOS
+// CARREGAR ALUNOS DA TURMA
 // =====================================================
 
 async function carregarAlunos() {
 
-    await carregarEnsino();
+    try {
 
-    await carregarNotas();
+        // =================================================
+        // 1. CARREGAR CONFIGURAÇÕES
+        // =================================================
 
-    await carregarControle();
+        await carregarEnsino();
+
+        await carregarNotas();
+
+        await carregarControle();
 
 
-    const alunosRef =
-        collection(
-            db,
-            "turmas",
-            turmaId,
-            "alunos"
+        // =================================================
+        // 2. BUSCAR ALUNOS DA TURMA
+        // =================================================
+
+        const alunosRef =
+            collection(
+                db,
+                "turmas",
+                turmaId,
+                "alunos"
+            );
+
+
+        const resultado =
+            await getDocs(
+                alunosRef
+            );
+
+
+        // =================================================
+        // 3. CRIAR LISTA DE ALUNOS
+        // =================================================
+
+        const alunos = [];
+
+
+        resultado.forEach(
+            documento => {
+
+                alunos.push({
+
+                    id:
+                        documento.id,
+
+                    ...documento.data()
+
+                });
+
+            }
         );
 
 
-    const resultado =
-        await getDocs(
-            alunosRef
+        // =================================================
+        // 4. DEBUG
+        // =================================================
+
+        alert(
+            "DEBUG ALUNOS DA TURMA\n\n" +
+
+            "Turma ID:\n" +
+            turmaId +
+
+            "\n\nQuantidade de alunos encontrados:\n" +
+            alunos.length
         );
 
-const controleAtual =
-    await getDoc(
-        controleRef
-    );
 
-const controle =
-    controleAtual.exists()
-        ? controleAtual.data()
-        : {};
-
-alert(
-    "DADOS DO CONTROLE\n\n" +
-    JSON.stringify(
-        controle,
-        null,
-        2
-    )
-);
-
-const sistemaContinuaAberto =
-    controle.sistemaAberto === true;
-
-const controlesAtuais =
-    controle.alunos || {};
-    
-    alunos.sort(
-        (a, b) =>
-            Number(a.numero) -
-            Number(b.numero)
-    );
+        console.log(
+            "ALUNOS ENCONTRADOS:",
+            alunos
+        );
 
 
-    lista.innerHTML =
-        "";
+        // =================================================
+        // 5. ORDENAR POR NÚMERO
+        // =================================================
+
+        alunos.sort(
+            (a, b) =>
+                Number(a.numero || 0) -
+                Number(b.numero || 0)
+        );
 
 
-    alunos.forEach(
-        aluno => {
+        // =================================================
+        // 6. LIMPAR TABELA
+        // =================================================
 
-            const nota =
-                notasGuardadas[
-                    aluno.numero
-                ] || {};
+        if (lista) {
 
+            lista.innerHTML =
+                "";
 
-            const podeEditar =
-                alunoPodeEditar(
-                    aluno.id,
-                    aluno.numero
-                );
+        }
 
 
-            lista.innerHTML += `
+        // =================================================
+        // 7. MOSTRAR ALUNOS
+        // =================================================
+
+        alunos.forEach(
+            aluno => {
+
+                // -----------------------------------------
+                // NOTA EXISTENTE
+                // -----------------------------------------
+
+                const nota =
+                    notasGuardadas[
+                        aluno.numero
+                    ] || {};
+
+
+                // -----------------------------------------
+                // VERIFICAR PERMISSÃO
+                // -----------------------------------------
+
+                const podeEditar =
+                    alunoPodeEditar(
+                        aluno.id,
+                        aluno.numero
+                    );
+
+
+                // -----------------------------------------
+                // LINHA
+                // -----------------------------------------
+
+                lista.innerHTML += `
 
 <tr data-aluno-id="${aluno.id}">
 
@@ -1121,8 +1179,7 @@ const controlesAtuais =
             type="number"
             min="0"
             max="${
-                ensino ===
-                "ensinoPrimario"
+                ensino === "ensinoPrimario"
                     ? 10
                     : 20
             }"
@@ -1141,8 +1198,7 @@ const controlesAtuais =
             type="number"
             min="0"
             max="${
-                ensino ===
-                "ensinoPrimario"
+                ensino === "ensinoPrimario"
                     ? 10
                     : 20
             }"
@@ -1158,6 +1214,7 @@ const controlesAtuais =
 
         <input
             class="mf"
+            type="text"
             readonly
             value="${nota.MF ?? ""}"
         >
@@ -1166,7 +1223,9 @@ const controlesAtuais =
 
 
     <td class="classificacao">
+
         ${nota.classificacao || ""}
+
     </td>
 
 
@@ -1194,54 +1253,100 @@ const controlesAtuais =
 
     </td>
 
-
 </tr>
 
-`;
+                `;
+
+            }
+        );
+
+
+        // =================================================
+        // 8. VERIFICAR BOTÃO GUARDAR
+        // =================================================
+
+        if (guardarNotas) {
+
+            const algumaLinhaEditavel =
+                alunos.some(
+                    aluno =>
+                        alunoPodeEditar(
+                            aluno.id,
+                            aluno.numero
+                        )
+                );
+
+
+            guardarNotas.disabled =
+                !algumaLinhaEditavel;
+
+
+            if (
+                algumaLinhaEditavel
+            ) {
+
+                guardarNotas.title =
+                    "Guardar lançamentos";
+
+            }
+            else {
+
+                guardarNotas.title =
+                    "Sistema fechado";
+
+            }
 
         }
-    );
 
 
-    // ---------------------------------------------
-    // ESTADO DO BOTÃO GUARDAR
-    // ---------------------------------------------
+        // =================================================
+        // 9. DEBUG FINAL
+        // =================================================
 
-    if (guardarNotas) {
+        console.log(
+            "MINI-PAUTA CARREGADA:",
+            {
+                turmaId,
+                turmaNome,
+                disciplina,
+                trimestre,
+                ensino,
+                quantidadeAlunos:
+                    alunos.length,
+                sistemaAberto,
+                controleAlunos
+            }
+        );
 
-        const algumaLinhaEditavel =
-            alunos.some(
-                aluno =>
-                    alunoPodeEditar(
-                        aluno.id,
-                        aluno.numero
-                    )
-            );
+    }
+
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO AO CARREGAR MINI-PAUTA:",
+            erro
+        );
 
 
-        guardarNotas.disabled =
-            !algumaLinhaEditavel;
+        alert(
+            "❌ ERRO AO CARREGAR MINI-PAUTA\n\n" +
+            erro.message
+        );
 
 
-        if (
-            algumaLinhaEditavel
-        ) {
+        if (estadoPauta) {
 
-            guardarNotas.title =
-                "Guardar lançamentos";
+            estadoPauta.innerHTML =
+                "❌ Erro ao carregar Mini-Pauta";
 
-        }
-        else {
-
-            guardarNotas.title =
-                "Sistema fechado";
+            estadoPauta.style.color =
+                "red";
 
         }
 
     }
 
 }
-
 
 // =====================================================
 // GUARDAR / ATUALIZAR
