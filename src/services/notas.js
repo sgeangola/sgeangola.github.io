@@ -888,16 +888,31 @@ function criarIdLancamento(
 ) {
 
     return (
-        turmaId +
+        String(turmaId || "").trim() +
         "_" +
-        disciplina
+        String(disciplina || "")
+            .trim()
             .replace(/\//g, "-")
             .replace(/\s+/g, "_") +
         "_" +
-        trimestre
+        String(trimestre || "")
+            .replace("º", "")
+            .replace("°", "")
+            .replace("ª", "")
+            .replace(" ", "")
+            .replace("Trimestre", "")
+            .trim()
     );
 
 }
+
+
+const idLancamento =
+    criarIdLancamento(
+        turmaId,
+        disciplina,
+        trimestre
+    );
 
 
 // =====================================================
