@@ -2092,9 +2092,9 @@ td.classificacao{
 
 
         <div>
-            <strong>Trimestre:</strong>
-            ${dados.trimestre}º
-        </div>
+    <strong>Trimestre:</strong>
+    ${dados.trimestre}.º Trimestre
+</div>
 
 
         <div>
