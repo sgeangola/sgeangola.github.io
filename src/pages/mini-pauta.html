@@ -163,14 +163,29 @@ width:90px;
 
 
 
-input{
+/* Campos de notas */
+input.mac,
+input.npt,
+input.mf {
+    width: 75px;
+    min-width: 75px;
+    padding: 6px 8px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 15px;
+}
 
-width:45px;
-padding:4px;
-border:1px solid #aaa;
-border-radius:5px;
-text-align:center;
+/* Chrome, Edge, Android e navegadores WebKit */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 
