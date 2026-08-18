@@ -1779,73 +1779,31 @@ function construirMiniPautaHTML(
 // ESTATÍSTICAS DA MINI-PAUTA
 // =====================================================
 
-const ensinoNormalizado =
+const ensino =
     String(
         dados.ensino || ""
     )
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
     .trim();
 
 
 // =====================================================
 // IDENTIFICAR O ENSINO
 // =====================================================
-//
-// Primeiro Ciclo:
-// 0–4    Mau
-// 5–9    Medíocre
-// 10–13  Suficiente
-// 14–16  Bom
-// 17–20  Muito Bom
-//
-// Ensino Primário:
-// 0–2    Mau
-// 3–4    Medíocre
-// 5–6    Suficiente
-// 7–8    Bom
-// 9–10   Muito Bom
-// =====================================================
 
 const primeiroCiclo =
-    ensinoNormalizado.includes("primeiro ciclo") ||
-    ensinoNormalizado.includes("primeirociclo") ||
-    (
-        ensinoNormalizado.includes("primeiro") &&
-        ensinoNormalizado.includes("ciclo")
-    );
+    ensino.includes("primeiro") &&
+    ensino.includes("ciclo");
 
-
-// =====================================================
-// MOSTRAR NO CONSOLE
-// =====================================================
 
 console.log(
-    "======================================"
-);
-
-console.log(
-    "📊 ESTATÍSTICA DA MINI-PAUTA"
-);
-
-console.log(
-    "Ensino recebido:",
+    "🎓 ENSINO:",
     dados.ensino
 );
 
 console.log(
-    "Ensino normalizado:",
-    ensinoNormalizado
-);
-
-console.log(
-    "É Primeiro Ciclo:",
+    "🎓 PRIMEIRO CICLO:",
     primeiroCiclo
-);
-
-console.log(
-    "======================================"
 );
 
 
@@ -1933,7 +1891,14 @@ const estatistica =
     classificacoes.map(
         item => ({
 
-            ...item,
+            nome:
+                item.nome,
+
+            minimo:
+                item.minimo,
+
+            maximo:
+                item.maximo,
 
             M: 0,
 
@@ -1957,11 +1922,21 @@ let semBomAproveitamento = 0;
 
 
 // =====================================================
-// ANALISAR ALUNOS
+// ANALISAR TODOS OS ALUNOS
 // =====================================================
 
 alunos.forEach(
     aluno => {
+
+        console.log(
+            "📊 ALUNO PARA ESTATÍSTICA:",
+            aluno
+        );
+
+
+        // ---------------------------------------------
+        // ESTADO
+        // ---------------------------------------------
 
         const estado =
             String(
@@ -1970,10 +1945,6 @@ alunos.forEach(
             .toLowerCase()
             .trim();
 
-
-        // =============================================
-        // DESISTIDO
-        // =============================================
 
         if (
             estado.includes("desist")
@@ -1986,10 +1957,6 @@ alunos.forEach(
         }
 
 
-        // =============================================
-        // TRANSFERIDO
-        // =============================================
-
         if (
             estado.includes("transfer")
         ) {
@@ -2001,23 +1968,62 @@ alunos.forEach(
         }
 
 
-        // =============================================
-        // MF — MÉDIA FINAL
-        // =============================================
+        // ---------------------------------------------
+        // OBTER MF
+        // ---------------------------------------------
+
+        let valorMF =
+            aluno.MF;
+
+
+        // aceitar também mf caso exista
+
+        if (
+            valorMF === undefined ||
+            valorMF === null ||
+            valorMF === ""
+        ) {
+
+            valorMF =
+                aluno.mf;
+
+        }
+
+
+        // ---------------------------------------------
+        // CONVERTER MF
+        // ---------------------------------------------
 
         const mf =
             Number(
                 String(
-                    aluno.MF ?? ""
+                    valorMF ?? ""
                 )
                 .replace(",", ".")
                 .trim()
             );
 
 
+        console.log(
+            "📌 MF:",
+            valorMF,
+            "→",
+            mf
+        );
+
+
+        // ---------------------------------------------
+        // MF INVÁLIDA
+        // ---------------------------------------------
+
         if (
             !Number.isFinite(mf)
         ) {
+
+            console.warn(
+                "⚠️ MF inválida:",
+                aluno
+            );
 
             return;
 
@@ -2027,9 +2033,9 @@ alunos.forEach(
         alunosValidos++;
 
 
-        // =============================================
+        // ---------------------------------------------
         // SEXO
-        // =============================================
+        // ---------------------------------------------
 
         const sexo =
             String(
@@ -2039,9 +2045,9 @@ alunos.forEach(
             .trim();
 
 
-        // =============================================
-        // ENCONTRAR CLASSIFICAÇÃO
-        // =============================================
+        // ---------------------------------------------
+        // LOCALIZAR CLASSIFICAÇÃO
+        // ---------------------------------------------
 
         const linha =
             estatistica.find(
@@ -2049,7 +2055,6 @@ alunos.forEach(
 
                     mf >= item.minimo &&
                     mf <= item.maximo
-
             );
 
 
@@ -2058,7 +2063,7 @@ alunos.forEach(
             console.warn(
                 "⚠️ MF fora da escala:",
                 mf,
-                aluno.nome
+                aluno
             );
 
             return;
@@ -2066,9 +2071,9 @@ alunos.forEach(
         }
 
 
-        // =============================================
+        // ---------------------------------------------
         // MASCULINO
-        // =============================================
+        // ---------------------------------------------
 
         if (
             sexo === "M" ||
@@ -2080,9 +2085,9 @@ alunos.forEach(
         }
 
 
-        // =============================================
+        // ---------------------------------------------
         // FEMININO
-        // =============================================
+        // ---------------------------------------------
 
         else if (
             sexo === "F" ||
@@ -2094,24 +2099,16 @@ alunos.forEach(
         }
 
 
-        // =============================================
+        // ---------------------------------------------
         // TOTAL
-        // =============================================
+        // ---------------------------------------------
 
         linha.total++;
 
 
-        // =============================================
+        // ---------------------------------------------
         // BOM APROVEITAMENTO
-        // =============================================
-        //
-        // Primeiro Ciclo:
-        // Bom começa em 14
-        //
-        // Ensino Primário:
-        // Bom começa em 7
-        //
-        // =============================================
+        // ---------------------------------------------
 
         const minimoBom =
             primeiroCiclo
@@ -2186,57 +2183,41 @@ const percentSemBom =
         : 0;
 
 
-// =====================================================
-// DEBUG FINAL
-// =====================================================
-
 console.log(
-    "📊 CLASSIFICAÇÕES:",
-    classificacoes
+    "📊 ESTATÍSTICA FINAL:",
+    estatistica
 );
 
 console.log(
-    "👨 Masculino:",
+    "👨 M:",
     totalM
 );
 
 console.log(
-    "👩 Feminino:",
+    "👩 F:",
     totalF
 );
 
 console.log(
-    "👥 Total:",
+    "👥 TOTAL:",
     totalClassificados
 );
 
 console.log(
-    "🎓 Alunos válidos:",
+    "🎓 VÁLIDOS:",
     alunosValidos
 );
 
 console.log(
-    "🟢 Bom aproveitamento:",
-    bomAproveitamento,
-    percentBom.toFixed(1) + "%"
-);
-
-console.log(
-    "🔴 Sem bom aproveitamento:",
-    semBomAproveitamento,
-    percentSemBom.toFixed(1) + "%"
-);
-
-console.log(
-    "🚫 Desistidos:",
+    "🚫 DESISTIDOS:",
     desistidos
 );
 
 console.log(
-    "🔄 Transferidos:",
+    "🔄 TRANSFERIDOS:",
     transferidos
 );
-
+    
     let linhas =
         "";
 
