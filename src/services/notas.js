@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS 10 CARREGADO!");
+alert("🔥 NOTAS.JS 9 CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1776,7 +1776,7 @@ alert(
 // ESTATÍSTICAS DA MINI-PAUTA
 // =====================================================
 
-const ensino =
+const ensinoTexto =
     String(
         dados.ensino || ""
     )
@@ -1789,18 +1789,45 @@ const ensino =
 // =====================================================
 
 const primeiroCiclo =
-    ensino.includes("primeiro") &&
-    ensino.includes("ciclo");
+    ensinoTexto.includes("primeiro ciclo") ||
+    ensinoTexto.includes("primeirociclo") ||
+    ensinoTexto === "ciclo";
 
+
+// =====================================================
+// DEBUG
+// =====================================================
 
 console.log(
-    "🎓 ENSINO:",
+    "================================="
+);
+
+console.log(
+    "📊 ESTATÍSTICAS DA MINI-PAUTA"
+);
+
+console.log(
+    "Turma ID:",
+    dados.turmaId
+);
+
+console.log(
+    "Ensino recebido:",
     dados.ensino
 );
 
 console.log(
-    "🎓 PRIMEIRO CICLO:",
+    "Primeiro Ciclo:",
     primeiroCiclo
+);
+
+console.log(
+    "Quantidade de alunos:",
+    alunos.length
+);
+
+console.log(
+    "================================="
 );
 
 
@@ -1881,7 +1908,7 @@ const classificacoes =
 
 
 // =====================================================
-// CONTADORES
+// CRIAR CONTADORES
 // =====================================================
 
 const estatistica =
@@ -1897,43 +1924,45 @@ const estatistica =
             maximo:
                 item.maximo,
 
-            M: 0,
+            M:
+                0,
 
-            F: 0,
+            F:
+                0,
 
-            total: 0
+            total:
+                0
 
         })
     );
 
 
-let desistidos = 0;
+let desistidos =
+    0;
 
-let transferidos = 0;
 
-let alunosValidos = 0;
+let transferidos =
+    0;
 
-let bomAproveitamento = 0;
 
-let semBomAproveitamento = 0;
+let alunosValidos =
+    0;
+
+
+let bomAproveitamento =
+    0;
+
+
+let semBomAproveitamento =
+    0;
 
 
 // =====================================================
-// ANALISAR TODOS OS ALUNOS
+// ANALISAR ALUNOS
 // =====================================================
 
 alunos.forEach(
     aluno => {
-
-        console.log(
-            "📊 ALUNO PARA ESTATÍSTICA:",
-            aluno
-        );
-
-
-        // ---------------------------------------------
-        // ESTADO
-        // ---------------------------------------------
 
         const estado =
             String(
@@ -1942,6 +1971,10 @@ alunos.forEach(
             .toLowerCase()
             .trim();
 
+
+        // ---------------------------------------------
+        // DESISTIDO
+        // ---------------------------------------------
 
         if (
             estado.includes("desist")
@@ -1953,6 +1986,10 @@ alunos.forEach(
 
         }
 
+
+        // ---------------------------------------------
+        // TRANSFERIDO
+        // ---------------------------------------------
 
         if (
             estado.includes("transfer")
@@ -1969,58 +2006,39 @@ alunos.forEach(
         // OBTER MF
         // ---------------------------------------------
 
-        let valorMF =
-            aluno.MF;
+        let mfTexto =
+            String(
+                aluno.MF ?? ""
+            )
+            .trim();
 
 
-        // aceitar também mf caso exista
+        mfTexto =
+            mfTexto.replace(
+                ",",
+                "."
+            );
 
-        if (
-            valorMF === undefined ||
-            valorMF === null ||
-            valorMF === ""
-        ) {
-
-            valorMF =
-                aluno.mf;
-
-        }
-
-
-        // ---------------------------------------------
-        // CONVERTER MF
-        // ---------------------------------------------
 
         const mf =
             Number(
-                String(
-                    valorMF ?? ""
-                )
-                .replace(",", ".")
-                .trim()
+                mfTexto
             );
 
 
         console.log(
-            "📌 MF:",
-            valorMF,
-            "→",
+            "Aluno:",
+            aluno.nome,
+            "MF:",
+            aluno.MF,
+            "MF convertido:",
             mf
         );
 
 
-        // ---------------------------------------------
-        // MF INVÁLIDA
-        // ---------------------------------------------
-
         if (
             !Number.isFinite(mf)
         ) {
-
-            console.warn(
-                "⚠️ MF inválida:",
-                aluno
-            );
 
             return;
 
@@ -2043,7 +2061,7 @@ alunos.forEach(
 
 
         // ---------------------------------------------
-        // LOCALIZAR CLASSIFICAÇÃO
+        // ENCONTRAR CLASSIFICAÇÃO
         // ---------------------------------------------
 
         const linha =
@@ -2051,7 +2069,9 @@ alunos.forEach(
                 item =>
 
                     mf >= item.minimo &&
+
                     mf <= item.maximo
+
             );
 
 
@@ -2060,7 +2080,7 @@ alunos.forEach(
             console.warn(
                 "⚠️ MF fora da escala:",
                 mf,
-                aluno
+                aluno.nome
             );
 
             return;
@@ -2110,7 +2130,7 @@ alunos.forEach(
         const minimoBom =
             primeiroCiclo
                 ? 14
-                : 7;
+                : 9;
 
 
         if (
@@ -2120,6 +2140,7 @@ alunos.forEach(
             bomAproveitamento++;
 
         }
+
         else {
 
             semBomAproveitamento++;
@@ -2136,24 +2157,39 @@ alunos.forEach(
 
 const totalM =
     estatistica.reduce(
-        (soma, item) =>
-            soma + item.M,
+        (
+            soma,
+            item
+        ) =>
+            soma +
+            item.M,
+
         0
     );
 
 
 const totalF =
     estatistica.reduce(
-        (soma, item) =>
-            soma + item.F,
+        (
+            soma,
+            item
+        ) =>
+            soma +
+            item.F,
+
         0
     );
 
 
 const totalClassificados =
     estatistica.reduce(
-        (soma, item) =>
-            soma + item.total,
+        (
+            soma,
+            item
+        ) =>
+            soma +
+            item.total,
+
         0
     );
 
@@ -2164,54 +2200,53 @@ const totalClassificados =
 
 const percentBom =
     alunosValidos > 0
+
         ? (
             bomAproveitamento /
             alunosValidos
         ) * 100
+
         : 0;
 
 
 const percentSemBom =
     alunosValidos > 0
+
         ? (
             semBomAproveitamento /
             alunosValidos
         ) * 100
+
         : 0;
 
 
 console.log(
-    "📊 ESTATÍSTICA FINAL:",
+    "📊 RESULTADO ESTATÍSTICA:",
     estatistica
 );
 
 console.log(
-    "👨 M:",
+    "M:",
     totalM
 );
 
 console.log(
-    "👩 F:",
+    "F:",
     totalF
 );
 
 console.log(
-    "👥 TOTAL:",
+    "TOTAL:",
     totalClassificados
 );
 
 console.log(
-    "🎓 VÁLIDOS:",
-    alunosValidos
-);
-
-console.log(
-    "🚫 DESISTIDOS:",
+    "Desistidos:",
     desistidos
 );
 
 console.log(
-    "🔄 TRANSFERIDOS:",
+    "Transferidos:",
     transferidos
 );
     
