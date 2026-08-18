@@ -1752,6 +1752,7 @@ async function obterDadosMiniPauta() {
                 : []
 
     };
+}
 
 // =====================================================
 // CONSTRUIR MINI-PAUTA COMPLETA
@@ -1764,6 +1765,16 @@ function construirMiniPautaHTML(
     const alunos =
         dados.alunos || [];
 
+    alert(
+    "ENSINO RECEBIDO:\n\n" +
+    "Ensino: " +
+    (dados.ensino || "VAZIO") +
+    "\n\nTurma ID: " +
+    (dados.turmaId || "VAZIO") +
+    "\n\nTurma: " +
+    (dados.turmaNome || "VAZIO")
+);
+    
 // =====================================================
 // ESTATÍSTICAS DA MINI-PAUTA
 // =====================================================
