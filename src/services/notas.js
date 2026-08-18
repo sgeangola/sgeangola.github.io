@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOUP!");
+alert("🔥 NOTAS.JS CARREGOUK!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -670,6 +670,65 @@ filtroTurma?.addEventListener(
         );
 
         lancamentoSelecionado = null;
+    }
+);
+
+// =====================================================
+// DISCIPLINA → TRIMESTRE
+// =====================================================
+
+filtroDisciplina?.addEventListener(
+    "change",
+    async function () {
+
+        alert(
+            "🔥 26 — DISCIPLINA SELECIONADA: " +
+            this.value
+        );
+
+        if (!this.value) {
+
+            alert(
+                "⚠️ NENHUMA DISCIPLINA SELECIONADA!"
+            );
+
+            return;
+        }
+
+        if (!filtroTrimestre) {
+
+            alert(
+                "❌ filtroTrimestre NÃO FOI ENCONTRADO!"
+            );
+
+            return;
+        }
+
+        filtroTrimestre.innerHTML = `
+
+            <option value="">
+                Selecionar trimestre
+            </option>
+
+            <option value="1">
+                1.º Trimestre
+            </option>
+
+            <option value="2">
+                2.º Trimestre
+            </option>
+
+            <option value="3">
+                3.º Trimestre
+            </option>
+
+        `;
+
+        filtroTrimestre.disabled = false;
+
+        alert(
+            "🔥 27 — TRIMESTRES COLOCADOS!"
+        );
     }
 );
 
