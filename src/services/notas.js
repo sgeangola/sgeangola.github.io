@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOU!");
+alert("🔥 NOTAS.JS CARREGOU OK!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
