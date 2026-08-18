@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOUU!");
+alert("🔥 NOTAS.JS CARREGOUR!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -905,9 +905,180 @@ filtroTrimestre?.addEventListener(
             return;
         }
 
-        await lerLancamentoExistente();
+       await lerLancamentoExistente();
+
+await mostrarNotasDoLancamento();
     }
 );
+
+// =====================================================
+// MOSTRAR NOTAS DO LANÇAMENTO
+// =====================================================
+
+async function mostrarNotasDoLancamento() {
+
+    alert("🔥 33 — VOU MOSTRAR AS NOTAS!");
+
+    const turmaId =
+        filtroTurma?.value;
+
+    const disciplina =
+        filtroDisciplina?.value;
+
+    const trimestre =
+        filtroTrimestre?.value;
+
+    if (
+        !turmaId ||
+        !disciplina ||
+        !trimestre
+    ) {
+        return;
+    }
+
+    const id =
+        criarIdLancamento(
+            turmaId,
+            disciplina,
+            trimestre
+        );
+
+    const referencia =
+        doc(
+            db,
+            "notas",
+            id
+        );
+
+    const snapshot =
+        await getDoc(
+            referencia
+        );
+
+    if (!snapshot.exists()) {
+
+        alert(
+            "⚠️ LANÇAMENTO NÃO ENCONTRADO."
+        );
+
+        return;
+    }
+
+    const dados =
+        snapshot.data();
+
+    const notasLancadas =
+        Array.isArray(dados.alunos)
+            ? dados.alunos
+            : [];
+
+    alert(
+        "🔥 34 — NOTAS RECEBIDAS: " +
+        notasLancadas.length
+    );
+
+    if (!notasLista) {
+
+        alert(
+            "❌ notasLista NÃO FOI ENCONTRADO!"
+        );
+
+        return;
+    }
+
+    notasLista.innerHTML = "";
+
+    notasLancadas.forEach(
+        (aluno, indice) => {
+
+            const matricula =
+                aluno.matricula ||
+                aluno.codigoAluno ||
+                aluno.numeroMatricula ||
+                "";
+
+            const nome =
+                aluno.nome ||
+                aluno.nomeAluno ||
+                "—";
+
+            const sexo =
+                aluno.sexo ||
+                aluno.Sexo ||
+                "—";
+
+            const mac =
+                aluno.MAC ??
+                aluno.mac ??
+                "";
+
+            const npt =
+                aluno.NPT ??
+                aluno.npt ??
+                "";
+
+            const mf =
+                aluno.MF ??
+                aluno.mf ??
+                "";
+
+            const classificacao =
+                aluno.classificacao ||
+                "";
+
+            const numero =
+                aluno.numero ??
+                aluno.n ??
+                (indice + 1);
+
+            const tr =
+                document.createElement("tr");
+
+            tr.innerHTML = `
+
+                <td>
+                    ${numero}
+                </td>
+
+                <td>
+                    ${nome}
+                </td>
+
+                <td>
+                    ${sexo}
+                </td>
+
+                <td>
+                    ${matricula}
+                </td>
+
+                <td>
+                    ${mac}
+                </td>
+
+                <td>
+                    ${npt}
+                </td>
+
+                <td>
+                    ${mf}
+                </td>
+
+                <td>
+                    ${classificacao}
+                </td>
+
+            `;
+
+            notasLista.appendChild(tr);
+
+        }
+    );
+
+    alert(
+        "🔥 35 — TABELA PREENCHIDA!"
+    );
+}
 
 // =====================================================
 // INICIAR
