@@ -1640,6 +1640,68 @@ async function obterDadosMiniPauta() {
     }
 
 
+// =====================================================
+    // OBTER ENSINO ATRAVÉS DO ID DA TURMA
+    // =====================================================
+
+    let ensino = "";
+
+    try {
+
+        if (dados.turmaId) {
+
+            const turmaRef =
+                doc(
+                    db,
+                    "turmas",
+                    dados.turmaId
+                );
+
+            const turmaSnap =
+                await getDoc(
+                    turmaRef
+                );
+
+
+            if (turmaSnap.exists()) {
+
+                const dadosTurma =
+                    turmaSnap.data();
+
+
+                ensino =
+                    String(
+                        dadosTurma.ensino ||
+                        dadosTurma.nivelEnsino ||
+                        dadosTurma.nivel ||
+                        ""
+                    ).trim();
+
+
+                console.log(
+                    "🎓 ENSINO DA TURMA:",
+                    ensino
+                );
+
+            }
+
+        }
+
+    }
+    catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível obter o ensino da turma:",
+            erro
+        );
+
+    }
+
+
+    // =====================================================
+    // RETORNAR DADOS COMPLETOS
+    // =====================================================
+
     return {
 
         escolaId:
@@ -1658,6 +1720,9 @@ async function obterDadosMiniPauta() {
             dados.classe ||
             "—",
 
+        turmaId:
+            dados.turmaId,
+
         turmaNome:
             notas.turmaNome ||
             dados.turmaNome ||
@@ -1673,12 +1738,12 @@ async function obterDadosMiniPauta() {
             dados.trimestre ||
             "—",
 
+        // IMPORTANTE:
+        // Ensino vem diretamente da turma
+
         ensino:
-    notas.ensino ||
-    dados.ensino ||
-    localStorage.getItem("ensino") ||
-    "",
-        
+            ensino,
+
         alunos:
             Array.isArray(
                 notas.alunos
@@ -1687,9 +1752,6 @@ async function obterDadosMiniPauta() {
                 : []
 
     };
-
-}
-
 
 // =====================================================
 // CONSTRUIR MINI-PAUTA COMPLETA
