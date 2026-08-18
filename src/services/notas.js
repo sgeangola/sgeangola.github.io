@@ -3,7 +3,7 @@
 // SGE ANGOLA
 // =====================================================
 
-alert("🔥 NOTAS.JS DF CARREGADO!");
+alert("🔥 NOTAS.JS Dg CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1360,7 +1360,33 @@ async function obterDadosMiniPauta() {
             ? notas.alunos
             : [];
 
+console.log(
+    "======================================"
+);
 
+console.log(
+    "🔎 DEBUG — NOTAS GUARDADAS NO LANÇAMENTO"
+);
+
+console.log(
+    "Quantidade de notas:",
+    notasLancadas.length
+);
+
+console.log(
+    "Primeira nota:",
+    notasLancadas[0]
+);
+
+console.log(
+    "Todas as notas:",
+    notasLancadas
+);
+
+console.log(
+    "======================================"
+);
+    
     // =================================================
     // ASSOCIAR NOTAS AOS ALUNOS
     // =================================================
@@ -1429,77 +1455,107 @@ async function obterDadosMiniPauta() {
                         aluno.MF ??
                         "",
 
-                    classificacao:
-                        notaEncontrada?.classificacao ??
-                        aluno.classificacao ??
-                        ""
-
-                };
-
-            }
-        );
-
-
-    return {
-
-        escolaId:
-
-            escolaId,
-
-        nomeEscola:
-
-            nomeEscola,
-
-        professorNome:
-
-            notas.professorNome ||
-            dados.professorNome ||
-            "—",
-
-        classe:
-
-            notas.classe ||
-            dados.classe ||
-            "—",
-
-        turmaId:
-
-            dados.turmaId,
-
-        turmaNome:
-
-            notas.turmaNome ||
-            dados.turmaNome ||
-            dadosTurma.nome ||
-            dadosTurma.turma ||
-            "—",
-
-        disciplina:
-
-            notas.disciplina ||
-            dados.disciplina ||
-            "—",
-
-        trimestre:
-
-            notas.trimestre ||
-            dados.trimestre ||
-            "—",
-
-        ensino:
-
-            ensino,
-
-        alunos:
-
-            alunosComNotas,
-
-        notasLancadas:
-
-            notasLancadas
+         classificacao:
+            notaEncontrada?.classificacao ??
+            aluno.classificacao ??
+            ""
 
     };
+
 }
+);
+
+
+// =================================================
+// DEBUG — VERIFICAR ALUNOS + NOTAS
+// =================================================
+
+console.log(
+    "======================================"
+);
+
+console.log(
+    "📋 ALUNOS COM NOTAS"
+);
+
+console.log(
+    "Quantidade:",
+    alunosComNotas.length
+);
+
+console.log(
+    "Primeiro aluno:",
+    alunosComNotas[0]
+);
+
+console.log(
+    "======================================"
+);
+
+
+// =================================================
+// RETORNAR DADOS COMPLETOS
+// =================================================
+
+return {
+
+    escolaId:
+
+        escolaId,
+
+    nomeEscola:
+
+        nomeEscola,
+
+    professorNome:
+
+        notas.professorNome ||
+        dados.professorNome ||
+        "—",
+
+    classe:
+
+        notas.classe ||
+        dados.classe ||
+        "—",
+
+    turmaId:
+
+        dados.turmaId,
+
+    turmaNome:
+
+        notas.turmaNome ||
+        dados.turmaNome ||
+        dadosTurma.nome ||
+        dadosTurma.turma ||
+        "—",
+
+    disciplina:
+
+        notas.disciplina ||
+        dados.disciplina ||
+        "—",
+
+    trimestre:
+
+        notas.trimestre ||
+        dados.trimestre ||
+        "—",
+
+    ensino:
+
+        ensino,
+
+    alunos:
+
+        alunosComNotas,
+
+    notasLancadas:
+
+        notasLancadas
+
+};
 
 // =====================================================
 // CONSTRUIR MINI-PAUTA HTML
