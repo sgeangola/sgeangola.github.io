@@ -1124,6 +1124,8 @@ async function () {
 
 async function obterDadosMiniPauta() {
 
+    alert("🚨 ENTREI EM obterDadosMiniPauta()");
+    
     if (!lancamentoSelecionado) {
 
         throw new Error(
