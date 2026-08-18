@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOUO!");
+alert("🔥 NOTAS.JS CARREGOUL!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -209,6 +209,152 @@ function preencherProfessores() {
         professores.length
     );
 }
+
+// =====================================================
+// PROFESSOR → CLASSES
+// =====================================================
+
+function carregarClassesDoProfessor(professorId) {
+
+    alert("🔥 12 — CARREGAR CLASSES DO PROFESSOR");
+
+    if (!filtroClasse) {
+
+        alert(
+            "❌ filtroClasse NÃO FOI ENCONTRADO!"
+        );
+
+        return;
+    }
+
+    filtroClasse.innerHTML = `
+        <option value="">
+            Selecionar classe
+        </option>
+    `;
+
+    filtroClasse.disabled = true;
+
+    professorSelecionado =
+        professores.find(
+            professor =>
+                professor.id === professorId
+        ) || null;
+
+    if (!professorSelecionado) {
+
+        alert(
+            "⚠️ PROFESSOR NÃO ENCONTRADO!"
+        );
+
+        return;
+    }
+
+    const atribuicoes =
+        Array.isArray(
+            professorSelecionado.atribuicoes
+        )
+            ? professorSelecionado.atribuicoes
+            : [];
+
+    alert(
+        "🔥 13 — ATRIBUIÇÕES ENCONTRADAS: " +
+        atribuicoes.length
+    );
+
+    const classes = new Map();
+
+    atribuicoes.forEach(atribuicao => {
+
+        const classe =
+            String(
+                atribuicao.classe || ""
+            ).trim();
+
+        if (!classe) return;
+
+        const chave =
+            classe.toLowerCase();
+
+        if (!classes.has(chave)) {
+
+            classes.set(
+                chave,
+                classe
+            );
+
+        }
+
+    });
+
+    classes.forEach(classe => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = classe;
+        option.textContent = classe;
+
+        filtroClasse.appendChild(option);
+
+    });
+
+    filtroClasse.disabled =
+        classes.size === 0;
+
+    alert(
+        "🔥 14 — CLASSES COLOCADAS: " +
+        classes.size
+    );
+
+    console.log(
+        "📚 CLASSES:",
+        [...classes.values()]
+    );
+}
+
+// =====================================================
+// EVENTO — PROFESSOR
+// =====================================================
+
+filtroProfessor?.addEventListener(
+    "change",
+    function () {
+
+        alert(
+            "🔥 15 — PROFESSOR SELECIONADO: " +
+            this.value
+        );
+
+        carregarClassesDoProfessor(
+            this.value
+        );
+
+        if (filtroTurma) {
+
+            filtroTurma.innerHTML = `
+                <option value="">
+                    Selecione primeiro a classe
+                </option>
+            `;
+
+            filtroTurma.disabled = true;
+        }
+
+        if (filtroDisciplina) {
+
+            filtroDisciplina.innerHTML = `
+                <option value="">
+                    Selecione primeiro a turma
+                </option>
+            `;
+
+            filtroDisciplina.disabled = true;
+        }
+
+        lancamentoSelecionado = null;
+    }
+);
 
 // =====================================================
 // INICIAR
