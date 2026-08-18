@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS d0 CARREGADO!");
+alert("🔥 NOTAS.JS d9 CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1768,8 +1768,19 @@ const alunos =
     dados.alunos || [];
 
 alert(
-    "ALUNOS ENCONTRADOS: " +
-    alunos.length
+    "TESTE DOS DADOS REAIS\n\n" +
+    "Quantidade de alunos: " +
+    alunos.length +
+    "\n\nPRIMEIRO ALUNO:\n\n" +
+    (
+        alunos.length > 0
+            ? JSON.stringify(
+                alunos[0],
+                null,
+                2
+            )
+            : "NENHUM ALUNO"
+    )
 );
     
 // =====================================================
