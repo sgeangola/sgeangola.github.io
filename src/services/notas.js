@@ -733,6 +733,183 @@ filtroDisciplina?.addEventListener(
 );
 
 // =====================================================
+// CRIAR ID DO LANÇAMENTO
+// =====================================================
+
+function criarIdLancamento(
+    turmaId,
+    disciplina,
+    trimestre
+) {
+
+    const turma =
+        String(turmaId || "")
+            .trim();
+
+    const materia =
+        String(disciplina || "")
+            .trim()
+            .replace(/\//g, "-")
+            .replace(/\s+/g, "_");
+
+    const tri =
+        String(trimestre || "")
+            .replace("º", "")
+            .replace("°", "")
+            .replace("ª", "")
+            .replace("Trimestre", "")
+            .replace(/\s+/g, "")
+            .trim();
+
+    return `${turma}_${materia}_${tri}`;
+}
+
+
+// =====================================================
+// LER LANÇAMENTO EXISTENTE
+// =====================================================
+
+async function lerLancamentoExistente() {
+
+    alert(
+        "🔥 28 — ENTROU EM lerLancamentoExistente()"
+    );
+
+    const turmaId =
+        filtroTurma?.value;
+
+    const disciplina =
+        filtroDisciplina?.value;
+
+    const trimestre =
+        filtroTrimestre?.value;
+
+    if (
+        !turmaId ||
+        !disciplina ||
+        !trimestre
+    ) {
+
+        alert(
+            "⚠️ FALTAM DADOS PARA BUSCAR O LANÇAMENTO."
+        );
+
+        return;
+    }
+
+    const id =
+        criarIdLancamento(
+            turmaId,
+            disciplina,
+            trimestre
+        );
+
+    alert(
+        "🔥 29 — ID DO LANÇAMENTO:\n\n" +
+        id
+    );
+
+    try {
+
+        const referencia =
+            doc(
+                db,
+                "notas",
+                id
+            );
+
+        const snapshot =
+            await getDoc(
+                referencia
+            );
+
+        alert(
+            "🔥 30 — DOCUMENTO CONSULTADO!"
+        );
+
+        if (!snapshot.exists()) {
+
+            alert(
+                "⚠️ 31 — ESTE LANÇAMENTO NÃO EXISTE."
+            );
+
+            console.log(
+                "❌ Documento não encontrado:",
+                id
+            );
+
+            return;
+        }
+
+        const dados =
+            snapshot.data();
+
+        console.log(
+            "📦 DADOS COMPLETOS DO LANÇAMENTO:",
+            dados
+        );
+
+        alert(
+            "🔥 31 — LANÇAMENTO ENCONTRADO!\n\n" +
+            "Alunos guardados: " +
+            (
+                Array.isArray(dados.alunos)
+                    ? dados.alunos.length
+                    : 0
+            )
+        );
+
+        console.log(
+            "👨‍🎓 ALUNOS GUARDADOS:",
+            dados.alunos
+        );
+
+        console.log(
+            "📝 PRIMEIRO ALUNO:",
+            Array.isArray(dados.alunos)
+                ? dados.alunos[0]
+                : null
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO AO LER LANÇAMENTO:",
+            erro
+        );
+
+        alert(
+            "❌ ERRO AO LER LANÇAMENTO:\n\n" +
+            erro.message
+        );
+    }
+}
+
+
+// =====================================================
+// EVENTO — TRIMESTRE
+// =====================================================
+
+filtroTrimestre?.addEventListener(
+    "change",
+    async function () {
+
+        alert(
+            "🔥 32 — TRIMESTRE SELECIONADO: " +
+            this.value
+        );
+
+        if (!this.value) {
+
+            return;
+        }
+
+        await lerLancamentoExistente();
+    }
+);
+
+// =====================================================
 // INICIAR
 // =====================================================
 
