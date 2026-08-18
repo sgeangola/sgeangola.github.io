@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOU OK!");
+alert("🔥 NOTAS.JS CARREGOUO!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -162,6 +162,55 @@ async function carregarTurmas() {
 }
 
 // =====================================================
+// PREENCHER PROFESSORES
+// =====================================================
+
+function preencherProfessores() {
+
+    alert("🔥 9 — ENTROU EM preencherProfessores()");
+
+    if (!filtroProfessor) {
+
+        alert(
+            "❌ filtroProfessor NÃO FOI ENCONTRADO!"
+        );
+
+        return;
+    }
+
+    filtroProfessor.innerHTML = `
+        <option value="">
+            Selecionar professor
+        </option>
+    `;
+
+    professores.forEach(professor => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            professor.id;
+
+        option.textContent =
+            professor.codigoProfessor
+                ? `${professor.codigoProfessor} — ${professor.nome}`
+                : (
+                    professor.nome ||
+                    "Professor sem nome"
+                );
+
+        filtroProfessor.appendChild(option);
+
+    });
+
+    alert(
+        "🔥 10 — PROFESSORES COLOCADOS NO SELECT: " +
+        professores.length
+    );
+}
+
+// =====================================================
 // INICIAR
 // =====================================================
 
@@ -171,13 +220,15 @@ async function iniciarNotas() {
 
     try {
 
-        await carregarProfessores();
+       await carregarProfessores();
 
-        await carregarTurmas();
+await carregarTurmas();
 
-        alert(
-            "🔥 8 — PROFESSORES E TURMAS CARREGADOS!"
-        );
+preencherProfessores();
+
+alert(
+    "🔥 11 — PROFESSORES PREENCHIDOS NO SELECT!"
+);
 
     }
     catch (erro) {
