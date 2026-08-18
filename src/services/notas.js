@@ -1353,147 +1353,91 @@ async function obterDadosMiniPauta() {
     );
 
 
-    // =================================================
-    // NOTAS LANÇADAS
-    // =================================================
+// =================================================
+// NOTAS LANÇADAS
+// =================================================
 
-    const notasLancadas =
-        Array.isArray(notas.alunos)
-            ? notas.alunos
-            : [];
-
-console.log(
-    "======================================"
-);
-
-console.log(
-    "🔎 DEBUG — NOTAS GUARDADAS NO LANÇAMENTO"
-);
-
-console.log(
-    "Quantidade de notas:",
-    notasLancadas.length
-);
-
-console.log(
-    "Primeira nota:",
-    notasLancadas[0]
-);
-
-console.log(
-    "Todas as notas:",
-    notasLancadas
-);
-
-console.log(
-    "======================================"
-);
-    
-    // =================================================
-    // ASSOCIAR NOTAS AOS ALUNOS
-    // =================================================
-
-    const alunosComNotas =
-        alunosDaTurma.map(
-            (aluno, indice) => {
-
-                const matriculaAluno =
-                    String(
-                        aluno.matricula ||
-                        aluno.codigoAluno ||
-                        aluno.numeroMatricula ||
-                        ""
-                    )
-                    .trim();
-
-
-                const notaEncontrada =
-                    notasLancadas.find(
-                        nota => {
-
-                            const matriculaNota =
-                                String(
-                                    nota.matricula ||
-                                    nota.codigoAluno ||
-                                    nota.numeroMatricula ||
-                                    ""
-                                )
-                                .trim();
-
-                            return (
-                                matriculaAluno &&
-                                matriculaNota &&
-                                matriculaAluno ===
-                                matriculaNota
-                            );
-                        }
-                    );
-
-
-                return {
-
-                    ...aluno,
-
-                    numero:
-                        aluno.numero ??
-                        aluno.n ??
-                        (indice + 1),
-
-                    MAC:
-                        notaEncontrada?.MAC ??
-                        notaEncontrada?.mac ??
-                        aluno.MAC ??
-                        "",
-
-                    NPT:
-                        notaEncontrada?.NPT ??
-                        notaEncontrada?.npt ??
-                        aluno.NPT ??
-                        "",
-
-                    MF:
-                        notaEncontrada?.MF ??
-                        notaEncontrada?.mf ??
-                        aluno.MF ??
-                        "",
-
-         classificacao:
-            notaEncontrada?.classificacao ??
-            aluno.classificacao ??
-            ""
-
-    };
-
-}
-);
+const notasLancadas =
+    Array.isArray(notas.alunos)
+        ? notas.alunos
+        : [];
 
 
 // =================================================
-// DEBUG — VERIFICAR ALUNOS + NOTAS
+// ASSOCIAR NOTAS AOS ALUNOS
 // =================================================
 
-console.log(
-    "======================================"
-);
+const alunosComNotas =
+    alunosDaTurma.map(
+        (aluno, indice) => {
 
-console.log(
-    "📋 ALUNOS COM NOTAS"
-);
+            const matriculaAluno =
+                String(
+                    aluno.matricula ||
+                    aluno.codigoAluno ||
+                    aluno.numeroMatricula ||
+                    ""
+                ).trim();
 
-console.log(
-    "Quantidade:",
-    alunosComNotas.length
-);
 
-console.log(
-    "Primeiro aluno:",
-    alunosComNotas[0]
-);
+            const notaEncontrada =
+                notasLancadas.find(
+                    nota => {
 
-console.log(
-    "======================================"
-);
+                        const matriculaNota =
+                            String(
+                                nota.matricula ||
+                                nota.codigoAluno ||
+                                nota.numeroMatricula ||
+                                ""
+                            ).trim();
 
+                        return (
+                            matriculaAluno &&
+                            matriculaNota &&
+                            matriculaAluno ===
+                            matriculaNota
+                        );
+                    }
+                );
+
+
+            return {
+
+                ...aluno,
+
+                numero:
+                    aluno.numero ??
+                    aluno.n ??
+                    (indice + 1),
+
+                MAC:
+                    notaEncontrada?.MAC ??
+                    notaEncontrada?.mac ??
+                    aluno.MAC ??
+                    "",
+
+                NPT:
+                    notaEncontrada?.NPT ??
+                    notaEncontrada?.npt ??
+                    aluno.NPT ??
+                    "",
+
+                MF:
+                    notaEncontrada?.MF ??
+                    notaEncontrada?.mf ??
+                    aluno.MF ??
+                    "",
+
+                classificacao:
+                    notaEncontrada?.classificacao ??
+                    aluno.classificacao ??
+                    ""
+
+            };
+
+        }
+    );
 
 // =================================================
 // RETORNAR DADOS COMPLETOS
