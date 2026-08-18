@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS 10 CARREGADO!");
+alert("🔥 NOTAS.JS 11 CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1762,17 +1762,14 @@ function construirMiniPautaHTML(
     dados
 ) {
 
-    const alunos =
-        dados.alunos || [];
+    alert("🔥 ENTROU NA CONSTRUIR MINI-PAUTA");
 
-    alert(
-    "ENSINO RECEBIDO:\n\n" +
-    "Ensino: " +
-    (dados.ensino || "VAZIO") +
-    "\n\nTurma ID: " +
-    (dados.turmaId || "VAZIO") +
-    "\n\nTurma: " +
-    (dados.turmaNome || "VAZIO")
+const alunos =
+    dados.alunos || [];
+
+alert(
+    "ALUNOS ENCONTRADOS: " +
+    alunos.length
 );
     
 // =====================================================
