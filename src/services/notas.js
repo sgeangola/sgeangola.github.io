@@ -2591,7 +2591,7 @@ td.classificacao{
 
 
 <!-- =========================================
-     ESTATÍSTICA
+     ESTATÍSTICA DA MINI-PAUTA
 ========================================== -->
 
 <div class="estatisticas">
@@ -2599,6 +2599,7 @@ td.classificacao{
     <h3>
         Estatística do Aproveitamento
     </h3>
+
 
     <table>
 
@@ -2626,6 +2627,7 @@ td.classificacao{
 
         </thead>
 
+
         <tbody>
 
             ${linhasEstatistica}
@@ -2640,11 +2642,14 @@ td.classificacao{
         <div>
 
             <strong>
-                Bom aproveitamento:
+                Bom aproveitamento
             </strong>
+
+            <br>
 
             ${bomAproveitamento}
-            (${percentBom.toFixed(1)}%)
+            —
+            ${percentBom.toFixed(1)}%
 
         </div>
 
@@ -2652,11 +2657,14 @@ td.classificacao{
         <div>
 
             <strong>
-                Sem bom aproveitamento:
+                Sem bom aproveitamento
             </strong>
+
+            <br>
 
             ${semBomAproveitamento}
-            (${percentSemBom.toFixed(1)}%)
+            —
+            ${percentSemBom.toFixed(1)}%
 
         </div>
 
@@ -2664,8 +2672,10 @@ td.classificacao{
         <div>
 
             <strong>
-                Desistidos:
+                Desistidos
             </strong>
+
+            <br>
 
             ${desistidos}
 
@@ -2675,8 +2685,10 @@ td.classificacao{
         <div>
 
             <strong>
-                Transferidos:
+                Transferidos
             </strong>
+
+            <br>
 
             ${transferidos}
 
@@ -2685,7 +2697,6 @@ td.classificacao{
     </div>
 
 </div>
-
 
 <!-- =========================================
      ASSINATURA
