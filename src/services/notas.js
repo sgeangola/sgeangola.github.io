@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOUI!");
+alert("🔥 NOTAS.JS CARREGOUP!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -523,6 +523,151 @@ filtroClasse?.addEventListener(
 
             filtroDisciplina.disabled = true;
         }
+
+        lancamentoSelecionado = null;
+    }
+);
+
+// =====================================================
+// TURMA → DISCIPLINAS
+// =====================================================
+
+function carregarDisciplinasDaTurma(turmaId) {
+
+    alert(
+        "🔥 21 — TURMA SELECIONADA: " +
+        turmaId
+    );
+
+    if (!filtroDisciplina) {
+
+        alert(
+            "❌ filtroDisciplina NÃO FOI ENCONTRADO!"
+        );
+
+        return;
+    }
+
+    filtroDisciplina.innerHTML = `
+        <option value="">
+            Selecionar disciplina
+        </option>
+    `;
+
+    filtroDisciplina.disabled = true;
+
+    if (!professorSelecionado) {
+
+        alert(
+            "❌ NENHUM PROFESSOR SELECIONADO!"
+        );
+
+        return;
+    }
+
+    if (!turmaId) {
+
+        alert(
+            "⚠️ NENHUMA TURMA SELECIONADA!"
+        );
+
+        return;
+    }
+
+    const atribuicoes =
+        Array.isArray(
+            professorSelecionado.atribuicoes
+        )
+            ? professorSelecionado.atribuicoes
+            : [];
+
+    alert(
+        "🔥 22 — ATRIBUIÇÕES DO PROFESSOR: " +
+        atribuicoes.length
+    );
+
+    const disciplinas = new Set();
+
+    atribuicoes.forEach(atribuicao => {
+
+        const atribuicaoTurmaId =
+            String(
+                atribuicao.turmaId || ""
+            ).trim();
+
+        if (
+            atribuicaoTurmaId !==
+            String(turmaId).trim()
+        ) {
+            return;
+        }
+
+        const disciplina =
+            String(
+                atribuicao.disciplina || ""
+            ).trim();
+
+        if (disciplina) {
+
+            disciplinas.add(
+                disciplina
+            );
+        }
+
+    });
+
+    alert(
+        "🔥 23 — DISCIPLINAS ENCONTRADAS: " +
+        disciplinas.size
+    );
+
+    console.log(
+        "📚 DISCIPLINAS:",
+        [...disciplinas]
+    );
+
+    disciplinas.forEach(disciplina => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            disciplina;
+
+        option.textContent =
+            disciplina;
+
+        filtroDisciplina.appendChild(
+            option
+        );
+
+    });
+
+    filtroDisciplina.disabled =
+        disciplinas.size === 0;
+
+    alert(
+        "🔥 24 — DISCIPLINAS COLOCADAS NO SELECT: " +
+        disciplinas.size
+    );
+}
+
+
+// =====================================================
+// EVENTO — TURMA
+// =====================================================
+
+filtroTurma?.addEventListener(
+    "change",
+    function () {
+
+        alert(
+            "🔥 25 — EVENTO DA TURMA FUNCIONOU!"
+        );
+
+        carregarDisciplinasDaTurma(
+            this.value
+        );
 
         lancamentoSelecionado = null;
     }
