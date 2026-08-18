@@ -2971,10 +2971,13 @@ td.classificacao{
 window.verLancamento =
 async function () {
 
+    alert("TESTE A — ENTROU NO VER LANÇAMENTO");
+
+
     if (!lancamentoSelecionado) {
 
         alert(
-            "⚠️ Nenhum lançamento selecionado."
+            "TESTE B — NÃO HÁ LANÇAMENTO"
         );
 
         return;
@@ -2984,8 +2987,24 @@ async function () {
 
     try {
 
+        alert(
+            "TESTE C — ANTES DE obterDadosMiniPauta"
+        );
+
+
         const dados =
             await obterDadosMiniPauta();
+
+
+        alert(
+            "TESTE D — obterDadosMiniPauta TERMINOU"
+        );
+
+
+        console.log(
+            "DADOS RECEBIDOS:",
+            dados
+        );
 
 
         const janela =
@@ -2995,15 +3014,25 @@ async function () {
             );
 
 
+        alert(
+            "TESTE E — janela aberta"
+        );
+
+
         if (!janela) {
 
             alert(
-                "⚠️ O navegador bloqueou a abertura da Mini-Pauta."
+                "TESTE F — navegador bloqueou"
             );
 
             return;
 
         }
+
+
+        alert(
+            "TESTE G — ANTES DE construirMiniPautaHTML"
+        );
 
 
         janela.document.write(
@@ -3013,27 +3042,27 @@ async function () {
         );
 
 
+        alert(
+            "TESTE H — construirMiniPautaHTML TERMINOU"
+        );
+
+
         janela.document.close();
 
-
-        console.log(
-            "✅ MINI-PAUTA ABERTA:",
-            dados
-        );
 
     }
 
     catch (erro) {
 
-        console.error(
-            "❌ ERRO AO VER MINI-PAUTA:",
-            erro
+        alert(
+            "ERRO:\n\n" +
+            erro.message
         );
 
 
-        alert(
-            "❌ Não foi possível abrir a Mini-Pauta.\n\n" +
-            erro.message
+        console.error(
+            "ERRO COMPLETO:",
+            erro
         );
 
     }
