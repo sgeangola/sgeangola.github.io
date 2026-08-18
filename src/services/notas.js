@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS df CARREGADO!");
+alert("🔥 NOTAS.JS d0 CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1774,214 +1774,123 @@ alert(
     
 // =====================================================
 // ESTATÍSTICAS DA MINI-PAUTA
-// REGRA:
-// turmaId → turmas/{turmaId} → ensino
-// depois → MF + sexo dos alunos
 // =====================================================
 
-let ensinoTurma = "";
+// Os alunos vêm diretamente do lançamento:
+// dados.alunos = notas.alunos
 
-
-// =====================================================
-// 1. IDENTIFICAR O ENSINO PELA TURMA
-// =====================================================
-
-try {
-
-    if (!dados.turmaId) {
-
-        console.warn(
-            "⚠️ turmaId não encontrado."
-        );
-
-    }
-    else {
-
-        const turmaRef =
-            doc(
-                db,
-                "turmas",
-                dados.turmaId
-            );
-
-
-        const turmaSnap =
-            await getDoc(
-                turmaRef
-            );
-
-
-        if (turmaSnap.exists()) {
-
-            const dadosTurma =
-                turmaSnap.data();
-
-
-            ensinoTurma =
-                String(
-                    dadosTurma.ensino ||
-                    dadosTurma.nivelEnsino ||
-                    dadosTurma.nivel ||
-                    ""
-                )
-                .toLowerCase()
-                .trim();
-
-
-            console.log(
-                "🎓 TURMA:",
-                dados.turmaId
-            );
-
-
-            console.log(
-                "🎓 ENSINO ENCONTRADO:",
-                ensinoTurma
-            );
-
-        }
-        else {
-
-            console.warn(
-                "⚠️ Turma não encontrada:",
-                dados.turmaId
-            );
-
-        }
-
-    }
-
-}
-catch (erro) {
-
-    console.error(
-        "❌ ERRO AO BUSCAR ENSINO:",
-        erro
-    );
-
-}
+const listaAlunos =
+    Array.isArray(dados.alunos)
+        ? dados.alunos
+        : [];
 
 
 // =====================================================
-// 2. IDENTIFICAR O TIPO DE ENSINO
+// IDENTIFICAR O ENSINO
 // =====================================================
 
-const ehPrimeiroCiclo =
-    ensinoTurma.includes("primeiro") &&
-    ensinoTurma.includes("ciclo");
+const ensinoNormalizado =
+    String(
+        dados.ensino || ""
+    )
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 
 
-const ehEnsinoPrimario =
-    ensinoTurma.includes("primario") ||
-    ensinoTurma.includes("primário");
-
-
-// =====================================================
-// 3. DEFINIR ESCALA
-// =====================================================
-
-let classificacoes;
-
-
-if (ehPrimeiroCiclo) {
-
-    classificacoes = [
-
-        {
-            nome: "Mau",
-            minimo: 0,
-            maximo: 4
-        },
-
-        {
-            nome: "Medíocre",
-            minimo: 5,
-            maximo: 9
-        },
-
-        {
-            nome: "Suficiente",
-            minimo: 10,
-            maximo: 13
-        },
-
-        {
-            nome: "Bom",
-            minimo: 14,
-            maximo: 16
-        },
-
-        {
-            nome: "Muito Bom",
-            minimo: 17,
-            maximo: 20
-        }
-
-    ];
-
-}
-else if (ehEnsinoPrimario) {
-
-    classificacoes = [
-
-        {
-            nome: "Mau",
-            minimo: 0,
-            maximo: 2
-        },
-
-        {
-            nome: "Medíocre",
-            minimo: 3,
-            maximo: 4
-        },
-
-        {
-            nome: "Suficiente",
-            minimo: 5,
-            maximo: 6
-        },
-
-        {
-            nome: "Bom",
-            minimo: 7,
-            maximo: 8
-        },
-
-        {
-            nome: "Muito Bom",
-            minimo: 9,
-            maximo: 10
-        }
-
-    ];
-
-}
-else {
-
-    console.warn(
-        "⚠️ Ensino não reconhecido:",
-        ensinoTurma
+const primeiroCiclo =
+    ensinoNormalizado.includes(
+        "primeiro ciclo"
+    ) ||
+    ensinoNormalizado.includes(
+        "1 ciclo"
+    ) ||
+    ensinoNormalizado.includes(
+        "primeiro"
     );
 
 
-    // Não assumir Ensino Primário.
-    // Isso evita classificações erradas.
+// =====================================================
+// ESCALA
+// =====================================================
 
-    classificacoes = [];
+const classificacoes =
+    primeiroCiclo
 
-}
+        ? [
+            {
+                nome: "Mau",
+                minimo: 0,
+                maximo: 4
+            },
+            {
+                nome: "Medíocre",
+                minimo: 5,
+                maximo: 9
+            },
+            {
+                nome: "Suficiente",
+                minimo: 10,
+                maximo: 13
+            },
+            {
+                nome: "Bom",
+                minimo: 14,
+                maximo: 16
+            },
+            {
+                nome: "Muito Bom",
+                minimo: 17,
+                maximo: 20
+            }
+        ]
+
+        : [
+            {
+                nome: "Mau",
+                minimo: 0,
+                maximo: 2
+            },
+            {
+                nome: "Medíocre",
+                minimo: 3,
+                maximo: 4
+            },
+            {
+                nome: "Suficiente",
+                minimo: 5,
+                maximo: 6
+            },
+            {
+                nome: "Bom",
+                minimo: 7,
+                maximo: 8
+            },
+            {
+                nome: "Muito Bom",
+                minimo: 9,
+                maximo: 10
+            }
+        ];
 
 
 // =====================================================
-// 4. CRIAR CONTADORES
+// CONTADORES
 // =====================================================
 
 const estatistica =
     classificacoes.map(
         item => ({
 
-            ...item,
+            nome:
+                item.nome,
+
+            minimo:
+                item.minimo,
+
+            maximo:
+                item.maximo,
 
             M: 0,
 
@@ -2005,14 +1914,14 @@ let semBomAproveitamento = 0;
 
 
 // =====================================================
-// 5. ANALISAR OS ALUNOS DA MINI-PAUTA
+// ANALISAR OS ALUNOS DA PRÓPRIA MINI-PAUTA
 // =====================================================
 
-alunos.forEach(
+listaAlunos.forEach(
     aluno => {
 
         // ---------------------------------------------
-        // ESTADO DO ALUNO
+        // ESTADO
         // ---------------------------------------------
 
         const estado =
@@ -2022,10 +1931,6 @@ alunos.forEach(
             .toLowerCase()
             .trim();
 
-
-        // ---------------------------------------------
-        // DESISTIDO
-        // ---------------------------------------------
 
         if (
             estado.includes("desist")
@@ -2037,10 +1942,6 @@ alunos.forEach(
 
         }
 
-
-        // ---------------------------------------------
-        // TRANSFERIDO
-        // ---------------------------------------------
 
         if (
             estado.includes("transfer")
@@ -2054,24 +1955,29 @@ alunos.forEach(
 
 
         // ---------------------------------------------
-        // MF — MÉDIA FINAL
+        // MF
         // ---------------------------------------------
 
-        const mfTexto =
-            String(
-                aluno.MF ?? ""
-            )
-            .replace(",", ".")
-            .trim();
+        const valorMF =
+            aluno.MF ??
+            aluno.mf ??
+            aluno.Mf ??
+            aluno.mediaFinal ??
+            aluno.mediaFinalGeral;
 
 
         const mf =
             Number(
-                mfTexto
+                String(
+                    valorMF ?? ""
+                )
+                .replace(",", ".")
+                .trim()
             );
 
 
-        // Sem MF não entra na classificação
+        // Sem MF válida → não entra
+        // na estatística
 
         if (
             !Number.isFinite(mf)
@@ -2091,14 +1997,17 @@ alunos.forEach(
 
         const sexo =
             String(
-                aluno.sexo || ""
+                aluno.sexo ??
+                aluno.Sexo ??
+                aluno.genero ??
+                ""
             )
             .toUpperCase()
             .trim();
 
 
         // ---------------------------------------------
-        // ENCONTRAR CLASSIFICAÇÃO PELO MF
+        // CLASSIFICAÇÃO
         // ---------------------------------------------
 
         const linha =
@@ -2111,19 +2020,13 @@ alunos.forEach(
 
         if (!linha) {
 
-            console.warn(
-                "⚠️ MF fora da escala:",
-                mf,
-                aluno
-            );
-
             return;
 
         }
 
 
         // ---------------------------------------------
-        // MASCULINO
+        // M
         // ---------------------------------------------
 
         if (
@@ -2137,7 +2040,7 @@ alunos.forEach(
 
 
         // ---------------------------------------------
-        // FEMININO
+        // F
         // ---------------------------------------------
 
         else if (
@@ -2159,16 +2062,18 @@ alunos.forEach(
 
         // ---------------------------------------------
         // BOM APROVEITAMENTO
+        //
+        // Suficiente + Bom + Muito Bom
         // ---------------------------------------------
 
-        const minimoBom =
-            ehPrimeiroCiclo
-                ? 14
-                : 7;
+        const minimoSuficiente =
+            primeiroCiclo
+                ? 10
+                : 5;
 
 
         if (
-            mf >= minimoBom
+            mf >= minimoSuficiente
         ) {
 
             bomAproveitamento++;
@@ -2185,7 +2090,7 @@ alunos.forEach(
 
 
 // =====================================================
-// 6. TOTAIS
+// TOTAIS
 // =====================================================
 
 const totalM =
@@ -2212,26 +2117,34 @@ const totalClassificados =
     );
 
 
+// =====================================================
+// PERCENTAGENS
+// =====================================================
+
 const percentBom =
     alunosValidos > 0
+
         ? (
             bomAproveitamento /
             alunosValidos
         ) * 100
+
         : 0;
 
 
 const percentSemBom =
     alunosValidos > 0
+
         ? (
             semBomAproveitamento /
             alunosValidos
         ) * 100
+
         : 0;
 
 
 // =====================================================
-// 7. DEBUG
+// DEBUG
 // =====================================================
 
 console.log(
@@ -2243,33 +2156,33 @@ console.log(
 );
 
 console.log(
-    "Turma ID:",
-    dados.turmaId
-);
-
-console.log(
     "Ensino:",
-    ensinoTurma
+    dados.ensino
 );
 
 console.log(
     "Primeiro Ciclo:",
-    ehPrimeiroCiclo
+    primeiroCiclo
 );
 
 console.log(
-    "Ensino Primário:",
-    ehEnsinoPrimario
-);
-
-console.log(
-    "Alunos:",
-    alunos.length
+    "Alunos recebidos:",
+    listaAlunos.length
 );
 
 console.log(
     "Alunos válidos:",
     alunosValidos
+);
+
+console.log(
+    "M:",
+    totalM
+);
+
+console.log(
+    "F:",
+    totalF
 );
 
 console.log(
@@ -2283,6 +2196,16 @@ console.log(
 );
 
 console.log(
+    "Bom aproveitamento:",
+    bomAproveitamento
+);
+
+console.log(
+    "Sem bom aproveitamento:",
+    semBomAproveitamento
+);
+
+console.log(
     "Estatística:",
     estatistica
 );
@@ -2290,7 +2213,7 @@ console.log(
 console.log(
     "===================================="
 );
-    
+
     let linhas =
         "";
 
