@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOUY!");
+alert("🔥 NOTAS.JS CARREGOUR!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -912,360 +912,12 @@ await mostrarNotasDoLancamento();
 );
 
 // =====================================================
-// DISCIPLINA → TRIMESTRE
+// MOSTRAR NOTAS DO LANÇAMENTO
 // =====================================================
 
-function prepararTrimestre() {
+async function mostrarNotasDoLancamento() {
 
-    if (!filtroTrimestre) return;
-
-    filtroTrimestre.innerHTML = `
-
-        <option value="">
-            Selecionar trimestre
-        </option>
-
-        <option value="1">
-            1.º Trimestre
-        </option>
-
-        <option value="2">
-            2.º Trimestre
-        </option>
-
-        <option value="3">
-            3.º Trimestre
-        </option>
-
-    `;
-
-    filtroTrimestre.disabled = false;
-}
-
-
-// =====================================================
-// TURMA → DISCIPLINAS
-// =====================================================
-
-function carregarDisciplinasDaTurma(turmaId) {
-
-    alert(
-        "🔥 16 — CARREGAR DISCIPLINAS DA TURMA"
-    );
-
-    if (!filtroDisciplina) {
-
-        alert(
-            "❌ filtroDisciplina NÃO FOI ENCONTRADO!"
-        );
-
-        return;
-    }
-
-    filtroDisciplina.innerHTML = `
-        <option value="">
-            Selecionar disciplina
-        </option>
-    `;
-
-    filtroDisciplina.disabled = true;
-
-    if (
-        !professorSelecionado ||
-        !turmaId
-    ) {
-
-        return;
-    }
-
-    const atribuicoes =
-        Array.isArray(
-            professorSelecionado.atribuicoes
-        )
-            ? professorSelecionado.atribuicoes
-            : [];
-
-    const disciplinas =
-        new Set();
-
-    atribuicoes.forEach(
-        atribuicao => {
-
-            const idTurma =
-                String(
-                    atribuicao.turmaId || ""
-                ).trim();
-
-            if (
-                idTurma !==
-                String(turmaId).trim()
-            ) {
-                return;
-            }
-
-            const disciplina =
-                String(
-                    atribuicao.disciplina || ""
-                ).trim();
-
-            if (disciplina) {
-
-                disciplinas.add(
-                    disciplina
-                );
-
-            }
-
-        }
-    );
-
-    disciplinas.forEach(
-        disciplina => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                disciplina;
-
-            option.textContent =
-                disciplina;
-
-            filtroDisciplina.appendChild(
-                option
-            );
-
-        }
-    );
-
-    filtroDisciplina.disabled =
-        disciplinas.size === 0;
-
-    alert(
-        "🔥 17 — DISCIPLINAS COLOCADAS: " +
-        disciplinas.size
-    );
-
-    console.log(
-        "📚 DISCIPLINAS:",
-        [...disciplinas]
-    );
-}
-
-
-// =====================================================
-// CLASSE → TURMA
-// =====================================================
-
-filtroClasse?.addEventListener(
-    "change",
-    function () {
-
-        alert(
-            "🔥 18 — CLASSE SELECIONADA: " +
-            this.value
-        );
-
-        const classe =
-            this.value;
-
-        if (!filtroTurma) return;
-
-        filtroTurma.innerHTML = `
-            <option value="">
-                Selecionar turma
-            </option>
-        `;
-
-        filtroTurma.disabled = true;
-
-        if (
-            !professorSelecionado ||
-            !classe
-        ) {
-
-            return;
-        }
-
-        const atribuicoes =
-            Array.isArray(
-                professorSelecionado.atribuicoes
-            )
-                ? professorSelecionado.atribuicoes
-                : [];
-
-        const idsTurmas = [
-            ...new Set(
-                atribuicoes
-                    .filter(
-                        atribuicao =>
-                            String(
-                                atribuicao.classe || ""
-                            ).trim() ===
-                            String(classe).trim()
-                    )
-                    .map(
-                        atribuicao =>
-                            atribuicao.turmaId
-                    )
-                    .filter(Boolean)
-            )
-        ];
-
-        const encontradas =
-            idsTurmas
-                .map(
-                    id =>
-                        turmas.find(
-                            turma =>
-                                turma.id === id
-                        )
-                )
-                .filter(Boolean);
-
-        encontradas.forEach(
-            turma => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    turma.id;
-
-                option.textContent =
-                    turma.nome ||
-                    turma.turma ||
-                    turma.designacao ||
-                    "Turma";
-
-                filtroTurma.appendChild(
-                    option
-                );
-
-            }
-        );
-
-        filtroTurma.disabled =
-            encontradas.length === 0;
-
-        alert(
-            "🔥 19 — TURMAS COLOCADAS: " +
-            encontradas.length
-        );
-
-    }
-);
-
-
-// =====================================================
-// TURMA → DISCIPLINA
-// =====================================================
-
-filtroTurma?.addEventListener(
-    "change",
-    function () {
-
-        alert(
-            "🔥 20 — TURMA SELECIONADA: " +
-            this.value
-        );
-
-        carregarDisciplinasDaTurma(
-            this.value
-        );
-
-    }
-);
-
-
-// =====================================================
-// DISCIPLINA → TRIMESTRE
-// =====================================================
-
-filtroDisciplina?.addEventListener(
-    "change",
-    function () {
-
-        alert(
-            "🔥 21 — DISCIPLINA SELECIONADA: " +
-            this.value
-        );
-
-        if (!this.value) {
-
-            if (filtroTrimestre) {
-
-                filtroTrimestre.innerHTML = `
-                    <option value="">
-                        Selecionar trimestre
-                    </option>
-                `;
-
-                filtroTrimestre.disabled =
-                    true;
-            }
-
-            return;
-        }
-
-        prepararTrimestre();
-
-    }
-);
-
-
-// =====================================================
-// CRIAR ID DO LANÇAMENTO
-// =====================================================
-
-function criarIdLancamento(
-    turmaId,
-    disciplina,
-    trimestre
-) {
-
-    const turma =
-        String(turmaId || "")
-            .trim();
-
-    const materia =
-        String(disciplina || "")
-            .trim()
-            .replace(/\//g, "-")
-            .replace(/\s+/g, "_");
-
-    const tri =
-        String(trimestre || "")
-            .replace("º", "")
-            .replace("°", "")
-            .replace("ª", "")
-            .replace("Trimestre", "")
-            .replace(/\s+/g, "")
-            .trim();
-
-    return `${turma}_${materia}_${tri}`;
-}
-
-
-// =====================================================
-// LER LANÇAMENTO
-// =====================================================
-
-async function carregarLancamento() {
-
-    alert(
-        "🔥 22 — A PROCURAR LANÇAMENTO"
-    );
-
-    const professorId =
-        filtroProfessor?.value;
-
-    const classe =
-        filtroClasse?.value;
+    alert("🔥 33 — VOU MOSTRAR AS NOTAS!");
 
     const turmaId =
         filtroTurma?.value;
@@ -1277,17 +929,10 @@ async function carregarLancamento() {
         filtroTrimestre?.value;
 
     if (
-        !professorId ||
-        !classe ||
         !turmaId ||
         !disciplina ||
         !trimestre
     ) {
-
-        alert(
-            "⚠️ FALTAM FILTROS!"
-        );
-
         return;
     }
 
@@ -1298,194 +943,142 @@ async function carregarLancamento() {
             trimestre
         );
 
+    const referencia =
+        doc(
+            db,
+            "notas",
+            id
+        );
+
+    const snapshot =
+        await getDoc(
+            referencia
+        );
+
+    if (!snapshot.exists()) {
+
+        alert(
+            "⚠️ LANÇAMENTO NÃO ENCONTRADO."
+        );
+
+        return;
+    }
+
+    const dados =
+        snapshot.data();
+
+    const notasLancadas =
+        Array.isArray(dados.alunos)
+            ? dados.alunos
+            : [];
+
     alert(
-        "🔥 23 — ID:\n\n" +
-        id
+        "🔥 34 — NOTAS RECEBIDAS: " +
+        notasLancadas.length
     );
 
-    try {
+    if (!notasLista) {
 
-        const referencia =
-            doc(
-                db,
-                "notas",
-                id
-            );
+        alert(
+            "❌ notasLista NÃO FOI ENCONTRADO!"
+        );
 
-        const snapshot =
-            await getDoc(
-                referencia
-            );
+        return;
+    }
 
-        if (!snapshot.exists()) {
+    notasLista.innerHTML = "";
 
-            alert(
-                "⚠️ LANÇAMENTO AINDA NÃO EXISTE."
-            );
+    notasLancadas.forEach(
+        (aluno, indice) => {
 
-            mostrarTabelaLancamento(
-                null
-            );
+            const matricula =
+                aluno.matricula ||
+                aluno.codigoAluno ||
+                aluno.numeroMatricula ||
+                "";
 
-            return;
+            const nome =
+                aluno.nome ||
+                aluno.nomeAluno ||
+                "—";
+
+            const sexo =
+                aluno.sexo ||
+                aluno.Sexo ||
+                "—";
+
+            const mac =
+                aluno.MAC ??
+                aluno.mac ??
+                "";
+
+            const npt =
+                aluno.NPT ??
+                aluno.npt ??
+                "";
+
+            const mf =
+                aluno.MF ??
+                aluno.mf ??
+                "";
+
+            const classificacao =
+                aluno.classificacao ||
+                "";
+
+            const numero =
+                aluno.numero ??
+                aluno.n ??
+                (indice + 1);
+
+            const tr =
+                document.createElement("tr");
+
+            tr.innerHTML = `
+
+                <td>
+                    ${numero}
+                </td>
+
+                <td>
+                    ${nome}
+                </td>
+
+                <td>
+                    ${sexo}
+                </td>
+
+                <td>
+                    ${matricula}
+                </td>
+
+                <td>
+                    ${mac}
+                </td>
+
+                <td>
+                    ${npt}
+                </td>
+
+                <td>
+                    ${mf}
+                </td>
+
+                <td>
+                    ${classificacao}
+                </td>
+
+            `;
+
+            notasLista.appendChild(tr);
+
         }
+    );
 
-        const dados =
-            snapshot.data();
-
-        alert(
-            "🔥 24 — LANÇAMENTO ENCONTRADO!"
-        );
-
-        console.log(
-            "📦 LANÇAMENTO:",
-            dados
-        );
-
-        mostrarTabelaLancamento(
-            dados
-        );
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ ERRO:",
-            erro
-        );
-
-        alert(
-            "❌ ERRO AO LER LANÇAMENTO:\n\n" +
-            erro.message
-        );
-    }
+    alert(
+        "🔥 35 — TABELA PREENCHIDA!"
+    );
 }
-
-
-// =====================================================
-// MOSTRAR TABELA PRINCIPAL
-// =====================================================
-
-function mostrarTabelaLancamento(
-    dados
-) {
-
-    if (!notasLista) return;
-
-    const professor =
-        professorSelecionado?.nome ||
-        "—";
-
-    const classe =
-        filtroClasse?.value ||
-        "—";
-
-    const turma =
-        turmas.find(
-            item =>
-                item.id ===
-                filtroTurma?.value
-        );
-
-    const turmaNome =
-        turma?.nome ||
-        turma?.turma ||
-        turma?.designacao ||
-        "—";
-
-    const disciplina =
-        filtroDisciplina?.value ||
-        "—";
-
-    const trimestre =
-        filtroTrimestre?.value ||
-        "—";
-
-    const aberto =
-        dados?.abertoGeral === true;
-
-    notasLista.innerHTML = `
-
-        <tr>
-
-            <td>
-                ${professor}
-            </td>
-
-            <td>
-                ${classe}
-            </td>
-
-            <td>
-                ${turmaNome}
-            </td>
-
-            <td>
-                ${disciplina}
-            </td>
-
-            <td>
-                ${trimestre}.º
-            </td>
-
-            <td>
-                ${
-                    aberto
-                        ? "🟢 Aberto"
-                        : "🔒 Fechado"
-                }
-            </td>
-
-            <td>
-
-                <button
-                    type="button"
-                    onclick="verLancamento()"
-                >
-                    👁️ Ver
-                </button>
-
-                <button
-                    type="button"
-                    onclick="baixarLancamento()"
-                >
-                    ⬇️ Baixar
-                </button>
-
-                <button
-                    type="button"
-                    onclick="imprimirLancamento()"
-                >
-                    🖨️ Imprimir
-                </button>
-
-            </td>
-
-        </tr>
-
-    `;
-}
-
-
-// =====================================================
-// EVENTO — TRIMESTRE
-// =====================================================
-
-filtroTrimestre?.addEventListener(
-    "change",
-    async function () {
-
-        alert(
-            "🔥 25 — TRIMESTRE SELECIONADO: " +
-            this.value
-        );
-
-        if (!this.value) return;
-
-        await carregarLancamento();
-
-    }
-);
 
 // =====================================================
 // INICIAR
