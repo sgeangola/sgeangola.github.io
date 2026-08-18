@@ -63,3 +63,140 @@ const botaoSistema =
 
 
 alert("🔥 ELEMENTOS DA PÁGINA CARREGADOS!");
+
+// =====================================================
+// DADOS
+// =====================================================
+
+let professores = [];
+let turmas = [];
+
+let professorSelecionado = null;
+let lancamentoSelecionado = null;
+
+
+alert("🔥 DADOS INICIALIZADOS!");
+
+// =====================================================
+// CARREGAR PROFESSORES
+// =====================================================
+
+async function carregarProfessores() {
+
+    alert("🔥 1 — ENTROU EM carregarProfessores()");
+
+    professores = [];
+
+    const resultado =
+        await getDocs(
+            query(
+                collection(db, "professores"),
+                where("escolaId", "==", escolaId)
+            )
+        );
+
+    alert(
+        "🔥 2 — PROFESSORES ENCONTRADOS: " +
+        resultado.size
+    );
+
+    resultado.forEach(documento => {
+
+        professores.push({
+            id: documento.id,
+            ...documento.data()
+        });
+
+    });
+
+    console.log(
+        "👨‍🏫 PROFESSORES:",
+        professores
+    );
+
+    alert(
+        "🔥 3 — PROFESSORES CARREGADOS!"
+    );
+}
+
+// =====================================================
+// CARREGAR TURMAS
+// =====================================================
+
+async function carregarTurmas() {
+
+    alert("🔥 4 — ENTROU EM carregarTurmas()");
+
+    turmas = [];
+
+    const resultado =
+        await getDocs(
+            query(
+                collection(db, "turmas"),
+                where("escolaId", "==", escolaId)
+            )
+        );
+
+    alert(
+        "🔥 5 — TURMAS ENCONTRADAS: " +
+        resultado.size
+    );
+
+    resultado.forEach(documento => {
+
+        turmas.push({
+            id: documento.id,
+            ...documento.data()
+        });
+
+    });
+
+    console.log(
+        "🏫 TURMAS:",
+        turmas
+    );
+
+    alert(
+        "🔥 6 — TURMAS CARREGADAS!"
+    );
+}
+
+// =====================================================
+// INICIAR
+// =====================================================
+
+async function iniciarNotas() {
+
+    alert("🔥 7 — ENTROU EM iniciarNotas()");
+
+    try {
+
+        await carregarProfessores();
+
+        await carregarTurmas();
+
+        alert(
+            "🔥 8 — PROFESSORES E TURMAS CARREGADOS!"
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO:",
+            erro
+        );
+
+        alert(
+            "❌ ERRO AO CARREGAR:\n\n" +
+            erro.message
+        );
+    }
+}
+
+
+// =====================================================
+// INICIAR SISTEMA
+// =====================================================
+
+iniciarNotas();
