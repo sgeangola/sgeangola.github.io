@@ -1702,23 +1702,23 @@ function construirMiniPautaHTML(
     const alunos =
         dados.alunos || [];
 
-    // =====================================================
+// =====================================================
 // ESTATÍSTICAS DA MINI-PAUTA
 // =====================================================
 
 const ensino =
     String(
         dados.ensino || ""
-    ).trim();
+    ).toLowerCase().trim();
 
 const primeiroCiclo =
-    ensino.toLowerCase().includes("primeirociclo") ||
-    ensino.toLowerCase().includes("primeiro ciclo");
+    ensino.includes("primeiro") ||
+    ensino.includes("ciclo");
 
 
-// -----------------------------------------------------
-// ESCALA DE CLASSIFICAÇÃO
-// -----------------------------------------------------
+// ---------------------------------------------
+// CLASSIFICAÇÃO CONFORME O ENSINO
+// ---------------------------------------------
 
 const classificacoes =
     primeiroCiclo
@@ -1726,111 +1726,187 @@ const classificacoes =
         ? [
             {
                 nome: "Mau",
-                min: 0,
-                max: 4
+                minimo: 0,
+                maximo: 2
             },
             {
                 nome: "Medíocre",
-                min: 5,
-                max: 9
+                minimo: 3,
+                maximo: 4
             },
             {
                 nome: "Suficiente",
-                min: 10,
-                max: 13
+                minimo: 5,
+                maximo: 6
             },
             {
                 nome: "Bom",
-                min: 14,
-                max: 16
+                minimo: 7,
+                maximo: 8
             },
             {
                 nome: "Muito Bom",
-                min: 17,
-                max: 20
+                minimo: 9,
+                maximo: 10
             }
         ]
 
         : [
             {
                 nome: "Mau",
-                min: 0,
-                max: 2
+                minimo: 0,
+                maximo: 4
             },
             {
                 nome: "Medíocre",
-                min: 3,
-                max: 4
+                minimo: 5,
+                maximo: 9
             },
             {
                 nome: "Suficiente",
-                min: 5,
-                max: 6
+                minimo: 10,
+                maximo: 13
             },
             {
                 nome: "Bom",
-                min: 7,
-                max: 8
+                minimo: 14,
+                maximo: 16
             },
             {
                 nome: "Muito Bom",
-                min: 9,
-                max: 10
+                minimo: 17,
+                maximo: 20
             }
         ];
 
 
-// -----------------------------------------------------
-// CRIAR CONTADORES
-// -----------------------------------------------------
+// ---------------------------------------------
+// CONTADORES
+// ---------------------------------------------
 
-const estatisticas =
+const estatistica =
     classificacoes.map(
         item => ({
+
             ...item,
+
             M: 0,
+
             F: 0,
+
             total: 0
+
         })
     );
 
 
-// -----------------------------------------------------
-// CONTAR ALUNOS
-// -----------------------------------------------------
+let desistidos = 0;
+
+let transferidos = 0;
+
+let alunosValidos = 0;
+
+let bomAproveitamento = 0;
+
+let semBomAproveitamento = 0;
+
+
+// ---------------------------------------------
+// ANALISAR ALUNOS
+// ---------------------------------------------
 
 alunos.forEach(
     aluno => {
 
+        const estado =
+            String(
+                aluno.estado || ""
+            )
+            .toLowerCase()
+            .trim();
+
+
+        // -----------------------------------------
+        // DESISTIDO
+        // -----------------------------------------
+
+        if (
+            estado.includes("desist")
+        ) {
+
+            desistidos++;
+
+            return;
+
+        }
+
+
+        // -----------------------------------------
+        // TRANSFERIDO
+        // -----------------------------------------
+
+        if (
+            estado.includes("transfer")
+        ) {
+
+            transferidos++;
+
+            return;
+
+        }
+
+
+        // -----------------------------------------
+        // MF
+        // -----------------------------------------
+
         const mf =
-            Number(aluno.MF);
+            Number(
+                String(
+                    aluno.MF ?? ""
+                )
+                .replace(",", ".")
+            );
+
 
         if (
             !Number.isFinite(mf)
         ) {
+
             return;
+
         }
 
+
+        alunosValidos++;
+
+
+        // -----------------------------------------
+        // SEXO
+        // -----------------------------------------
 
         const sexo =
             String(
                 aluno.sexo || ""
             )
-            .trim()
-            .toUpperCase();
+            .toUpperCase()
+            .trim();
 
 
-        const classificacao =
-            estatisticas.find(
+        // -----------------------------------------
+        // ENCONTRAR CLASSIFICAÇÃO
+        // -----------------------------------------
+
+        const linha =
+            estatistica.find(
                 item =>
-                    mf >= item.min &&
-                    mf <= item.max
+                    mf >= item.minimo &&
+                    mf <= item.maximo
             );
 
 
-        if (!classificacao) {
+        if (!linha)
             return;
-        }
 
 
         if (
@@ -1838,33 +1914,57 @@ alunos.forEach(
             sexo === "MASCULINO"
         ) {
 
-            classificacao.M++;
+            linha.M++;
 
         }
 
 
-        else if (
+        if (
             sexo === "F" ||
             sexo === "FEMININO"
         ) {
 
-            classificacao.F++;
+            linha.F++;
 
         }
 
 
-        classificacao.total++;
+        linha.total++;
+
+
+        // -----------------------------------------
+        // APROVEITAMENTO
+        // -----------------------------------------
+
+        const minimoBom =
+            primeiroCiclo
+                ? 7
+                : 14;
+
+
+        if (
+            mf >= minimoBom
+        ) {
+
+            bomAproveitamento++;
+
+        }
+        else {
+
+            semBomAproveitamento++;
+
+        }
 
     }
 );
 
 
-// -----------------------------------------------------
+// ---------------------------------------------
 // TOTAIS
-// -----------------------------------------------------
+// ---------------------------------------------
 
 const totalM =
-    estatisticas.reduce(
+    estatistica.reduce(
         (soma, item) =>
             soma + item.M,
         0
@@ -1872,221 +1972,36 @@ const totalM =
 
 
 const totalF =
-    estatisticas.reduce(
+    estatistica.reduce(
         (soma, item) =>
             soma + item.F,
         0
     );
 
 
-const totalAlunos =
-    estatisticas.reduce(
-        (soma, item) =>
-            soma + item.total,
-        0
-    );
+const totalClassificados =
+    totalM + totalF;
 
 
-// -----------------------------------------------------
-// BOM APROVEITAMENTO
-// SUFICIENTE + BOM + MUITO BOM
-// -----------------------------------------------------
-
-const bomAproveitamento =
-    estatisticas
-        .filter(
-            item =>
-                item.nome === "Suficiente" ||
-                item.nome === "Bom" ||
-                item.nome === "Muito Bom"
-        )
-        .reduce(
-            (soma, item) =>
-                soma + item.total,
-            0
-        );
-
-
-const semBomAproveitamento =
-    estatisticas
-        .filter(
-            item =>
-                item.nome === "Mau" ||
-                item.nome === "Medíocre"
-        )
-        .reduce(
-            (soma, item) =>
-                soma + item.total,
-            0
-        );
-
-
-const percentualBom =
-    totalAlunos > 0
+const percentBom =
+    alunosValidos > 0
         ? (
             bomAproveitamento /
-            totalAlunos *
-            100
-        ).toFixed(1)
-        : "0.0";
+            alunosValidos
+        ) * 100
+        : 0;
 
 
-const percentualSemBom =
-    totalAlunos > 0
+const percentSemBom =
+    alunosValidos > 0
         ? (
             semBomAproveitamento /
-            totalAlunos *
-            100
-        ).toFixed(1)
-        : "0.0";
-
-
-// -----------------------------------------------------
-// LINHAS DA TABELA ESTATÍSTICA
-// -----------------------------------------------------
-
-let linhasEstatisticas =
-    "";
-
-
-estatisticas.forEach(
-    item => {
-
-        linhasEstatisticas += `
-
-            <tr>
-
-                <td>
-                    ${item.nome}
-                    (${item.min}-${item.max})
-                </td>
-
-                <td>
-                    ${item.M}
-                </td>
-
-                <td>
-                    ${item.F}
-                </td>
-
-                <td>
-                    ${item.total}
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-);
-
-
-linhasEstatisticas += `
-
-    <tr class="linha-total">
-
-        <td>
-            <strong>Total</strong>
-        </td>
-
-        <td>
-            <strong>${totalM}</strong>
-        </td>
-
-        <td>
-            <strong>${totalF}</strong>
-        </td>
-
-        <td>
-            <strong>${totalAlunos}</strong>
-        </td>
-
-    </tr>
-
-`;
-
-
-// -----------------------------------------------------
-// TABELA DE ESTATÍSTICAS
-// -----------------------------------------------------
-
-const estatisticasHTML = `
-
-    <div class="estatisticas">
-
-        <h3>
-            Estatística do Aproveitamento
-        </h3>
-
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Classificação
-                    </th>
-
-                    <th>
-                        M
-                    </th>
-
-                    <th>
-                        F
-                    </th>
-
-                    <th>
-                        Total
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                ${linhasEstatisticas}
-
-            </tbody>
-
-        </table>
-
-
-        <div class="resumo-aproveitamento">
-
-            <div>
-                <strong>
-                    Bom aproveitamento:
-                </strong>
-
-                ${bomAproveitamento}
-                aluno(s)
-                — ${percentualBom}%
-            </div>
-
-
-            <div>
-                <strong>
-                    Sem bom aproveitamento:
-                </strong>
-
-                ${semBomAproveitamento}
-                aluno(s)
-                — ${percentualSemBom}%
-            </div>
-
-        </div>
-
-    </div>
-
-`;
+            alunosValidos
+        ) * 100
+        : 0;
 
     let linhas =
         "";
-
 
     alunos.forEach(
         (aluno, indice) => {
@@ -2194,6 +2109,68 @@ const estatisticasHTML = `
 
     }
 
+    // =====================================================
+// CONSTRUIR TABELA DE ESTATÍSTICA
+// =====================================================
+
+let linhasEstatistica = "";
+
+
+estatistica.forEach(
+    item => {
+
+        linhasEstatistica += `
+
+            <tr>
+
+                <td>
+                    ${item.nome}
+                    (${item.minimo}-${item.maximo})
+                </td>
+
+                <td>
+                    ${item.M}
+                </td>
+
+                <td>
+                    ${item.F}
+                </td>
+
+                <td>
+                    ${item.total}
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+);
+
+
+linhasEstatistica += `
+
+    <tr class="linha-total">
+
+        <td>
+            <strong>Total</strong>
+        </td>
+
+        <td>
+            <strong>${totalM}</strong>
+        </td>
+
+        <td>
+            <strong>${totalF}</strong>
+        </td>
+
+        <td>
+            <strong>${totalClassificados}</strong>
+        </td>
+
+    </tr>
+
+`;
 
     return `
 
@@ -2423,22 +2400,14 @@ td.classificacao{
 
 <style>
 
-*{
-    box-sizing:border-box;
-}
-
-/* estilos que já existem... */
-
-
-/* COLOCA O CSS DAS ESTATÍSTICAS AQUI */
-
 .estatisticas {
-    margin-top: 25px;
+    margin-top: 12px;
+    page-break-inside: avoid;
 }
 
 .estatisticas h3 {
-    margin: 0 0 10px;
-    font-size: 15px;
+    margin: 0 0 5px;
+    font-size: 11px;
     text-align: left;
     text-transform: uppercase;
 }
@@ -2446,13 +2415,13 @@ td.classificacao{
 .estatisticas table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 9px;
 }
 
 .estatisticas th,
 .estatisticas td {
     border: 1px solid #222;
-    padding: 6px;
+    padding: 3px 5px;
     text-align: center;
 }
 
@@ -2465,26 +2434,34 @@ td.classificacao{
 }
 
 .resumo-aproveitamento {
-    margin-top: 12px;
+    margin-top: 6px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    font-size: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    font-size: 9px;
 }
 
 .resumo-aproveitamento div {
     border: 1px solid #aaa;
-    padding: 8px;
+    padding: 4px;
 }
 
-@media(max-width:600px) {
+@media print {
 
-    .resumo-aproveitamento {
-        grid-template-columns: 1fr;
+    @page {
+        size: A4 portrait;
+        margin: 7mm;
+    }
+
+    body {
+        padding: 0;
+    }
+
+    .pauta {
+        max-width: none;
     }
 
 }
-
 </style>
 
 </head>
@@ -2615,9 +2592,99 @@ td.classificacao{
 
 <!-- =========================================
      ESTATÍSTICA
-========================================= -->
+========================================== -->
 
-${estatisticasHTML}
+<div class="estatisticas">
+
+    <h3>
+        Estatística do Aproveitamento
+    </h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Classificação
+                </th>
+
+                <th>
+                    M
+                </th>
+
+                <th>
+                    F
+                </th>
+
+                <th>
+                    Total
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            ${linhasEstatistica}
+
+        </tbody>
+
+    </table>
+
+
+    <div class="resumo-aproveitamento">
+
+        <div>
+
+            <strong>
+                Bom aproveitamento:
+            </strong>
+
+            ${bomAproveitamento}
+            (${percentBom.toFixed(1)}%)
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Sem bom aproveitamento:
+            </strong>
+
+            ${semBomAproveitamento}
+            (${percentSemBom.toFixed(1)}%)
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Desistidos:
+            </strong>
+
+            ${desistidos}
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Transferidos:
+            </strong>
+
+            ${transferidos}
+
+        </div>
+
+    </div>
+
+</div>
 
 
 <!-- =========================================
