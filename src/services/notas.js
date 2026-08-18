@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS1 CARREGADO!");
+alert("🔥 NOTAS.JS 10 CARREGADO!");
 
 // =====================================================
 // FIREBASE
