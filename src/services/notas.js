@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS 90 CARREGADO!");
+alert("🔥 NOTAS.JS df CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -3184,7 +3184,7 @@ async function () {
         // =================================================
 
         const html =
-            construirMiniPautaHTML(
+            await construirMiniPautaHTML(
                 dados
             );
 
