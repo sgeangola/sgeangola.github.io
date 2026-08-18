@@ -1504,7 +1504,7 @@ return {
 };
 
 // =====================================================
-// CONSTRUIR MINI-PAUTA HTML
+// CONSTRUIR MINI-PAUTA HTML — SEM ESTATÍSTICA
 // =====================================================
 
 async function construirMiniPautaHTML(dados) {
@@ -1513,284 +1513,6 @@ async function construirMiniPautaHTML(dados) {
         Array.isArray(dados.alunos)
             ? dados.alunos
             : [];
-
-
-    // =================================================
-    // IDENTIFICAR ENSINO
-    // =================================================
-
-    const ensinoNormalizado =
-        String(dados.ensino || "")
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .trim();
-
-
-    const primeiroCiclo =
-        ensinoNormalizado.includes(
-            "primeiro ciclo"
-        ) ||
-        ensinoNormalizado.includes(
-            "1 ciclo"
-        ) ||
-        ensinoNormalizado === "1c" ||
-        ensinoNormalizado.includes(
-            "primeiro"
-        );
-
-
-    // =================================================
-    // ESCALA
-    // =================================================
-
-    const classificacoes =
-        primeiroCiclo
-
-            ? [
-                {
-                    nome: "Mau",
-                    minimo: 0,
-                    maximo: 4
-                },
-                {
-                    nome: "Medíocre",
-                    minimo: 5,
-                    maximo: 9
-                },
-                {
-                    nome: "Suficiente",
-                    minimo: 10,
-                    maximo: 13
-                },
-                {
-                    nome: "Bom",
-                    minimo: 14,
-                    maximo: 16
-                },
-                {
-                    nome: "Muito Bom",
-                    minimo: 17,
-                    maximo: 20
-                }
-            ]
-
-            : [
-                {
-                    nome: "Mau",
-                    minimo: 0,
-                    maximo: 2
-                },
-                {
-                    nome: "Medíocre",
-                    minimo: 3,
-                    maximo: 4
-                },
-                {
-                    nome: "Suficiente",
-                    minimo: 5,
-                    maximo: 6
-                },
-                {
-                    nome: "Bom",
-                    minimo: 7,
-                    maximo: 8
-                },
-                {
-                    nome: "Muito Bom",
-                    minimo: 9,
-                    maximo: 10
-                }
-            ];
-
-
-    // =================================================
-    // ESTATÍSTICAS
-    // =================================================
-
-    const estatistica =
-        classificacoes.map(item => ({
-
-            nome:
-                item.nome,
-
-            minimo:
-                item.minimo,
-
-            maximo:
-                item.maximo,
-
-            M: 0,
-
-            F: 0,
-
-            total: 0
-
-        }));
-
-
-    let desistidos = 0;
-    let transferidos = 0;
-    let alunosValidos = 0;
-    let bomAproveitamento = 0;
-    let semBomAproveitamento = 0;
-
-
-    alunos.forEach(aluno => {
-
-        const estado =
-            String(
-                aluno.estado || ""
-            )
-            .toLowerCase()
-            .trim();
-
-
-        if (estado.includes("desist")) {
-
-            desistidos++;
-
-            return;
-        }
-
-
-        if (estado.includes("transfer")) {
-
-            transferidos++;
-
-            return;
-        }
-
-
-        const valorMF =
-            aluno.MF ??
-            aluno.mf ??
-            aluno.Mf ??
-            aluno.mediaFinal ??
-            aluno.mediaFinalGeral;
-
-
-        const mf =
-            Number(
-                String(valorMF ?? "")
-                    .replace(",", ".")
-                    .trim()
-            );
-
-
-        if (!Number.isFinite(mf)) {
-            return;
-        }
-
-
-        alunosValidos++;
-
-
-        const sexo =
-            String(
-                aluno.sexo ??
-                aluno.Sexo ??
-                aluno.genero ??
-                ""
-            )
-            .toUpperCase()
-            .trim();
-
-
-        const linha =
-            estatistica.find(
-                item =>
-                    mf >= item.minimo &&
-                    mf <= item.maximo
-            );
-
-
-        if (!linha) {
-            return;
-        }
-
-
-        if (
-            sexo === "M" ||
-            sexo === "MASCULINO"
-        ) {
-
-            linha.M++;
-
-        }
-        else if (
-            sexo === "F" ||
-            sexo === "FEMININO"
-        ) {
-
-            linha.F++;
-
-        }
-
-
-        linha.total++;
-
-
-        const minimoSuficiente =
-            primeiroCiclo
-                ? 10
-                : 5;
-
-
-        if (mf >= minimoSuficiente) {
-
-            bomAproveitamento++;
-
-        }
-        else {
-
-            semBomAproveitamento++;
-
-        }
-
-    });
-
-
-    const totalM =
-        estatistica.reduce(
-            (soma, item) =>
-                soma + item.M,
-            0
-        );
-
-
-    const totalF =
-        estatistica.reduce(
-            (soma, item) =>
-                soma + item.F,
-            0
-        );
-
-
-    const totalClassificados =
-        estatistica.reduce(
-            (soma, item) =>
-                soma + item.total,
-            0
-        );
-
-
-    const percentBom =
-        alunosValidos > 0
-            ? (
-                bomAproveitamento /
-                alunosValidos
-            ) * 100
-            : 0;
-
-
-    const percentSemBom =
-        alunosValidos > 0
-            ? (
-                semBomAproveitamento /
-                alunosValidos
-            ) * 100
-            : 0;
 
 
     // =================================================
@@ -1804,6 +1526,7 @@ async function construirMiniPautaHTML(dados) {
 
         const numero =
             aluno.numero ??
+            aluno.n ??
             (indice + 1);
 
 
@@ -1816,6 +1539,7 @@ async function construirMiniPautaHTML(dados) {
         const sexo =
             aluno.sexo ||
             aluno.Sexo ||
+            aluno.genero ||
             "—";
 
 
@@ -1883,8 +1607,13 @@ async function construirMiniPautaHTML(dados) {
             </tr>
 
         `;
+
     });
 
+
+    // =================================================
+    // CASO NÃO EXISTAM ALUNOS
+    // =================================================
 
     if (!linhas) {
 
@@ -1894,7 +1623,10 @@ async function construirMiniPautaHTML(dados) {
 
                 <td
                     colspan="7"
-                    style="padding:20px"
+                    style="
+                        padding:20px;
+                        text-align:center;
+                    "
                 >
                     Nenhum aluno encontrado.
                 </td>
@@ -1902,68 +1634,8 @@ async function construirMiniPautaHTML(dados) {
             </tr>
 
         `;
+
     }
-
-
-    // =================================================
-    // TABELA ESTATÍSTICA
-    // =================================================
-
-    let linhasEstatistica = "";
-
-
-    estatistica.forEach(item => {
-
-        linhasEstatistica += `
-
-            <tr>
-
-                <td>
-                    ${item.nome}
-                    (${item.minimo}-${item.maximo})
-                </td>
-
-                <td>
-                    ${item.M}
-                </td>
-
-                <td>
-                    ${item.F}
-                </td>
-
-                <td>
-                    ${item.total}
-                </td>
-
-            </tr>
-
-        `;
-    });
-
-
-    linhasEstatistica += `
-
-        <tr class="linha-total">
-
-            <td>
-                <strong>Total</strong>
-            </td>
-
-            <td>
-                <strong>${totalM}</strong>
-            </td>
-
-            <td>
-                <strong>${totalF}</strong>
-            </td>
-
-            <td>
-                <strong>${totalClassificados}</strong>
-            </td>
-
-        </tr>
-
-    `;
 
 
     // =================================================
@@ -1980,15 +1652,20 @@ async function construirMiniPautaHTML(dados) {
 
 <meta charset="UTF-8">
 
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
 <title>
-    Mini-Pauta — ${dados.turmaNome}
+    Mini-Pauta — ${dados.turmaNome || "Turma"}
 </title>
+
 
 <style>
 
 * {
     box-sizing: border-box;
 }
+
 
 body {
 
@@ -2006,6 +1683,7 @@ body {
     background: white;
 }
 
+
 .pauta {
 
     width: 100%;
@@ -2013,7 +1691,9 @@ body {
     max-width: 1100px;
 
     margin: auto;
+
 }
+
 
 .cabecalho {
 
@@ -2025,7 +1705,9 @@ body {
     padding-bottom: 12px;
 
     margin-bottom: 15px;
+
 }
+
 
 .cabecalho h1 {
 
@@ -2034,21 +1716,27 @@ body {
     font-size: 22px;
 
     text-transform: uppercase;
+
 }
+
 
 .cabecalho h2 {
 
     margin: 6px 0;
 
     font-size: 18px;
+
 }
+
 
 .cabecalho p {
 
     margin: 4px 0;
 
     font-size: 14px;
+
 }
+
 
 .informacoes {
 
@@ -2057,12 +1745,15 @@ body {
     grid-template-columns:
         1fr 1fr;
 
-    gap: 6px 25px;
+    gap:
+        6px 25px;
 
     margin-bottom: 15px;
 
     font-size: 14px;
+
 }
+
 
 .informacoes div {
 
@@ -2070,7 +1761,9 @@ body {
         1px solid #ccc;
 
     padding: 5px;
+
 }
+
 
 table {
 
@@ -2080,7 +1773,9 @@ table {
         collapse;
 
     font-size: 12px;
+
 }
+
 
 th,
 td {
@@ -2091,7 +1786,9 @@ td {
     padding: 6px;
 
     text-align: center;
+
 }
+
 
 th {
 
@@ -2099,102 +1796,32 @@ th {
         #e5e7eb;
 
     font-weight: bold;
+
 }
+
 
 td.nome {
 
     text-align: left;
+
 }
+
 
 td.classificacao {
 
     text-align: center;
+
 }
 
-.estatisticas {
-
-    margin-top: 12px;
-
-    page-break-inside:
-        avoid;
-}
-
-.estatisticas h3 {
-
-    margin:
-        0 0 5px;
-
-    font-size: 11px;
-
-    text-align: left;
-
-    text-transform:
-        uppercase;
-}
-
-.estatisticas table {
-
-    width: 100%;
-
-    border-collapse:
-        collapse;
-
-    font-size: 9px;
-}
-
-.estatisticas th,
-.estatisticas td {
-
-    border:
-        1px solid #222;
-
-    padding:
-        3px 5px;
-
-    text-align:
-        center;
-}
-
-.estatisticas th {
-
-    background:
-        #e5e7eb;
-}
-
-.linha-total {
-
-    background:
-        #f1f5f9;
-}
-
-.resumo-aproveitamento {
-
-    margin-top: 6px;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 5px;
-
-    font-size: 9px;
-}
-
-.resumo-aproveitamento div {
-
-    border:
-        1px solid #aaa;
-
-    padding: 4px;
-}
 
 .assinatura {
 
     margin-top: 60px;
 
     text-align: center;
+
 }
+
 
 .linha-assinatura {
 
@@ -2205,7 +1832,9 @@ td.classificacao {
 
     margin:
         45px auto 5px;
+
 }
+
 
 .rodape {
 
@@ -2221,36 +1850,55 @@ td.classificacao {
     font-size: 11px;
 
     color: #555;
+
 }
+
 
 @media print {
 
     body {
+
         padding: 0;
+
     }
+
 
     .pauta {
+
         max-width: none;
+
     }
 
+
     @page {
+
         size: A4 portrait;
+
         margin: 7mm;
+
     }
+
 }
 
 </style>
 
 </head>
 
+
 <body>
 
+
 <div class="pauta">
+
+
+    <!-- =========================================
+         CABEÇALHO
+    ========================================== -->
 
     <div class="cabecalho">
 
         <h1>
-            ${dados.nomeEscola}
+            ${dados.nomeEscola || "ESCOLA"}
         </h1>
 
         <h2>
@@ -2264,40 +1912,88 @@ td.classificacao {
     </div>
 
 
+    <!-- =========================================
+         INFORMAÇÕES
+    ========================================== -->
+
     <div class="informacoes">
 
-        <div>
-            <strong>Classe:</strong>
-            ${dados.classe}
-        </div>
 
         <div>
-            <strong>Turma:</strong>
-            ${dados.turmaNome}
+
+            <strong>
+                Classe:
+            </strong>
+
+            ${dados.classe || "—"}
+
         </div>
 
-        <div>
-            <strong>Disciplina:</strong>
-            ${dados.disciplina}
-        </div>
 
         <div>
-            <strong>Trimestre:</strong>
-            ${dados.trimestre}.º Trimestre
+
+            <strong>
+                Turma:
+            </strong>
+
+            ${dados.turmaNome || "—"}
+
         </div>
 
-        <div>
-            <strong>Professor:</strong>
-            ${dados.professorNome}
-        </div>
 
         <div>
-            <strong>Total de alunos:</strong>
+
+            <strong>
+                Disciplina:
+            </strong>
+
+            ${dados.disciplina || "—"}
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Trimestre:
+            </strong>
+
+            ${dados.trimestre
+                ? `${dados.trimestre}.º Trimestre`
+                : "—"
+            }
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Professor:
+            </strong>
+
+            ${dados.professorNome || "—"}
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Total de alunos:
+            </strong>
+
             ${alunos.length}
+
         </div>
+
 
     </div>
 
+
+    <!-- =========================================
+         TABELA PRINCIPAL
+    ========================================== -->
 
     <table>
 
@@ -2305,23 +2001,38 @@ td.classificacao {
 
             <tr>
 
-                <th>Nº</th>
+                <th>
+                    Nº
+                </th>
 
-                <th>Nome do Aluno</th>
+                <th>
+                    Nome do Aluno
+                </th>
 
-                <th>Sexo</th>
+                <th>
+                    Sexo
+                </th>
 
-                <th>MAC</th>
+                <th>
+                    MAC
+                </th>
 
-                <th>NPT</th>
+                <th>
+                    NPT
+                </th>
 
-                <th>MF</th>
+                <th>
+                    MF
+                </th>
 
-                <th>Classificação</th>
+                <th>
+                    Classificação
+                </th>
 
             </tr>
 
         </thead>
+
 
         <tbody>
 
@@ -2332,108 +2043,9 @@ td.classificacao {
     </table>
 
 
-    <div class="estatisticas">
-
-        <h3>
-            Estatística do Aproveitamento
-        </h3>
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Classificação
-                    </th>
-
-                    <th>
-                        M
-                    </th>
-
-                    <th>
-                        F
-                    </th>
-
-                    <th>
-                        Total
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${linhasEstatistica}
-
-            </tbody>
-
-        </table>
-
-
-        <div class="resumo-aproveitamento">
-
-            <div>
-
-                <strong>
-                    Bom aproveitamento
-                </strong>
-
-                <br>
-
-                ${bomAproveitamento}
-                —
-                ${percentBom.toFixed(1)}%
-
-            </div>
-
-
-            <div>
-
-                <strong>
-                    Sem bom aproveitamento
-                </strong>
-
-                <br>
-
-                ${semBomAproveitamento}
-                —
-                ${percentSemBom.toFixed(1)}%
-
-            </div>
-
-
-            <div>
-
-                <strong>
-                    Desistidos
-                </strong>
-
-                <br>
-
-                ${desistidos}
-
-            </div>
-
-
-            <div>
-
-                <strong>
-                    Transferidos
-                </strong>
-
-                <br>
-
-                ${transferidos}
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <!-- =========================================
+         ASSINATURA
+    ========================================== -->
 
     <div class="assinatura">
 
@@ -2441,14 +2053,20 @@ td.classificacao {
             O Professor
         </p>
 
+
         <div class="linha-assinatura"></div>
 
+
         <strong>
-            ${dados.professorNome}
+            ${dados.professorNome || "—"}
         </strong>
 
     </div>
 
+
+    <!-- =========================================
+         RODAPÉ
+    ========================================== -->
 
     <div class="rodape">
 
@@ -2460,13 +2078,16 @@ td.classificacao {
 
     </div>
 
+
 </div>
+
 
 </body>
 
 </html>
 
 `;
+
 }
 
 
