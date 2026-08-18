@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS 11 CARREGADO!");
+alert("🔥 NOTAS.JS 10 CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -2968,7 +2968,9 @@ td.classificacao{
 window.verLancamento =
 async function () {
 
-    alert("TESTE A — ENTROU NO VER LANÇAMENTO");
+    alert(
+        "TESTE A — ENTROU NO VER LANÇAMENTO"
+    );
 
 
     if (!lancamentoSelecionado) {
@@ -2980,6 +2982,98 @@ async function () {
         return;
 
     }
+
+
+    // =================================================
+    // ABRIR A JANELA IMEDIATAMENTE
+    // Antes de qualquer await
+    // =================================================
+
+    const janela =
+        window.open(
+            "",
+            "_blank"
+        );
+
+
+    if (!janela) {
+
+        alert(
+            "❌ O navegador bloqueou a nova janela.\n\n" +
+            "Permita pop-ups para este site."
+        );
+
+        return;
+
+    }
+
+
+    // =================================================
+    // MOSTRAR CARREGAMENTO
+    // =================================================
+
+    janela.document.write(`
+
+        <!DOCTYPE html>
+
+        <html lang="pt">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <title>
+                Mini-Pauta
+            </title>
+
+            <style>
+
+                body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    background: #f8fafc;
+                    color: #1e3a8a;
+                }
+
+                .carregando {
+                    text-align: center;
+                    padding: 30px;
+                }
+
+                .carregando h2 {
+                    margin-bottom: 10px;
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <div class="carregando">
+
+                <h2>
+                    ⏳ A carregar Mini-Pauta...
+                </h2>
+
+                <p>
+                    Aguarde um momento.
+                </p>
+
+            </div>
+
+        </body>
+
+        </html>
+
+    `);
+
+
+    janela.document.close();
 
 
     try {
@@ -3004,39 +3098,19 @@ async function () {
         );
 
 
-        const janela =
-            window.open(
-                "",
-                "_blank"
-            );
-
-
-        alert(
-            "TESTE E — janela aberta"
-        );
-
-
-        if (!janela) {
-
-            alert(
-                "TESTE F — navegador bloqueou"
-            );
-
-            return;
-
-        }
-
-
         alert(
             "TESTE G — ANTES DE construirMiniPautaHTML"
         );
 
 
-        janela.document.write(
+        // =================================================
+        // CONSTRUIR MINI-PAUTA
+        // =================================================
+
+        const html =
             construirMiniPautaHTML(
                 dados
-            )
-        );
+            );
 
 
         alert(
@@ -3044,22 +3118,79 @@ async function () {
         );
 
 
+        janela.document.open();
+
+        janela.document.write(
+            html
+        );
+
         janela.document.close();
+
+
+        console.log(
+            "✅ MINI-PAUTA ABERTA:",
+            dados
+        );
 
 
     }
 
     catch (erro) {
 
-        alert(
-            "ERRO:\n\n" +
-            erro.message
+        console.error(
+            "❌ ERRO AO ABRIR MINI-PAUTA:",
+            erro
         );
 
 
-        console.error(
-            "ERRO COMPLETO:",
-            erro
+        janela.document.open();
+
+        janela.document.write(`
+
+            <!DOCTYPE html>
+
+            <html lang="pt">
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <title>
+                    Erro
+                </title>
+
+            </head>
+
+            <body>
+
+                <div style="
+                    font-family:Arial;
+                    padding:30px;
+                    color:#b91c1c;
+                ">
+
+                    <h2>
+                        ❌ Não foi possível abrir a Mini-Pauta
+                    </h2>
+
+                    <p>
+                        ${erro.message}
+                    </p>
+
+                </div>
+
+            </body>
+
+            </html>
+
+        `);
+
+        janela.document.close();
+
+
+        alert(
+            "❌ ERRO:\n\n" +
+            erro.message
         );
 
     }
