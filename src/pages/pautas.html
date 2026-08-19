@@ -1,1077 +1,135 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Pautas Gerais - SGE</title>
-
-<link
-    rel="stylesheet"
-    href="../styles/dashboard.css"
->
-
-<style>
-
-    *{
-        box-sizing:border-box;
-    }
-
-    body{
-
-        margin:0;
-
-        background:#f1f5f9;
-
-        font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-        color:#1e293b;
-
-    }
-
-
-    /* =====================================================
-       ÁREA PRINCIPAL
-    ===================================================== */
-
-    .pautas-container{
-
-        padding:25px;
-
-        max-width:100%;
-
-    }
-
-
-    /* =====================================================
-       CABEÇALHO
-    ===================================================== */
-
-    .pautas-header{
-
-        background:
-            linear-gradient(
-                135deg,
-                #1e3a8a,
-                #2563eb
-            );
-
-        color:white;
-
-        padding:25px;
-
-        border-radius:18px;
-
-        margin-bottom:20px;
-
-        box-shadow:
-            0 5px 18px
-            rgba(0,0,0,.12);
-
-    }
-
-
-    .pautas-header h1{
-
-        margin:0 0 8px;
-
-        font-size:26px;
-
-    }
-
-
-    .pautas-header p{
-
-        margin:0;
-
-        opacity:.9;
-
-    }
-
-
-    /* =====================================================
-       CONTROLOS
-    ===================================================== */
-
-    .controles-pauta{
-
-        background:white;
-
-        padding:20px;
-
-        border-radius:16px;
-
-        margin-bottom:20px;
-
-        display:grid;
-
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(200px,1fr)
-            );
-
-        gap:18px;
-
-        box-shadow:
-            0 3px 12px
-            rgba(0,0,0,.07);
-
-    }
-
-
-    .campo{
-
-        display:flex;
-
-        flex-direction:column;
-
-        gap:7px;
-
-    }
-
-
-    .campo label{
-
-        font-weight:bold;
-
-        color:#1e3a8a;
-
-    }
-
-
-    .campo select{
-
-        width:100%;
-
-        padding:12px;
-
-        border:1px solid #cbd5e1;
-
-        border-radius:9px;
-
-        background:white;
-
-        font-size:15px;
-
-    }
-
-
-    /* =====================================================
-       INFORMAÇÃO DA PAUTA
-    ===================================================== */
-
-    .info-pauta{
-
-        background:white;
-
-        padding:20px;
-
-        border-radius:16px;
-
-        margin-bottom:20px;
-
-        display:flex;
-
-        justify-content:space-between;
-
-        align-items:center;
-
-        gap:15px;
-
-        box-shadow:
-            0 3px 12px
-            rgba(0,0,0,.07);
-
-    }
-
-
-    .info-pauta strong{
-
-        color:#1e3a8a;
-
-    }
-
-
-    .info-pauta .dados{
-
-        display:flex;
-
-        flex-direction:column;
-
-        gap:5px;
-
-    }
-
-
-    .info-pauta .nome-escola{
-
-        font-size:19px;
-
-        font-weight:bold;
-
-        color:#1e3a8a;
-
-    }
-
-
-    .info-pauta .detalhes{
-
-        color:#475569;
-
-        font-size:14px;
-
-    }
-
-
-    .estado-pauta{
-
-        padding:8px 14px;
-
-        border-radius:20px;
-
-        background:#e0f2fe;
-
-        color:#0369a1;
-
-        font-weight:bold;
-
-        font-size:13px;
-
-        white-space:nowrap;
-
-    }
-
-
-    /* =====================================================
-       AÇÕES
-    ===================================================== */
-
-    .acoes-pauta{
-
-        background:white;
-
-        padding:15px;
-
-        border-radius:16px;
-
-        margin-bottom:20px;
-
-        display:flex;
-
-        flex-wrap:wrap;
-
-        gap:10px;
-
-        box-shadow:
-            0 3px 12px
-            rgba(0,0,0,.07);
-
-    }
-
-
-    .btn-pauta{
-
-        border:none;
-
-        padding:11px 18px;
-
-        border-radius:9px;
-
-        cursor:pointer;
-
-        font-weight:bold;
-
-        font-size:14px;
-
-    }
-
-
-    #exportarExcel{
-
-        background:#16a34a;
-
-        color:white;
-
-    }
-
-
-    #exportarPDF{
-
-        background:#dc2626;
-
-        color:white;
-
-    }
-
-
-    #imprimirPauta{
-
-        background:#1e3a8a;
-
-        color:white;
-
-    }
-
-
-    /* =====================================================
-       TABELA
-    ===================================================== */
-
-    .tabela-pauta-container{
-
-        background:white;
-
-        padding:15px;
-
-        border-radius:16px;
-
-        overflow-x:auto;
-
-        box-shadow:
-            0 3px 12px
-            rgba(0,0,0,.07);
-
-    }
-
-
-    .tabela-pauta{
-
-        border-collapse:collapse;
-
-        min-width:1800px;
-
-        width:max-content;
-
-    }
-
-
-    .tabela-pauta th,
-    .tabela-pauta td{
-
-        border:1px solid #cbd5e1;
-
-        padding:8px;
-
-        text-align:center;
-
-        white-space:nowrap;
-
-    }
-
-
-    /* =====================================================
-       CABEÇALHO PRINCIPAL
-    ===================================================== */
-
-    .tabela-pauta thead tr:nth-child(1) th{
-
-        background:#1e3a8a;
-
-        color:white;
-
-        font-size:14px;
-
-    }
-
-
-    /* =====================================================
-       DISCIPLINAS
-    ===================================================== */
-
-    .tabela-pauta .disciplina{
-
-        background:#2563eb;
-
-        color:white;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       TRIMESTRES
-    ===================================================== */
-
-    .tabela-pauta .trimestre{
-
-        background:#dbeafe;
-
-        color:#1e3a8a;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       SUBCOLUNAS
-    ===================================================== */
-
-    .tabela-pauta .subcoluna{
-
-        background:#eff6ff;
-
-        color:#1e3a8a;
-
-        font-size:12px;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       ALUNO
-    ===================================================== */
-
-    .numero{
-
-        width:55px;
-
-        min-width:55px;
-
-        background:#f8fafc;
-
-        font-weight:bold;
-
-    }
-
-
-    .nome-aluno{
-
-        min-width:240px;
-
-        text-align:left !important;
-
-        background:#f8fafc;
-
-        font-weight:bold;
-
-    }
-
-
-    .sexo{
-
-        min-width:65px;
-
-        background:#f8fafc;
-
-        font-weight:bold;
-
-    }
-
-
-    .idade{
-
-        min-width:65px;
-
-        background:#f8fafc;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       NOTAS
-    ===================================================== */
-
-    .nota{
-
-        min-width:65px;
-
-        height:38px;
-
-        background:white;
-
-    }
-
-
-    .mf{
-
-        background:#f0fdf4;
-
-        color:#166534;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       MÉDIA FINAL
-    ===================================================== */
-
-    .media-final{
-
-        min-width:95px;
-
-        background:#f0fdf4;
-
-        color:#166534;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       CLASSIFICAÇÃO
-    ===================================================== */
-
-    .classificacao{
-
-        min-width:110px;
-
-        background:#eff6ff;
-
-        color:#1e3a8a;
-
-        font-weight:bold;
-
-    }
-
-
-    /* =====================================================
-       OBSERVAÇÃO / RESULTADO
-    ===================================================== */
-
-    .observacao{
-
-        min-width:120px;
-
-        font-weight:bold;
-
-        background:#fefce8;
-
-    }
-
-
-    .observacao.aprovado{
-
-        color:#15803d;
-
-        background:#f0fdf4;
-
-    }
-
-
-    .observacao.reprovado{
-
-        color:#dc2626;
-
-        background:#fef2f2;
-
-    }
-
-
-    /* =====================================================
-       ESTADO VAZIO
-    ===================================================== */
-
-    .estado-vazio{
-
-        padding:45px !important;
-
-        color:#64748b;
-
-        font-size:15px;
-
-    }
-
-
-    /* =====================================================
-       LEGENDA
-    ===================================================== */
-
-    .legenda{
-
-        margin-top:18px;
-
-        background:white;
-
-        padding:15px;
-
-        border-radius:12px;
-
-        display:flex;
-
-        flex-wrap:wrap;
-
-        gap:18px;
-
-        box-shadow:
-            0 3px 10px
-            rgba(0,0,0,.05);
-
-        font-size:13px;
-
-    }
-
-
-    .legenda span{
-
-        display:flex;
-
-        align-items:center;
-
-        gap:6px;
-
-    }
-
-
-    .legenda strong{
-
-        color:#1e3a8a;
-
-    }
-
-
-    /* =====================================================
-       IMPRESSÃO
-    ===================================================== */
-
-    @media print{
-
-        body{
-
-            background:white;
-
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pauta Geral — SGE Angola</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f1f5f9;
         }
 
-
-        .controles-pauta,
-        .acoes-pauta,
-        .legenda{
-
-            display:none !important;
-
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
         }
 
-
-        .pautas-container{
-
-            padding:0;
-
+        h1 {
+            margin-top: 0;
         }
 
-
-        .pautas-header{
-
-            box-shadow:none;
-
-            border-radius:0;
-
+        .filtros {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
-
-        .info-pauta{
-
-            box-shadow:none;
-
+        select,
+        button {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
         }
 
-
-        .tabela-pauta-container{
-
-            box-shadow:none;
-
-            overflow:visible;
-
+        button {
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
         }
 
-    }
-
-
-    /* =====================================================
-       MOBILE
-    ===================================================== */
-
-    @media(max-width:700px){
-
-        .pautas-container{
-
-            padding:12px;
-
+        .tabela-container {
+            overflow-x: auto;
         }
 
-
-        .pautas-header{
-
-            padding:20px;
-
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
         }
 
-
-        .pautas-header h1{
-
-            font-size:22px;
-
+        th,
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: center;
         }
 
-
-        .controles-pauta{
-
-            grid-template-columns:1fr;
-
+        th {
+            background: #e2e8f0;
         }
 
-
-        .info-pauta{
-
-            flex-direction:column;
-
-            align-items:flex-start;
-
+        .nome {
+            text-align: left;
+            min-width: 220px;
         }
 
-
-        .acoes-pauta{
-
-            flex-direction:column;
-
+        .erro {
+            color: #dc2626;
+            padding: 15px;
         }
+    </style>
+</head>
 
+<body>
 
-        .btn-pauta{
+<div class="container">
 
-            width:100%;
+    <h1>📋 Pauta Geral</h1>
 
-        }
-
-    }
-
-</style>
-
-</head><body><div class="pautas-container"><!-- =================================================
-     CABEÇALHO
-================================================== -->
-
-<div class="pautas-header">
-
-    <h1>
-        📊 Pautas Gerais
-    </h1>
-
-    <p>
-        Gestão e acompanhamento dos resultados escolares
-    </p>
-
-</div>
-
-
-<!-- =================================================
-     SELEÇÃO
-================================================== -->
-
-<div class="controles-pauta">
-
-
-    <div class="campo">
-
-        <label for="classeSelect">
-            Classe
-        </label>
-
-
-        <select id="classeSelect">
-
-            <option value="">
-                -- Selecione a classe --
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <div class="campo">
-
-        <label for="turmaSelect">
-            Turma
-        </label>
-
+    <div class="filtros">
 
         <select id="turmaSelect">
-
             <option value="">
-                -- Selecione a turma --
+                Selecionar turma
             </option>
-
         </select>
 
-    </div>
+        <button id="carregarPauta">
+            🔍 Carregar Pauta
+        </button>
 
-
-</div>
-
-
-<!-- =================================================
-     INFORMAÇÃO DA PAUTA
-================================================== -->
-
-<div class="info-pauta">
-
-
-    <div class="dados">
-
-
-        <div
-            id="nomeEscola"
-            class="nome-escola"
-        >
-            Complexo Escolar Nº 89M
-            "Eduardo Domingos Sukuete"
-        </div>
-
-
-        <div
-            id="anoLetivo"
-            class="detalhes"
-        >
-            Ano Lectivo: —
-        </div>
-
-
-        <div
-            id="classeInfo"
-            class="detalhes"
-        >
-            Classe: —
-        </div>
-
-
-        <div
-            id="turmaInfo"
-            class="detalhes"
-        >
-            Turma: —
-        </div>
-
+        <button id="imprimirPauta">
+            🖨️ Imprimir
+        </button>
 
     </div>
 
-
-    <div
-        id="estadoPauta"
-        class="estado-pauta"
-    >
-        Aguardando seleção
+    <div id="estado">
+        Selecione uma turma.
     </div>
 
+    <div class="tabela-container">
+
+        <table id="tabelaPauta">
+
+            <thead id="cabecalhoPauta">
+
+            </thead>
+
+            <tbody id="corpoPauta">
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </div>
 
-
-<!-- =================================================
-     BOTÕES
-================================================== -->
-
-<div class="acoes-pauta">
-
-
-    <button
-        type="button"
-        id="exportarExcel"
-        class="btn-pauta"
-    >
-        📊 Exportar Excel
-    </button>
-
-
-    <button
-        type="button"
-        id="exportarPDF"
-        class="btn-pauta"
-    >
-        📄 Exportar PDF
-    </button>
-
-
-    <button
-        type="button"
-        id="imprimirPauta"
-        class="btn-pauta"
-    >
-        🖨️ Imprimir
-    </button>
-
-
-</div>
-
-
-<!-- =================================================
-     TABELA PRINCIPAL
-================================================== -->
-
-<div class="tabela-pauta-container">
-
-
-    <table class="tabela-pauta">
-
-
-        <thead>
-
-
-            <tr>
-
-                <th
-                    rowspan="3"
-                    class="numero"
-                >
-                    Nº
-                </th>
-
-
-                <th
-                    rowspan="3"
-                    class="nome-aluno"
-                >
-                    Nome Completo
-                </th>
-
-
-                <th
-                    rowspan="3"
-                    class="sexo"
-                >
-                    Sexo
-                </th>
-
-
-                <th
-                    rowspan="3"
-                    class="idade"
-                >
-                    Idade
-                </th>
-
-
-                <!--
-                    AS DISCIPLINAS E OS TRIMESTRES
-                    SÃO COMPLETADOS PELO pautas.js
-                    CONFORME A CLASSE/CICLO.
-                -->
-
-
-            </tr>
-
-
-        </thead>
-
-
-        <tbody id="pautaLista">
-
-
-            <tr>
-
-                <td
-                    colspan="100"
-                    class="estado-vazio"
-                >
-
-                    📋
-
-                    Selecione uma classe e
-                    uma turma para carregar
-                    a pauta.
-
-                </td>
-
-            </tr>
-
-
-        </tbody>
-
-
-    </table>
-
-
-</div>
-
-
-<!-- =================================================
-     LEGENDA
-================================================== -->
-
-<div class="legenda">
-
-
-    <span>
-
-        <strong>MAC</strong>
-
-        Média de Avaliação Contínua
-
-    </span>
-
-
-    <span>
-
-        <strong>NPT</strong>
-
-        Nota da Prova Trimestral
-
-    </span>
-
-
-    <span>
-
-        <strong>MF</strong>
-
-        Média Final do Trimestre
-
-    </span>
-
-
-    <span>
-
-        <strong>Média Final</strong>
-
-        Média final
-
-    </span>
-
-
-    <span>
-
-        <strong>Classificação</strong>
-
-        Classificação final
-
-    </span>
-
-
-    <span>
-
-        <strong>Observação</strong>
-
-        Aprovado / Reprovado
-
-    </span>
-
-
-    <span>
-
-        <strong>—</strong>
-
-        Trimestre ainda não concluído
-
-    </span>
-
-
-</div>
-
-</div><script
+<script
     type="module"
-    src="../services/pautas.js?v=3"></script>
+    src="../services/pautas.js">
+</script>
 
 </body>
-
-    </html>
+</html>
