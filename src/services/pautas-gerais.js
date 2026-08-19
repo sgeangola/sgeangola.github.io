@@ -15,7 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("PAUTAS-GERAIS.JS CARREGADO ✅");
+alert("PAUTAS-GERAIS.JS1 CARREGADO ✅");
 
 
 // =====================================================
@@ -4443,125 +4443,250 @@ window.carregarPautaSelecionada =
 
 BLOCO 3.15 — BOTÃO CARREGAR PAUTA
 
+BLOCO 3.15 — CARREGAR TURMA PELO ID E ESCOLA
+
 // =====================================================
 // PAUTA-GERAL.JS — BLOCO 3.15
-// BOTÃO CARREGAR PAUTA
+// CARREGAR TURMA DIRETAMENTE DO FIRESTORE
 // =====================================================
 
-const botaoCarregar =
+async function carregarPautaSelecionada() {
+
+    try {
+
+        const select =
+            document.getElementById(
+                "turmaSelect"
+            );
+
+
+        if (!select) {
+
+            alert(
+                "❌ Campo turmaSelect não encontrado."
+            );
+
+            return;
+
+        }
+
+
+        const turmaIdSelecionada =
+            String(
+                select.value || ""
+            ).trim();
+
+
+        if (!turmaIdSelecionada) {
+
+            alert(
+                "⚠️ Selecione uma turma."
+            );
+
+            return;
+
+        }
+
+
+        if (!escolaId) {
+
+            alert(
+                "❌ Escola não identificada."
+            );
+
+            return;
+
+        }
+
+
+        console.log(
+            "🏫 Escola:",
+            escolaId
+        );
+
+        console.log(
+            "📚 Turma:",
+            turmaIdSelecionada
+        );
+
+
+        // =================================================
+        // BUSCAR TURMA PELO ID
+        // =================================================
+
+        const turmaRef =
+            doc(
+                db,
+                "turmas",
+                turmaIdSelecionada
+            );
+
+
+        const turmaSnap =
+            await getDoc(
+                turmaRef
+            );
+
+
+        if (!turmaSnap.exists()) {
+
+            alert(
+                "❌ Esta turma não existe no Firestore."
+            );
+
+            return;
+
+        }
+
+
+        const dadosTurma =
+            turmaSnap.data();
+
+
+        // =================================================
+        // SEGURANÇA DA ESCOLA
+        // =================================================
+
+        if (
+            dadosTurma.escolaId &&
+            String(
+                dadosTurma.escolaId
+            ).trim() !==
+            String(
+                escolaId
+            ).trim()
+        ) {
+
+            alert(
+                "❌ Esta turma pertence a outra escola."
+            );
+
+            console.error(
+                "Escola da turma:",
+                dadosTurma.escolaId
+            );
+
+            console.error(
+                "Escola atual:",
+                escolaId
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // DEFINIR TURMA ATUAL
+        // =================================================
+
+        turmaAtual = {
+
+            id:
+                turmaSnap.id,
+
+            ...dadosTurma
+
+        };
+
+
+        console.log(
+            "✅ TURMA ENCONTRADA:",
+            turmaAtual
+        );
+
+
+        // =================================================
+        // BUSCAR ALUNOS DA TURMA
+        // =================================================
+
+        const alunosRef =
+            collection(
+                db,
+                "turmas",
+                turmaSnap.id,
+                "alunos"
+            );
+
+
+        const alunosSnap =
+            await getDocs(
+                alunosRef
+            );
+
+
+        alunosAtuais = [];
+
+
+        alunosSnap.forEach(
+            documento => {
+
+                alunosAtuais.push({
+
+                    id:
+                        documento.id,
+
+                    ...documento.data()
+
+                });
+
+            }
+        );
+
+
+        console.log(
+            "👨‍🎓 ALUNOS:",
+            alunosAtuais.length
+        );
+
+
+        // =================================================
+        // CONSTRUIR PAUTA
+        // =================================================
+
+        await atualizarPautaCompleta();
+
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO AO CARREGAR TURMA:",
+            erro
+        );
+
+
+        alert(
+            "❌ Erro ao carregar turma:\n\n" +
+            erro.message
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// BOTÃO
+// =====================================================
+
+const botaoCarregarPauta =
     document.getElementById(
         "carregarPauta"
     );
 
 
-if (botaoCarregar) {
+if (
+    botaoCarregarPauta
+) {
 
-    botaoCarregar.onclick =
-        async function () {
-
-            try {
-
-                const select =
-                    document.getElementById(
-                        "turmaSelect"
-                    );
-
-
-                if (!select) {
-
-                    alert(
-                        "❌ Campo de turma não encontrado."
-                    );
-
-                    return;
-
-                }
-
-
-                const turmaId =
-                    String(
-                        select.value || ""
-                    ).trim();
-
-
-                if (!turmaId) {
-
-                    alert(
-                        "⚠️ Selecione uma turma."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // PROCURAR A TURMA
-                // =========================================
-
-                const turma =
-                    turmasAtuais.find(
-                        item =>
-                            String(
-                                item.id
-                            ) ===
-                            turmaId
-                    );
-
-
-                if (!turma) {
-
-                    alert(
-                        "❌ Turma não encontrada."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // DEFINIR TURMA ATUAL
-                // =========================================
-
-                turmaAtual =
-                    turma;
-
-
-                console.log(
-                    "🏫 TURMA ATUAL:",
-                    turmaAtual
-                );
-
-
-                // =========================================
-                // CONSTRUIR PAUTA
-                // =========================================
-
-                await atualizarPautaCompleta();
-
-
-                console.log(
-                    "✅ PAUTA CARREGADA."
-                );
-
-            }
-
-            catch (erro) {
-
-                console.error(
-                    "❌ ERRO AO CARREGAR PAUTA:",
-                    erro
-                );
-
-
-                alert(
-                    "❌ Erro ao carregar a pauta:\n\n" +
-                    erro.message
-                );
-
-            }
-
-        };
+    botaoCarregarPauta.onclick =
+        carregarPautaSelecionada;
 
 }
+
+
+// =====================================================
+// FIM DO BLOCO 3.15
+// =====================================================
