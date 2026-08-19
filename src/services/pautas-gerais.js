@@ -2340,7 +2340,6 @@ function construirLinhas() {
 
 }
 
-BLOCO 3.7 — FINALIZAR A CONSTRUÇÃO DA PAUTA
 
 // =====================================================
 // PAUTA-GERAL.JS — BLOCO 3.7
