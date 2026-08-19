@@ -190,7 +190,6 @@ async function carregarEscola() {
 
     }
 
-
     const referencia =
         doc(
             db,
@@ -198,12 +197,10 @@ async function carregarEscola() {
             escolaId
         );
 
-
     const resultado =
         await getDoc(
             referencia
         );
-
 
     if (!resultado.exists()) {
 
@@ -213,21 +210,17 @@ async function carregarEscola() {
 
     }
 
-
     escolaAtual =
         resultado.data();
-
 
     console.log(
         "🏫 ESCOLA CARREGADA:",
         escolaAtual
     );
 
-
     nomeEscola.textContent =
         escolaAtual.nome ||
         "Escola";
-
 
     anoLetivo.textContent =
         `Ano Lectivo: ${
@@ -249,7 +242,6 @@ async function carregarTurmas() {
         estadoPauta.textContent =
             "A carregar turmas...";
 
-
         if (!escolaId) {
 
             throw new Error(
@@ -257,7 +249,6 @@ async function carregarTurmas() {
             );
 
         }
-
 
         const consulta =
             query(
@@ -275,12 +266,10 @@ async function carregarTurmas() {
 
             );
 
-
         const snapshot =
             await getDocs(
                 consulta
             );
-
 
         todasTurmas =
             snapshot.docs.map(
@@ -294,15 +283,12 @@ async function carregarTurmas() {
                 })
             );
 
-
         console.log(
-            "TURMAS DA ESCOLA:",
+            "🏫 TURMAS DA ESCOLA:",
             todasTurmas
         );
 
-
         preencherClasses();
-
 
         estadoPauta.textContent =
             "Selecione uma classe e uma turma.";
@@ -315,7 +301,6 @@ async function carregarTurmas() {
             "Erro ao carregar turmas:",
             erro
         );
-
 
         estadoPauta.textContent =
             "❌ Erro ao carregar turmas.";
@@ -333,7 +318,6 @@ function preencherClasses() {
 
     const classes = [];
 
-
     todasTurmas.forEach(
         turma => {
 
@@ -341,7 +325,6 @@ function preencherClasses() {
                 turma.classe ||
                 turma.classeNome ||
                 "";
-
 
             if (
                 classe &&
@@ -354,7 +337,6 @@ function preencherClasses() {
 
         }
     );
-
 
     classes.sort(
         (a, b) => {
@@ -373,12 +355,10 @@ function preencherClasses() {
                     10
                 );
 
-
             return numeroA - numeroB;
 
         }
     );
-
 
     classeSelect.innerHTML = `
 
@@ -388,7 +368,6 @@ function preencherClasses() {
 
     `;
 
-
     classes.forEach(
         classe => {
 
@@ -397,14 +376,11 @@ function preencherClasses() {
                     "option"
                 );
 
-
             option.value =
                 classe;
 
-
             option.textContent =
                 classe;
-
 
             classeSelect.appendChild(
                 option
@@ -427,7 +403,6 @@ classeSelect.addEventListener(
         const classe =
             this.value;
 
-
         turmaSelect.innerHTML = `
 
             <option value="">
@@ -436,9 +411,7 @@ classeSelect.addEventListener(
 
         `;
 
-
         turmaAtual = null;
-
 
         if (!classe) {
 
@@ -448,19 +421,26 @@ classeSelect.addEventListener(
 
         }
 
-
         const turmasDaClasse =
             todasTurmas.filter(
-                turma =>
+                turma => {
 
-                    normalizarTexto(
-                        turma.classe
-                    ) ===
-                    normalizarTexto(
-                        classe
-                    )
+                    const classeTurma =
+                        turma.classe ||
+                        turma.classeNome ||
+                        "";
+
+                    return (
+                        normalizarTexto(
+                            classeTurma
+                        ) ===
+                        normalizarTexto(
+                            classe
+                        )
+                    );
+
+                }
             );
-
 
         turmasDaClasse.forEach(
             turma => {
@@ -470,15 +450,13 @@ classeSelect.addEventListener(
                         "option"
                     );
 
-
                 option.value =
                     turma.id;
 
-
                 option.textContent =
                     turma.nome ||
+                    turma.nomeTurma ||
                     turma.id;
-
 
                 turmaSelect.appendChild(
                     option
@@ -486,7 +464,6 @@ classeSelect.addEventListener(
 
             }
         );
-
 
         atualizarInformacoes();
 
@@ -500,11 +477,10 @@ classeSelect.addEventListener(
 
 turmaSelect.addEventListener(
     "change",
-    async function() {
+    function() {
 
         const turmaId =
             this.value;
-
 
         if (!turmaId) {
 
@@ -516,14 +492,17 @@ turmaSelect.addEventListener(
 
         }
 
-
         turmaAtual =
             todasTurmas.find(
                 turma =>
-                    turma.id ===
-                    turmaId
+                    String(turma.id) ===
+                    String(turmaId)
             );
 
+        console.log(
+            "🎓 TURMA SELECIONADA:",
+            turmaAtual
+        );
 
         atualizarInformacoes();
 
@@ -549,17 +528,17 @@ function atualizarInformacoes() {
 
     }
 
-
     classeInfo.textContent =
         `Classe: ${
             turmaAtual.classe ||
+            turmaAtual.classeNome ||
             "—"
         }`;
-
 
     turmaInfo.textContent =
         `Turma: ${
             turmaAtual.nome ||
+            turmaAtual.nomeTurma ||
             "—"
         }`;
 
@@ -586,7 +565,6 @@ if (carregarPautaBtn) {
 
             }
 
-
             await carregarPauta(
                 turmaAtual.id
             );
@@ -608,9 +586,7 @@ async function carregarPauta(turmaId) {
         estadoPauta.textContent =
             "⏳ A carregar pauta...";
 
-
         pautaLista.innerHTML = "";
-
 
         // =============================================
         // ALUNOS
@@ -628,7 +604,6 @@ async function carregarPauta(turmaId) {
 
             );
 
-
         alunosAtuais =
             alunosSnapshot.docs.map(
                 documento => ({
@@ -641,9 +616,8 @@ async function carregarPauta(turmaId) {
                 })
             );
 
-
         // =============================================
-        // ORDENAR
+        // ORDENAR ALUNOS
         // =============================================
 
         alunosAtuais.sort(
@@ -655,13 +629,11 @@ async function carregarPauta(turmaId) {
                         10
                     );
 
-
                 const numeroB =
                     parseInt(
                         b.numero,
                         10
                     );
-
 
                 if (
                     Number.isNaN(numeroA) &&
@@ -679,7 +651,6 @@ async function carregarPauta(turmaId) {
 
                 }
 
-
                 if (
                     Number.isNaN(numeroA)
                 ) {
@@ -687,7 +658,6 @@ async function carregarPauta(turmaId) {
                     return 1;
 
                 }
-
 
                 if (
                     Number.isNaN(numeroB)
@@ -697,19 +667,16 @@ async function carregarPauta(turmaId) {
 
                 }
 
-
                 return numeroA - numeroB;
 
             }
         );
-
 
         // =============================================
         // NOTAS
         // =============================================
 
         notasAtuais = [];
-
 
         const notasSnapshot =
             await getDocs(
@@ -719,17 +686,19 @@ async function carregarPauta(turmaId) {
                 )
             );
 
-
         notasSnapshot.forEach(
             documento => {
 
                 const dados =
                     documento.data();
 
-
                 if (
-                    dados.turmaId ===
-                    turmaId
+                    String(
+                        dados.turmaId
+                    ) ===
+                    String(
+                        turmaId
+                    )
                 ) {
 
                     notasAtuais.push({
@@ -746,12 +715,10 @@ async function carregarPauta(turmaId) {
             }
         );
 
-
         console.log(
-            "📝 NOTAS:",
+            "📝 NOTAS DA TURMA:",
             notasAtuais
         );
-
 
         // =============================================
         // CABEÇALHO
@@ -759,13 +726,11 @@ async function carregarPauta(turmaId) {
 
         construirCabecalho();
 
-
         // =============================================
-        // ALUNOS
+        // LINHAS
         // =============================================
 
         construirLinhas();
-
 
         estadoPauta.textContent =
             `✅ ${
@@ -780,7 +745,6 @@ async function carregarPauta(turmaId) {
             "Erro ao carregar pauta:",
             erro
         );
-
 
         pautaLista.innerHTML = `
 
@@ -803,7 +767,6 @@ async function carregarPauta(turmaId) {
 
         `;
 
-
         estadoPauta.textContent =
             "❌ Erro ao carregar pauta.";
 
@@ -818,101 +781,119 @@ async function carregarPauta(turmaId) {
 
 function obterNotaAluno(
     aluno,
-    disciplina,
-    trimestre
+    disciplina
 ) {
 
-    const registro =
-        notasAtuais.find(
+    const registros =
+        notasAtuais.filter(
             nota => {
 
-                if (
+                return (
                     normalizarTexto(
                         nota.disciplina
-                    ) !==
+                    ) ===
                     normalizarTexto(
                         disciplina
                     )
-                ) {
-
-                    return false;
-
-                }
-
-
-                if (
-                    String(
-                        nota.trimestre
-                    ) !==
-                    String(
-                        trimestre
-                    )
-                ) {
-
-                    return false;
-
-                }
-
-
-                return true;
-
-            }
-        );
-
-
-    if (!registro) {
-
-        return {};
-
-    }
-
-
-    const encontrado =
-        registro.alunos?.find(
-            item => {
-
-                if (
-                    aluno.numero &&
-                    item.numero
-                ) {
-
-                    return String(
-                        item.numero
-                    ) ===
-                    String(
-                        aluno.numero
-                    );
-
-                }
-
-
-                if (
-                    aluno.id &&
-                    item.id
-                ) {
-
-                    return String(
-                        item.id
-                    ) ===
-                    String(
-                        aluno.id
-                    );
-
-                }
-
-
-                return normalizarTexto(
-                    item.nome
-                ) ===
-                normalizarTexto(
-                    aluno.nome
                 );
 
             }
         );
 
+    if (
+        registros.length === 0
+    ) {
 
-    return encontrado || {};
+        return {};
+
+    }
+
+    const resultado = {};
+
+    registros.forEach(
+        registro => {
+
+            const encontrado =
+                registro.alunos?.find(
+                    item => {
+
+                        if (
+                            aluno.numero &&
+                            item.numero
+                        ) {
+
+                            return (
+                                String(
+                                    item.numero
+                                ) ===
+                                String(
+                                    aluno.numero
+                                )
+                            );
+
+                        }
+
+                        if (
+                            aluno.id &&
+                            item.id
+                        ) {
+
+                            return (
+                                String(
+                                    item.id
+                                ) ===
+                                String(
+                                    aluno.id
+                                )
+                            );
+
+                        }
+
+                        if (
+                            aluno.id &&
+                            item.alunoId
+                        ) {
+
+                            return (
+                                String(
+                                    item.alunoId
+                                ) ===
+                                String(
+                                    aluno.id
+                                )
+                            );
+
+                        }
+
+                        return (
+                            normalizarTexto(
+                                item.nome
+                            ) ===
+                            normalizarTexto(
+                                aluno.nome
+                            )
+                        );
+
+                    }
+                );
+
+            if (encontrado) {
+
+                const trimestre =
+                    String(
+                        registro.trimestre
+                    );
+
+                resultado[
+                    `trimestre${trimestre}`
+                ] = encontrado;
+
+            }
+
+        }
+    );
+
+    return resultado;
 
 }
 
@@ -933,10 +914,11 @@ function valorNota(valor) {
 
     }
 
-
     const numero =
-        Number(valor);
-
+        Number(
+            String(valor)
+                .replace(",", ".")
+        );
 
     if (
         Number.isNaN(numero)
@@ -946,17 +928,16 @@ function valorNota(valor) {
 
     }
 
-
     return numero;
 
 }
 
 
 // =====================================================
-// CALCULAR MF
+// CALCULAR MDF
 // =====================================================
 
-function calcularMF(
+function calcularMDF(
     mac,
     npt
 ) {
@@ -970,13 +951,65 @@ function calcularMF(
 
     }
 
-
     return Number(
         (
             (
                 Number(mac) +
                 Number(npt)
             ) / 2
+        ).toFixed(1)
+    );
+
+}
+
+
+// =====================================================
+// CALCULAR MÉDIA FINAL DA DISCIPLINA
+// =====================================================
+
+function calcularMediaFinalDisciplina(
+    notas
+) {
+
+    const valores = [];
+
+    notas.forEach(
+        nota => {
+
+            if (
+                nota !== "" &&
+                nota !== null &&
+                nota !== undefined
+            ) {
+
+                valores.push(
+                    Number(nota)
+                );
+
+            }
+
+        }
+    );
+
+    if (
+        valores.length === 0
+    ) {
+
+        return "";
+
+    }
+
+    return Number(
+        (
+            valores.reduce(
+                (
+                    total,
+                    valor
+                ) =>
+                    total + valor,
+                0
+            ) /
+            valores.length
         ).toFixed(1)
     );
 
@@ -1002,10 +1035,8 @@ function classificarNota(
 
     }
 
-
     const valor =
         Number(nota);
-
 
     if (
         Number.isNaN(valor)
@@ -1014,7 +1045,6 @@ function classificarNota(
         return "";
 
     }
-
 
     if (
         ciclo ===
@@ -1036,7 +1066,6 @@ function classificarNota(
         return "Muito Bom";
 
     }
-
 
     if (valor <= 4)
         return "Mau";
@@ -1067,12 +1096,11 @@ function obterDisciplinasDaTurma() {
 
     }
 
-
     const ciclo =
         identificarCiclo(
-            turmaAtual.classe
+            turmaAtual.classe ||
+            turmaAtual.classeNome
         );
-
 
     return [
         ...disciplinasPorCiclo[ciclo]
@@ -1082,7 +1110,8 @@ function obterDisciplinasDaTurma() {
 
 
 // =====================================================
-// CABEÇALHO DA TABELA
+// CABEÇALHO
+// DISCIPLINA → MDF | MF
 // =====================================================
 
 function construirCabecalho() {
@@ -1090,34 +1119,32 @@ function construirCabecalho() {
     const disciplinas =
         obterDisciplinasDaTurma();
 
-
     cabecalhoPauta.innerHTML = "";
 
-
     const linha1 =
-        document.createElement("tr");
-
+        document.createElement(
+            "tr"
+        );
 
     linha1.innerHTML = `
 
-        <th rowspan="3">
+        <th rowspan="2">
             Nº
         </th>
 
-        <th rowspan="3">
+        <th rowspan="2">
             Nome Completo
         </th>
 
-        <th rowspan="3">
+        <th rowspan="2">
             Sexo
         </th>
 
-        <th rowspan="3">
+        <th rowspan="2">
             Idade
         </th>
 
     `;
-
 
     disciplinas.forEach(
         disciplina => {
@@ -1125,7 +1152,7 @@ function construirCabecalho() {
             linha1.innerHTML += `
 
                 <th
-                    colspan="9"
+                    colspan="2"
                     class="disciplina"
                 >
                     ${disciplina}
@@ -1136,52 +1163,38 @@ function construirCabecalho() {
         }
     );
 
-
     linha1.innerHTML += `
 
-        <th rowspan="3">
+        <th rowspan="2">
             Média Final
         </th>
 
-        <th rowspan="3">
+        <th rowspan="2">
             Classificação
         </th>
 
-        <th rowspan="3">
+        <th rowspan="2">
             Observação
         </th>
 
     `;
 
-
     const linha2 =
-        document.createElement("tr");
-
+        document.createElement(
+            "tr"
+        );
 
     disciplinas.forEach(
         () => {
 
             linha2.innerHTML += `
 
-                <th
-                    colspan="3"
-                    class="trimestre"
-                >
-                    1.º Trimestre
+                <th class="subcoluna">
+                    MDF
                 </th>
 
-                <th
-                    colspan="3"
-                    class="trimestre"
-                >
-                    2.º Trimestre
-                </th>
-
-                <th
-                    colspan="3"
-                    class="trimestre"
-                >
-                    3.º Trimestre
+                <th class="subcoluna">
+                    MF
                 </th>
 
             `;
@@ -1189,52 +1202,12 @@ function construirCabecalho() {
         }
     );
 
-
-    const linha3 =
-        document.createElement("tr");
-
-
-    disciplinas.forEach(
-        () => {
-
-            for (
-                let i = 0;
-                i < 3;
-                i++
-            ) {
-
-                linha3.innerHTML += `
-
-                    <th class="subcoluna">
-                        MAC
-                    </th>
-
-                    <th class="subcoluna">
-                        NPT
-                    </th>
-
-                    <th class="subcoluna">
-                        MF
-                    </th>
-
-                `;
-
-            }
-
-        }
-    );
-
-
     cabecalhoPauta.appendChild(
         linha1
     );
 
     cabecalhoPauta.appendChild(
         linha2
-    );
-
-    cabecalhoPauta.appendChild(
-        linha3
     );
 
 }
@@ -1248,16 +1221,14 @@ function construirLinhas() {
 
     pautaLista.innerHTML = "";
 
-
     const disciplinas =
         obterDisciplinasDaTurma();
 
-
     const ciclo =
         identificarCiclo(
-            turmaAtual.classe
+            turmaAtual.classe ||
+            turmaAtual.classeNome
         );
-
 
     alunosAtuais.forEach(
         (aluno, indice) => {
@@ -1267,28 +1238,23 @@ function construirLinhas() {
                     "tr"
                 );
 
-
             const numero =
                 aluno.numero ||
                 indice + 1;
 
-
             const nome =
                 aluno.nome ||
                 "—";
-
 
             const sexo =
                 aluno.sexo ||
                 aluno.Sexo ||
                 "—";
 
-
             const idade =
                 aluno.idade ||
                 aluno.Idade ||
                 "—";
-
 
             let html = `
 
@@ -1310,127 +1276,201 @@ function construirLinhas() {
 
             `;
 
-
             const mediasDisciplinas = [];
-
 
             disciplinas.forEach(
                 disciplina => {
 
-                    let medias = [];
+                    const notas =
+                        obterNotaAluno(
+                            aluno,
+                            disciplina
+                        );
 
+                    const notasTrimestres = [];
 
-                    for (
-                        let trimestre = 1;
-                        trimestre <= 3;
-                        trimestre++
-                    ) {
+                    // =================================
+                    // 1.º TRIMESTRE
+                    // =================================
 
-                        const nota =
-                            obterNotaAluno(
-                                aluno,
-                                disciplina,
-                                trimestre
-                            );
+                    const nota1 =
+                        notas.trimestre1 ||
+                        {};
 
+                    const mac1 =
+                        valorNota(
+                            nota1.MAC
+                        );
 
-                        const mac =
-                            valorNota(
-                                nota.MAC
-                            );
+                    const npt1 =
+                        valorNota(
+                            nota1.NPT
+                        );
 
-
-                        const npt =
-                            valorNota(
-                                nota.NPT
-                            );
-
-
-                        const mf =
-                            nota.MF !==
+                    const mdf1 =
+                        nota1.MDF !==
                             undefined &&
-                            nota.MF !== ""
-                                ? valorNota(
-                                    nota.MF
-                                )
-                                : calcularMF(
-                                    mac,
-                                    npt
-                                );
-
-
-                        if (
-                            mf !== ""
-                        ) {
-
-                            medias.push(
-                                Number(mf)
+                        nota1.MDF !== ""
+                            ? valorNota(
+                                nota1.MDF
+                            )
+                            : calcularMDF(
+                                mac1,
+                                npt1
                             );
-
-                        }
-
-
-                        html += `
-
-                            <td>
-                                ${
-                                    mac === ""
-                                        ? "—"
-                                        : mac
-                                }
-                            </td>
-
-                            <td>
-                                ${
-                                    npt === ""
-                                        ? "—"
-                                        : npt
-                                }
-                            </td>
-
-                            <td class="mf">
-                                ${
-                                    mf === ""
-                                        ? "—"
-                                        : mf
-                                }
-                            </td>
-
-                        `;
-
-                    }
-
 
                     if (
-                        medias.length > 0
+                        mdf1 !== ""
                     ) {
 
-                        const mediaDisciplina =
-                            Number(
-                                (
-                                    medias.reduce(
-                                        (
-                                            total,
-                                            valor
-                                        ) =>
-                                            total +
-                                            valor,
-                                        0
-                                    ) /
-                                    medias.length
-                                ).toFixed(1)
-                            );
-
-
-                        mediasDisciplinas.push(
-                            mediaDisciplina
+                        notasTrimestres.push(
+                            Number(mdf1)
                         );
 
                     }
 
+                    // =================================
+                    // 2.º TRIMESTRE
+                    // =================================
+
+                    const nota2 =
+                        notas.trimestre2 ||
+                        {};
+
+                    const mac2 =
+                        valorNota(
+                            nota2.MAC
+                        );
+
+                    const npt2 =
+                        valorNota(
+                            nota2.NPT
+                        );
+
+                    const mdf2 =
+                        nota2.MDF !==
+                            undefined &&
+                        nota2.MDF !== ""
+                            ? valorNota(
+                                nota2.MDF
+                            )
+                            : calcularMDF(
+                                mac2,
+                                npt2
+                            );
+
+                    if (
+                        mdf2 !== ""
+                    ) {
+
+                        notasTrimestres.push(
+                            Number(mdf2)
+                        );
+
+                    }
+
+                    // =================================
+                    // 3.º TRIMESTRE
+                    // =================================
+
+                    const nota3 =
+                        notas.trimestre3 ||
+                        {};
+
+                    const mac3 =
+                        valorNota(
+                            nota3.MAC
+                        );
+
+                    const npt3 =
+                        valorNota(
+                            nota3.NPT
+                        );
+
+                    const mdf3 =
+                        nota3.MDF !==
+                            undefined &&
+                        nota3.MDF !== ""
+                            ? valorNota(
+                                nota3.MDF
+                            )
+                            : calcularMDF(
+                                mac3,
+                                npt3
+                            );
+
+                    if (
+                        mdf3 !== ""
+                    ) {
+
+                        notasTrimestres.push(
+                            Number(mdf3)
+                        );
+
+                    }
+
+                    // =================================
+                    // MDF GERAL DA DISCIPLINA
+                    // =================================
+
+                    const MDF =
+                        calcularMediaFinalDisciplina(
+                            notasTrimestres
+                        );
+
+                    // =================================
+                    // MF DA DISCIPLINA
+                    // =================================
+
+                    let MF = "";
+
+                    if (
+                        MDF !== ""
+                    ) {
+
+                        MF =
+                            Math.round(
+                                Number(MDF)
+                            );
+
+                    }
+
+                    if (
+                        MDF !== ""
+                    ) {
+
+                        mediasDisciplinas.push(
+                            Number(MDF)
+                        );
+
+                    }
+
+                    // =================================
+                    // COLUNAS
+                    // =================================
+
+                    html += `
+
+                        <td>
+                            ${
+                                MDF === ""
+                                    ? "—"
+                                    : MDF
+                            }
+                        </td>
+
+                        <td class="mf">
+                            ${
+                                MF === ""
+                                    ? "—"
+                                    : MF
+                            }
+                        </td>
+
+                    `;
+
                 }
             );
-
 
             // =========================================
             // MÉDIA FINAL GERAL
@@ -1438,29 +1478,29 @@ function construirLinhas() {
 
             let mediaFinal = "";
 
-
             if (
                 mediasDisciplinas.length > 0
             ) {
 
                 mediaFinal =
-                    Number(
-                        (
-                            mediasDisciplinas.reduce(
-                                (
-                                    total,
-                                    valor
-                                ) =>
-                                    total +
-                                    valor,
-                                0
-                            ) /
-                            mediasDisciplinas.length
-                        ).toFixed(1)
+                    Math.round(
+                        mediasDisciplinas.reduce(
+                            (
+                                total,
+                                valor
+                            ) =>
+                                total +
+                                valor,
+                            0
+                        ) /
+                        mediasDisciplinas.length
                     );
 
             }
 
+            // =========================================
+            // CLASSIFICAÇÃO
+            // =========================================
 
             const classificacao =
                 classificarNota(
@@ -1468,29 +1508,22 @@ function construirLinhas() {
                     ciclo
                 );
 
+            // =========================================
+            // OBSERVAÇÃO
+            // =========================================
 
             let observacao =
                 "—";
 
-
             let classe =
                 "";
-
 
             if (
                 mediaFinal !== ""
             ) {
 
-                const limite =
-                    ciclo ===
-                    "ensinoPrimario"
-                        ? 10
-                        : 10;
-
-
                 if (
-                    mediaFinal >=
-                    limite
+                    mediaFinal >= 10
                 ) {
 
                     observacao =
@@ -1512,6 +1545,9 @@ function construirLinhas() {
 
             }
 
+            // =========================================
+            // RESULTADO
+            // =========================================
 
             html += `
 
@@ -1536,10 +1572,8 @@ function construirLinhas() {
 
             `;
 
-
             tr.innerHTML =
                 html;
-
 
             pautaLista.appendChild(
                 tr
@@ -1555,274 +1589,263 @@ function construirLinhas() {
 // EXPORTAR EXCEL
 // =====================================================
 
-exportarExcel.addEventListener(
-    "click",
-    function() {
+if (exportarExcel) {
 
-        if (!turmaAtual) {
+    exportarExcel.addEventListener(
+        "click",
+        function() {
 
-            alert(
-                "Selecione primeiro uma turma."
+            if (!turmaAtual) {
+
+                alert(
+                    "Selecione primeiro uma turma."
+                );
+
+                return;
+
+            }
+
+            if (
+                typeof XLSX ===
+                "undefined"
+            ) {
+
+                alert(
+                    "Biblioteca Excel não carregada."
+                );
+
+                return;
+
+            }
+
+            const workbook =
+                XLSX.utils.table_to_book(
+                    tabelaPauta,
+                    {
+                        sheet: "Pauta"
+                    }
+                );
+
+            const classe =
+                turmaAtual.classe ||
+                turmaAtual.classeNome ||
+                "Classe";
+
+            const turma =
+                turmaAtual.nome ||
+                turmaAtual.nomeTurma ||
+                "Turma";
+
+            const nome =
+                escolaAtual?.nome ||
+                "Escola";
+
+            const arquivo =
+                `Pauta_${nome}_${classe}_${turma}.xlsx`;
+
+            XLSX.writeFile(
+                workbook,
+                arquivo
             );
-
-            return;
 
         }
+    );
 
-
-        if (
-            typeof XLSX ===
-            "undefined"
-        ) {
-
-            alert(
-                "Biblioteca Excel não carregada."
-            );
-
-            return;
-
-        }
-
-
-        const workbook =
-            XLSX.utils.table_to_book(
-                tabelaPauta,
-                {
-                    sheet: "Pauta"
-                }
-            );
-
-
-        const classe =
-            turmaAtual.classe ||
-            "Classe";
-
-
-        const turma =
-            turmaAtual.nome ||
-            "Turma";
-
-
-        const nome =
-            escolaAtual?.nome ||
-            "Escola";
-
-
-        const arquivo =
-            `Pauta_${nome}_${classe}_${turma}.xlsx`;
-
-
-        XLSX.writeFile(
-            workbook,
-            arquivo
-        );
-
-    }
-);
+}
 
 
 // =====================================================
 // EXPORTAR PDF
 // =====================================================
 
-exportarPDF.addEventListener(
-    "click",
-    function() {
+if (exportarPDF) {
 
-        if (!turmaAtual) {
+    exportarPDF.addEventListener(
+        "click",
+        function() {
 
-            alert(
-                "Selecione primeiro uma turma."
-            );
+            if (!turmaAtual) {
 
-            return;
+                alert(
+                    "Selecione primeiro uma turma."
+                );
 
-        }
-
-
-        if (
-            typeof window.jspdf ===
-            "undefined"
-        ) {
-
-            alert(
-                "Biblioteca PDF não carregada."
-            );
-
-            return;
-
-        }
-
-
-        const {
-            jsPDF
-        } =
-            window.jspdf;
-
-
-        const pdf =
-            new jsPDF({
-
-                orientation:
-                    "landscape",
-
-                unit:
-                    "mm",
-
-                format:
-                    "a3"
-
-            });
-
-
-        const escola =
-            escolaAtual?.nome ||
-            "Escola";
-
-
-        const ano =
-            escolaAtual?.anoLetivoAtual ||
-            "—";
-
-
-        const classe =
-            turmaAtual.classe ||
-            "—";
-
-
-        const turma =
-            turmaAtual.nome ||
-            "—";
-
-
-        pdf.setFontSize(16);
-
-
-        pdf.text(
-            escola,
-            15,
-            15
-        );
-
-
-        pdf.setFontSize(10);
-
-
-        pdf.text(
-            `Ano Lectivo: ${ano}`,
-            15,
-            22
-        );
-
-
-        pdf.text(
-            `Classe: ${classe}    Turma: ${turma}`,
-            15,
-            28
-        );
-
-
-        pdf.setFontSize(14);
-
-
-        pdf.text(
-            "PAUTA GERAL",
-            15,
-            36
-        );
-
-
-        if (
-            typeof pdf.autoTable !==
-            "function"
-        ) {
-
-            alert(
-                "AutoTable não foi carregado."
-            );
-
-            return;
-
-        }
-
-
-        pdf.autoTable({
-
-            html:
-                tabelaPauta,
-
-            startY:
-                40,
-
-            theme:
-                "grid",
-
-            styles: {
-
-                fontSize:
-                    5,
-
-                cellPadding:
-                    1,
-
-                overflow:
-                    "linebreak"
-
-            },
-
-            headStyles: {
-
-                fontSize:
-                    5
-
-            },
-
-            margin: {
-
-                left:
-                    5,
-
-                right:
-                    5
+                return;
 
             }
 
-        });
+            if (
+                typeof window.jspdf ===
+                "undefined"
+            ) {
 
+                alert(
+                    "Biblioteca PDF não carregada."
+                );
 
-        pdf.save(
+                return;
 
-            `Pauta_${classe}_${turma}.pdf`
+            }
 
-        );
+            const {
+                jsPDF
+            } =
+                window.jspdf;
 
-    }
-);
+            const pdf =
+                new jsPDF({
+
+                    orientation:
+                        "landscape",
+
+                    unit:
+                        "mm",
+
+                    format:
+                        "a3"
+
+                });
+
+            const escola =
+                escolaAtual?.nome ||
+                "Escola";
+
+            const ano =
+                escolaAtual?.anoLetivoAtual ||
+                "—";
+
+            const classe =
+                turmaAtual.classe ||
+                turmaAtual.classeNome ||
+                "—";
+
+            const turma =
+                turmaAtual.nome ||
+                turmaAtual.nomeTurma ||
+                "—";
+
+            pdf.setFontSize(16);
+
+            pdf.text(
+                escola,
+                15,
+                15
+            );
+
+            pdf.setFontSize(10);
+
+            pdf.text(
+                `Ano Lectivo: ${ano}`,
+                15,
+                22
+            );
+
+            pdf.text(
+                `Classe: ${classe}    Turma: ${turma}`,
+                15,
+                28
+            );
+
+            pdf.setFontSize(14);
+
+            pdf.text(
+                "PAUTA GERAL",
+                15,
+                36
+            );
+
+            if (
+                typeof pdf.autoTable !==
+                "function"
+            ) {
+
+                alert(
+                    "AutoTable não foi carregado."
+                );
+
+                return;
+
+            }
+
+            pdf.autoTable({
+
+                html:
+                    tabelaPauta,
+
+                startY:
+                    40,
+
+                theme:
+                    "grid",
+
+                styles: {
+
+                    fontSize:
+                        6,
+
+                    cellPadding:
+                        1,
+
+                    overflow:
+                        "linebreak"
+
+                },
+
+                headStyles: {
+
+                    fontSize:
+                        6
+
+                },
+
+                margin: {
+
+                    left:
+                        5,
+
+                    right:
+                        5
+
+                }
+
+            });
+
+            pdf.save(
+                `Pauta_${classe}_${turma}.pdf`
+            );
+
+        }
+    );
+
+}
 
 
 // =====================================================
 // IMPRIMIR
 // =====================================================
 
-imprimirPauta.addEventListener(
-    "click",
-    function() {
+if (imprimirPauta) {
 
-        if (!turmaAtual) {
+    imprimirPauta.addEventListener(
+        "click",
+        function() {
 
-            alert(
-                "Selecione primeiro uma turma."
-            );
+            if (!turmaAtual) {
 
-            return;
+                alert(
+                    "Selecione primeiro uma turma."
+                );
+
+                return;
+
+            }
+
+            window.print();
 
         }
+    );
 
-
-        window.print();
-
-    }
-);
+}
 
 
 // =====================================================
@@ -1845,7 +1868,6 @@ async function iniciar() {
             "Erro ao iniciar pauta:",
             erro
         );
-
 
         estadoPauta.textContent =
             "❌ " + erro.message;
