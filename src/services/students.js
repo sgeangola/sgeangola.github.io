@@ -366,7 +366,8 @@ guardarAluno.addEventListener(
 
                     senhaAcesso:
                         gerarSenha(),
-
+authUid: "",
+                    
                     estado:
                         "ativo",
 
@@ -847,7 +848,8 @@ importarAlunos.addEventListener(
 
                         senhaAcesso:
                             gerarSenha(),
-
+                        authUid: "",
+                        
                         estado:
                             "ativo",
 
@@ -1003,6 +1005,7 @@ importarPDF.addEventListener(
 
                         senhaAcesso:
                             gerarSenha(),
+                        authUid: "",
 
                         estado:
                             "ativo",
