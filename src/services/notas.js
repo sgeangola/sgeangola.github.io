@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS CARREGADO!");
+alert("🔥 NOTAS.JS1 CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1497,1527 +1497,18 @@ window.alternarLancamento =
 
 
 // =====================================================
-// OBTER DADOS COMPLETOS DA MINI-PAUTA
-// =====================================================
-
-async function obterDadosMiniPauta() {
-
-    if (!lancamentoSelecionado) {
-
-        throw new Error(
-            "Nenhum lançamento selecionado."
-        );
-
-    }
-
-
-    const dados =
-        lancamentoSelecionado;
-
-
-    const id =
-        criarIdLancamento(
-            dados.turmaId,
-            dados.disciplina,
-            dados.trimestre
-        );
-
-
-    const referencia =
-        doc(
-            db,
-            "notas",
-            id
-        );
-
-
-    const snapshot =
-        await getDoc(
-            referencia
-        );
-
-
-    if (!snapshot.exists()) {
-
-        throw new Error(
-            "A Mini-Pauta ainda não possui lançamento de notas."
-        );
-
-    }
-
-
-    const notas =
-        snapshot.data();
-
-
-    // ---------------------------------------------
-    // SEGURANÇA DA ESCOLA
-    // ---------------------------------------------
-
-    if (
-        notas.escolaId &&
-        String(notas.escolaId).trim() !==
-        String(escolaId).trim()
-    ) {
-
-        throw new Error(
-            "Esta Mini-Pauta pertence a outra escola."
-        );
-
-    }
-
-
-    // ---------------------------------------------
-    // NOME DA ESCOLA
-    // ---------------------------------------------
-
-    let nomeEscola =
-        localStorage.getItem(
-            "nomeEscola"
-        ) ||
-        sessionStorage.getItem(
-            "nomeEscola"
-        ) ||
-        "";
-
-
-    // Se não estiver guardado,
-    // tentar buscar no Firestore
-
-    if (!nomeEscola) {
-
-        try {
-
-            const escolaRef =
-                doc(
-                    db,
-                    "escolas",
-                    escolaId
-                );
-
-
-            const escolaSnap =
-                await getDoc(
-                    escolaRef
-                );
-
-
-            if (
-                escolaSnap.exists()
-            ) {
-
-                const escola =
-                    escolaSnap.data();
-
-
-                nomeEscola =
-                    escola.nome ||
-                    escola.nomeEscola ||
-                    escola.designacao ||
-                    "";
-
-            }
-
-        }
-        catch (erro) {
-
-            console.warn(
-                "Não foi possível obter nome da escola:",
-                erro
-            );
-
-        }
-
-    }
-
-
-    if (!nomeEscola) {
-
-        nomeEscola =
-            notas.nomeEscola ||
-            "ESCOLA";
-
-    }
-
-
-// =====================================================
-    // OBTER ENSINO ATRAVÉS DO ID DA TURMA
-    // =====================================================
-
-    let ensino = "";
-
-    try {
-
-        if (dados.turmaId) {
-
-            const turmaRef =
-                doc(
-                    db,
-                    "turmas",
-                    dados.turmaId
-                );
-
-            const turmaSnap =
-                await getDoc(
-                    turmaRef
-                );
-
-
-            if (turmaSnap.exists()) {
-
-                const dadosTurma =
-                    turmaSnap.data();
-
-
-                ensino =
-                    String(
-                        dadosTurma.ensino ||
-                        dadosTurma.nivelEnsino ||
-                        dadosTurma.nivel ||
-                        ""
-                    ).trim();
-
-
-                console.log(
-                    "🎓 ENSINO DA TURMA:",
-                    ensino
-                );
-
-            }
-
-        }
-
-    }
-    catch (erro) {
-
-        console.warn(
-            "⚠️ Não foi possível obter o ensino da turma:",
-            erro
-        );
-
-    }
-
-
-    // =====================================================
-    // RETORNAR DADOS COMPLETOS
-    // =====================================================
-
-    return {
-
-        escolaId:
-            escolaId,
-
-        nomeEscola:
-            nomeEscola,
-
-        professorNome:
-            notas.professorNome ||
-            dados.professorNome ||
-            "—",
-
-        classe:
-            notas.classe ||
-            dados.classe ||
-            "—",
-
-        turmaId:
-            dados.turmaId,
-
-        turmaNome:
-            notas.turmaNome ||
-            dados.turmaNome ||
-            "—",
-
-        disciplina:
-            notas.disciplina ||
-            dados.disciplina ||
-            "—",
-
-        trimestre:
-            notas.trimestre ||
-            dados.trimestre ||
-            "—",
-
-        // IMPORTANTE:
-        // Ensino vem diretamente da turma
-
-        ensino:
-            ensino,
-
-        alunos:
-            Array.isArray(
-                notas.alunos
-            )
-                ? notas.alunos
-                : []
-
-    };
-}
-
-// =====================================================
-// CONSTRUIR MINI-PAUTA COMPLETA
-// =====================================================
-
-function construirMiniPautaHTML(
-    dados
-) {
-
-    const alunos =
-        dados.alunos || [];
-
-    alert(
-    "ENSINO RECEBIDO:\n\n" +
-    "Ensino: " +
-    (dados.ensino || "VAZIO") +
-    "\n\nTurma ID: " +
-    (dados.turmaId || "VAZIO") +
-    "\n\nTurma: " +
-    (dados.turmaNome || "VAZIO")
-);
-    
-// =====================================================
-// ESTATÍSTICAS DA MINI-PAUTA
-// =====================================================
-
-const ensinoNormalizado =
-    String(
-        dados.ensino || ""
-    )
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-
-
-// =====================================================
-// IDENTIFICAR O ENSINO
-// =====================================================
-//
-// Primeiro Ciclo:
-// 0–4    Mau
-// 5–9    Medíocre
-// 10–13  Suficiente
-// 14–16  Bom
-// 17–20  Muito Bom
-//
-// Ensino Primário:
-// 0–2    Mau
-// 3–4    Medíocre
-// 5–6    Suficiente
-// 7–8    Bom
-// 9–10   Muito Bom
-// =====================================================
-
-const primeiroCiclo =
-    ensinoNormalizado.includes("primeiro ciclo") ||
-    ensinoNormalizado.includes("primeirociclo") ||
-    (
-        ensinoNormalizado.includes("primeiro") &&
-        ensinoNormalizado.includes("ciclo")
-    );
-
-
-// =====================================================
-// MOSTRAR NO CONSOLE
-// =====================================================
-
-console.log(
-    "======================================"
-);
-
-console.log(
-    "📊 ESTATÍSTICA DA MINI-PAUTA"
-);
-
-console.log(
-    "Ensino recebido:",
-    dados.ensino
-);
-
-console.log(
-    "Ensino normalizado:",
-    ensinoNormalizado
-);
-
-console.log(
-    "É Primeiro Ciclo:",
-    primeiroCiclo
-);
-
-console.log(
-    "======================================"
-);
-
-
-// =====================================================
-// CLASSIFICAÇÕES
-// =====================================================
-
-const classificacoes =
-    primeiroCiclo
-
-        ? [
-
-            {
-                nome: "Mau",
-                minimo: 0,
-                maximo: 4
-            },
-
-            {
-                nome: "Medíocre",
-                minimo: 5,
-                maximo: 9
-            },
-
-            {
-                nome: "Suficiente",
-                minimo: 10,
-                maximo: 13
-            },
-
-            {
-                nome: "Bom",
-                minimo: 14,
-                maximo: 16
-            },
-
-            {
-                nome: "Muito Bom",
-                minimo: 17,
-                maximo: 20
-            }
-
-        ]
-
-        : [
-
-            {
-                nome: "Mau",
-                minimo: 0,
-                maximo: 2
-            },
-
-            {
-                nome: "Medíocre",
-                minimo: 3,
-                maximo: 4
-            },
-
-            {
-                nome: "Suficiente",
-                minimo: 5,
-                maximo: 6
-            },
-
-            {
-                nome: "Bom",
-                minimo: 7,
-                maximo: 8
-            },
-
-            {
-                nome: "Muito Bom",
-                minimo: 9,
-                maximo: 10
-            }
-
-        ];
-
-
-// =====================================================
-// CONTADORES
-// =====================================================
-
-const estatistica =
-    classificacoes.map(
-        item => ({
-
-            ...item,
-
-            M: 0,
-
-            F: 0,
-
-            total: 0
-
-        })
-    );
-
-
-let desistidos = 0;
-
-let transferidos = 0;
-
-let alunosValidos = 0;
-
-let bomAproveitamento = 0;
-
-let semBomAproveitamento = 0;
-
-
-// =====================================================
-// ANALISAR ALUNOS
-// =====================================================
-
-alunos.forEach(
-    aluno => {
-
-        const estado =
-            String(
-                aluno.estado || ""
-            )
-            .toLowerCase()
-            .trim();
-
-
-        // =============================================
-        // DESISTIDO
-        // =============================================
-
-        if (
-            estado.includes("desist")
-        ) {
-
-            desistidos++;
-
-            return;
-
-        }
-
-
-        // =============================================
-        // TRANSFERIDO
-        // =============================================
-
-        if (
-            estado.includes("transfer")
-        ) {
-
-            transferidos++;
-
-            return;
-
-        }
-
-
-        // =============================================
-        // MF — MÉDIA FINAL
-        // =============================================
-
-        const mf =
-            Number(
-                String(
-                    aluno.MF ?? ""
-                )
-                .replace(",", ".")
-                .trim()
-            );
-
-
-        if (
-            !Number.isFinite(mf)
-        ) {
-
-            return;
-
-        }
-
-
-        alunosValidos++;
-
-
-        // =============================================
-        // SEXO
-        // =============================================
-
-        const sexo =
-            String(
-                aluno.sexo || ""
-            )
-            .toUpperCase()
-            .trim();
-
-
-        // =============================================
-        // ENCONTRAR CLASSIFICAÇÃO
-        // =============================================
-
-        const linha =
-            estatistica.find(
-                item =>
-
-                    mf >= item.minimo &&
-                    mf <= item.maximo
-
-            );
-
-
-        if (!linha) {
-
-            console.warn(
-                "⚠️ MF fora da escala:",
-                mf,
-                aluno.nome
-            );
-
-            return;
-
-        }
-
-
-        // =============================================
-        // MASCULINO
-        // =============================================
-
-        if (
-            sexo === "M" ||
-            sexo === "MASCULINO"
-        ) {
-
-            linha.M++;
-
-        }
-
-
-        // =============================================
-        // FEMININO
-        // =============================================
-
-        else if (
-            sexo === "F" ||
-            sexo === "FEMININO"
-        ) {
-
-            linha.F++;
-
-        }
-
-
-        // =============================================
-        // TOTAL
-        // =============================================
-
-        linha.total++;
-
-
-        // =============================================
-        // BOM APROVEITAMENTO
-        // =============================================
-        //
-        // Primeiro Ciclo:
-        // Bom começa em 14
-        //
-        // Ensino Primário:
-        // Bom começa em 7
-        //
-        // =============================================
-
-        const minimoBom =
-            primeiroCiclo
-                ? 14
-                : 7;
-
-
-        if (
-            mf >= minimoBom
-        ) {
-
-            bomAproveitamento++;
-
-        }
-        else {
-
-            semBomAproveitamento++;
-
-        }
-
-    }
-);
-
-
-// =====================================================
-// TOTAIS
-// =====================================================
-
-const totalM =
-    estatistica.reduce(
-        (soma, item) =>
-            soma + item.M,
-        0
-    );
-
-
-const totalF =
-    estatistica.reduce(
-        (soma, item) =>
-            soma + item.F,
-        0
-    );
-
-
-const totalClassificados =
-    estatistica.reduce(
-        (soma, item) =>
-            soma + item.total,
-        0
-    );
-
-
-// =====================================================
-// PERCENTAGENS
-// =====================================================
-
-const percentBom =
-    alunosValidos > 0
-        ? (
-            bomAproveitamento /
-            alunosValidos
-        ) * 100
-        : 0;
-
-
-const percentSemBom =
-    alunosValidos > 0
-        ? (
-            semBomAproveitamento /
-            alunosValidos
-        ) * 100
-        : 0;
-
-
-// =====================================================
-// DEBUG FINAL
-// =====================================================
-
-console.log(
-    "📊 CLASSIFICAÇÕES:",
-    classificacoes
-);
-
-console.log(
-    "👨 Masculino:",
-    totalM
-);
-
-console.log(
-    "👩 Feminino:",
-    totalF
-);
-
-console.log(
-    "👥 Total:",
-    totalClassificados
-);
-
-console.log(
-    "🎓 Alunos válidos:",
-    alunosValidos
-);
-
-console.log(
-    "🟢 Bom aproveitamento:",
-    bomAproveitamento,
-    percentBom.toFixed(1) + "%"
-);
-
-console.log(
-    "🔴 Sem bom aproveitamento:",
-    semBomAproveitamento,
-    percentSemBom.toFixed(1) + "%"
-);
-
-console.log(
-    "🚫 Desistidos:",
-    desistidos
-);
-
-console.log(
-    "🔄 Transferidos:",
-    transferidos
-);
-
-    let linhas =
-        "";
-
-    alunos.forEach(
-        (aluno, indice) => {
-
-            const numero =
-                aluno.numero ??
-                (indice + 1);
-
-
-            const nome =
-                aluno.nome ||
-                "—";
-
-
-            const sexo =
-                aluno.sexo ||
-                "—";
-
-
-            const mac =
-                aluno.MAC !== null &&
-                aluno.MAC !== undefined &&
-                aluno.MAC !== ""
-                    ? aluno.MAC
-                    : "";
-
-
-            const npt =
-                aluno.NPT !== null &&
-                aluno.NPT !== undefined &&
-                aluno.NPT !== ""
-                    ? aluno.NPT
-                    : "";
-
-
-            const mf =
-                aluno.MF !== null &&
-                aluno.MF !== undefined &&
-                aluno.MF !== ""
-                    ? aluno.MF
-                    : "";
-
-
-            const classificacao =
-                aluno.classificacao ||
-                "";
-
-
-            linhas += `
-
-                <tr>
-
-                    <td>
-                        ${numero}
-                    </td>
-
-                    <td class="nome">
-                        ${nome}
-                    </td>
-
-                    <td>
-                        ${sexo}
-                    </td>
-
-                    <td>
-                        ${mac}
-                    </td>
-
-                    <td>
-                        ${npt}
-                    </td>
-
-                    <td>
-                        ${mf}
-                    </td>
-
-                    <td class="classificacao">
-                        ${classificacao}
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
-
-
-    if (!linhas) {
-
-        linhas = `
-
-            <tr>
-
-                <td
-                    colspan="7"
-                    style="padding:20px"
-                >
-                    Nenhum aluno encontrado.
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-
-    // =====================================================
-// CONSTRUIR TABELA DE ESTATÍSTICA
-// =====================================================
-
-let linhasEstatistica = "";
-
-
-estatistica.forEach(
-    item => {
-
-        linhasEstatistica += `
-
-            <tr>
-
-                <td>
-                    ${item.nome}
-                    (${item.minimo}-${item.maximo})
-                </td>
-
-                <td>
-                    ${item.M}
-                </td>
-
-                <td>
-                    ${item.F}
-                </td>
-
-                <td>
-                    ${item.total}
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-);
-
-
-linhasEstatistica += `
-
-    <tr class="linha-total">
-
-        <td>
-            <strong>Total</strong>
-        </td>
-
-        <td>
-            <strong>${totalM}</strong>
-        </td>
-
-        <td>
-            <strong>${totalF}</strong>
-        </td>
-
-        <td>
-            <strong>${totalClassificados}</strong>
-        </td>
-
-    </tr>
-
-`;
-
-    return `
-
-<!DOCTYPE html>
-
-<html lang="pt">
-
-<head>
-
-<meta charset="UTF-8">
-
-<title>
-    Mini-Pauta — ${dados.turmaNome}
-</title>
-
-
-<style>
-
-*{
-    box-sizing:border-box;
-}
-
-
-body{
-
-    margin:0;
-
-    padding:25px;
-
-    font-family:Arial,
-        Helvetica,
-        sans-serif;
-
-    color:#111;
-
-    background:white;
-
-}
-
-
-.pauta{
-
-    width:100%;
-
-    max-width:1100px;
-
-    margin:auto;
-
-}
-
-
-.cabecalho{
-
-    text-align:center;
-
-    border-bottom:3px solid #1e3a8a;
-
-    padding-bottom:12px;
-
-    margin-bottom:15px;
-
-}
-
-
-.cabecalho h1{
-
-    margin:0;
-
-    font-size:22px;
-
-    text-transform:uppercase;
-
-}
-
-
-.cabecalho h2{
-
-    margin:6px 0;
-
-    font-size:18px;
-
-}
-
-
-.cabecalho p{
-
-    margin:4px 0;
-
-    font-size:14px;
-
-}
-
-
-.informacoes{
-
-    display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap:6px 25px;
-
-    margin-bottom:15px;
-
-    font-size:14px;
-
-}
-
-
-.informacoes div{
-
-    border-bottom:1px solid #ccc;
-
-    padding:5px;
-
-}
-
-
-table{
-
-    width:100%;
-
-    border-collapse:collapse;
-
-    font-size:12px;
-
-}
-
-
-th,
-td{
-
-    border:1px solid #222;
-
-    padding:6px;
-
-    text-align:center;
-
-}
-
-
-th{
-
-    background:#e5e7eb;
-
-    font-weight:bold;
-
-}
-
-
-td.nome{
-
-    text-align:left;
-
-}
-
-
-td.classificacao{
-
-    text-align:center;
-
-}
-
-
-.assinatura{
-
-    margin-top:60px;
-
-    text-align:center;
-
-}
-
-
-.linha-assinatura{
-
-    width:280px;
-
-    border-top:1px solid #111;
-
-    margin:45px auto 5px;
-
-}
-
-
-.rodape{
-
-    margin-top:45px;
-
-    padding-top:10px;
-
-    border-top:1px solid #aaa;
-
-    text-align:center;
-
-    font-size:11px;
-
-    color:#555;
-
-}
-
-
-@media print{
-
-    body{
-
-        padding:10px;
-
-    }
-
-
-    .pauta{
-
-        max-width:none;
-
-    }
-
-
-    @page{
-
-        size:A4 portrait;
-
-        margin:10mm;
-
-    }
-
-}
-
-<style>
-
-.estatisticas {
-    margin-top: 12px;
-    page-break-inside: avoid;
-}
-
-.estatisticas h3 {
-    margin: 0 0 5px;
-    font-size: 11px;
-    text-align: left;
-    text-transform: uppercase;
-}
-
-.estatisticas table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 9px;
-}
-
-.estatisticas th,
-.estatisticas td {
-    border: 1px solid #222;
-    padding: 3px 5px;
-    text-align: center;
-}
-
-.estatisticas th {
-    background: #e5e7eb;
-}
-
-.estatisticas .linha-total {
-    background: #f1f5f9;
-}
-
-.resumo-aproveitamento {
-    margin-top: 6px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    font-size: 9px;
-}
-
-.resumo-aproveitamento div {
-    border: 1px solid #aaa;
-    padding: 4px;
-}
-
-@media print {
-
-    @page {
-        size: A4 portrait;
-        margin: 7mm;
-    }
-
-    body {
-        padding: 0;
-    }
-
-    .pauta {
-        max-width: none;
-    }
-
-}
-</style>
-
-</head>
-
-
-<body>
-
-
-<div class="pauta">
-
-
-    <!-- =========================================
-         CABEÇALHO
-    ========================================== -->
-
-    <div class="cabecalho">
-
-        <h1>
-            ${dados.nomeEscola}
-        </h1>
-
-        <h2>
-            MINI-PAUTA DE AVALIAÇÃO
-        </h2>
-
-        <p>
-            Sistema de Gestão Escolar — SGE
-        </p>
-
-    </div>
-
-
-    <!-- =========================================
-         INFORMAÇÕES
-    ========================================== -->
-
-    <div class="informacoes">
-
-        <div>
-            <strong>Classe:</strong>
-            ${dados.classe}
-        </div>
-
-
-        <div>
-            <strong>Turma:</strong>
-            ${dados.turmaNome}
-        </div>
-
-
-        <div>
-            <strong>Disciplina:</strong>
-            ${dados.disciplina}
-        </div>
-
-
-        <div>
-    <strong>Trimestre:</strong>
-    ${dados.trimestre}.º Trimestre
-</div>
-
-
-        <div>
-            <strong>Professor:</strong>
-            ${dados.professorNome}
-        </div>
-
-
-        <div>
-            <strong>Total de alunos:</strong>
-            ${alunos.length}
-        </div>
-
-    </div>
-
-
-    <!-- =========================================
-         TABELA
-    ========================================== -->
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>
-                    Nº
-                </th>
-
-                <th>
-                    Nome do Aluno
-                </th>
-
-                <th>
-                    Sexo
-                </th>
-
-                <th>
-                    MAC
-                </th>
-
-                <th>
-                    NPT
-                </th>
-
-                <th>
-                    MF
-                </th>
-
-                <th>
-                    Classificação
-                </th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody>
-
-            ${linhas}
-
-        </tbody>
-
-   </table>
-
-
-<!-- =========================================
-     ESTATÍSTICA DA MINI-PAUTA
-========================================== -->
-
-<div class="estatisticas">
-
-    <h3>
-        Estatística do Aproveitamento
-    </h3>
-
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>
-                    Classificação
-                </th>
-
-                <th>
-                    M
-                </th>
-
-                <th>
-                    F
-                </th>
-
-                <th>
-                    Total
-                </th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody>
-
-            ${linhasEstatistica}
-
-        </tbody>
-
-    </table>
-
-
-    <div class="resumo-aproveitamento">
-
-        <div>
-
-            <strong>
-                Bom aproveitamento
-            </strong>
-
-            <br>
-
-            ${bomAproveitamento}
-            —
-            ${percentBom.toFixed(1)}%
-
-        </div>
-
-
-        <div>
-
-            <strong>
-                Sem bom aproveitamento
-            </strong>
-
-            <br>
-
-            ${semBomAproveitamento}
-            —
-            ${percentSemBom.toFixed(1)}%
-
-        </div>
-
-
-        <div>
-
-            <strong>
-                Desistidos
-            </strong>
-
-            <br>
-
-            ${desistidos}
-
-        </div>
-
-
-        <div>
-
-            <strong>
-                Transferidos
-            </strong>
-
-            <br>
-
-            ${transferidos}
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- =========================================
-     ASSINATURA
-========================================= -->
-
-    <div class="assinatura">
-
-        <p>
-            O Professor
-        </p>
-
-
-        <div class="linha-assinatura"></div>
-
-
-        <strong>
-            ${dados.professorNome}
-        </strong>
-
-    </div>
-
-
-    <!-- =========================================
-         RODAPÉ
-    ========================================== -->
-
-    <div class="rodape">
-
-        SGE — Sistema de Gestão Escolar
-
-        <br>
-
-        Mini-Pauta gerada pelo Sistema de Gestão Escolar
-
-    </div>
-
-
-</div>
-
-
-</body>
-
-</html>
-
-`;
-
-}
-
-
-// =====================================================
-// VER MINI-PAUTA
+// VER
 // =====================================================
 
 window.verLancamento =
-async function () {
+    function () {
 
-    if (!lancamentoSelecionado) {
-
-        alert(
-            "⚠️ Nenhum lançamento selecionado."
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        const dados =
-            await obterDadosMiniPauta();
-
-
-        const janela =
-            window.open(
-                "",
-                "_blank"
-            );
-
-
-        if (!janela) {
+        if (
+            !lancamentoSelecionado
+        ) {
 
             alert(
-                "⚠️ O navegador bloqueou a abertura da Mini-Pauta."
+                "⚠️ Nenhum lançamento selecionado."
             );
 
             return;
@@ -3025,63 +1516,70 @@ async function () {
         }
 
 
-        janela.document.write(
-            construirMiniPautaHTML(
-                dados
-            )
-        );
-
-
-        janela.document.close();
-
-
-        console.log(
-            "✅ MINI-PAUTA ABERTA:",
-            dados
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "❌ ERRO AO VER MINI-PAUTA:",
-            erro
-        );
+        const dados =
+            lancamentoSelecionado;
 
 
         alert(
-            "❌ Não foi possível abrir a Mini-Pauta.\n\n" +
-            erro.message
+
+            "📋 LANÇAMENTO\n\n" +
+
+            "Professor: " +
+            dados.professorNome +
+
+            "\nClasse: " +
+            dados.classe +
+
+            "\nTurma: " +
+            dados.turmaNome +
+
+            "\nDisciplina: " +
+            dados.disciplina +
+
+            "\nTrimestre: " +
+            dados.trimestre +
+
+            "\n\nEstado: " +
+
+            (
+                dados.estado.abertoGeral
+                    ? "🟢 ABERTO"
+                    : "🔒 FECHADO"
+            )
+
         );
 
-    }
-
-};
+    };
 
 
 // =====================================================
-// IMPRIMIR MINI-PAUTA
+// IMPRIMIR
 // =====================================================
 
 window.imprimirLancamento =
-async function () {
+    function () {
 
-    if (!lancamentoSelecionado) {
+        if (
+            !lancamentoSelecionado
+        ) {
 
-        alert(
-            "⚠️ Nenhum lançamento selecionado."
-        );
+            alert(
+                "⚠️ Nenhum lançamento selecionado."
+            );
 
-        return;
+            return;
 
-    }
+        }
 
-
-    try {
 
         const dados =
-            await obterDadosMiniPauta();
+            lancamentoSelecionado;
+
+
+        const estado =
+            dados.estado.abertoGeral
+                ? "ABERTO"
+                : "FECHADO";
 
 
         const janela =
@@ -3094,7 +1592,7 @@ async function () {
         if (!janela) {
 
             alert(
-                "⚠️ O navegador bloqueou a janela de impressão."
+                "⚠️ O navegador bloqueou a impressão."
             );
 
             return;
@@ -3102,48 +1600,113 @@ async function () {
         }
 
 
-        janela.document.write(
-            construirMiniPautaHTML(
-                dados
-            )
-        );
+        janela.document.write(`
+
+            <!DOCTYPE html>
+
+            <html lang="pt">
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <title>
+                    Lançamento de Notas
+                </title>
+
+                <style>
+
+                    body {
+                        font-family: Arial;
+                        padding: 30px;
+                    }
+
+                    table {
+                        width:100%;
+                        border-collapse:collapse;
+                    }
+
+                    td,
+                    th {
+                        border:1px solid #999;
+                        padding:10px;
+                    }
+
+                    th {
+                        background:#eee;
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <h1>
+                    Lançamento de Notas
+                </h1>
+
+                <table>
+
+                    <tr>
+                        <th>Professor</th>
+                        <td>
+                            ${dados.professorNome}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Classe</th>
+                        <td>
+                            ${dados.classe}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Turma</th>
+                        <td>
+                            ${dados.turmaNome}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Disciplina</th>
+                        <td>
+                            ${dados.disciplina}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Trimestre</th>
+                        <td>
+                            ${dados.trimestre}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Estado</th>
+                        <td>
+                            ${estado}
+                        </td>
+                    </tr>
+
+                </table>
+
+            </body>
+
+            </html>
+
+        `);
 
 
         janela.document.close();
 
+        janela.focus();
 
-        janela.onload =
-            function () {
+        janela.print();
 
-                janela.focus();
+    };
 
-                janela.print();
-
-            };
-
-
-        console.log(
-            "🖨️ MINI-PAUTA ENVIADA PARA IMPRESSÃO."
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "❌ ERRO AO IMPRIMIR MINI-PAUTA:",
-            erro
-        );
-
-
-        alert(
-            "❌ Não foi possível imprimir a Mini-Pauta.\n\n" +
-            erro.message
-        );
-
-    }
-
-};
 
 // =====================================================
 // EVENTOS DOS FILTROS
