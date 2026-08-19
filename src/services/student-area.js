@@ -31,7 +31,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 alert(
-    "🎓 SGE — student-area.js iniciado"
+    "🎓 SGE — student-area.js1 iniciado"
 );
 
 console.log(
@@ -1263,13 +1263,21 @@ async function () {
                     >
 
                         <table
-                            style="
-                                width:100%;
-                                border-collapse:
-                                    collapse;
-                                min-width:700px;
-                            "
-                        >
+    style="
+        width:100%;
+        border-collapse:collapse;
+        min-width:700px;
+        text-align:center;
+    "
+>
+
+<style>
+    #janelaBoletimAluno th,
+    #janelaBoletimAluno td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
 
                             <thead>
 
