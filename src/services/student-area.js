@@ -842,15 +842,590 @@ function () {
 
 
 // =====================================================
-// VER BOLETIM
+// VER BOLETIM DO ALUNO
 // =====================================================
 
 window.verBoletim =
-function () {
+async function () {
 
-    alert(
-        "📄 A área de boletins será ativada na próxima etapa."
-    );
+    try {
+
+        const turmaId =
+            String(
+                aluno.turmaId || ""
+            ).trim();
+
+
+        const alunoId =
+            String(
+                aluno.id || ""
+            ).trim();
+
+
+        const escolaId =
+            String(
+                aluno.escolaId || ""
+            ).trim();
+
+
+        if (!turmaId || !alunoId) {
+
+            alert(
+                "❌ Não foi possível identificar o aluno ou a turma."
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // PROCURAR NOTAS
+        // =================================================
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "notas"
+                )
+            );
+
+
+        const disciplinas = [];
+
+
+        snapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
+
+
+                // -----------------------------------------
+                // FILTRAR ESCOLA
+                // -----------------------------------------
+
+                if (
+                    escolaId &&
+                    dados.escolaId &&
+                    String(
+                        dados.escolaId
+                    ).trim() !== escolaId
+                ) {
+
+                    return;
+
+                }
+
+
+                // -----------------------------------------
+                // FILTRAR TURMA
+                // -----------------------------------------
+
+                if (
+                    String(
+                        dados.turmaId || ""
+                    ).trim() !== turmaId
+                ) {
+
+                    return;
+
+                }
+
+
+                // -----------------------------------------
+                // PROCURAR O ALUNO
+                // -----------------------------------------
+
+                if (
+                    !Array.isArray(
+                        dados.alunos
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                const alunoNota =
+                    dados.alunos.find(
+                        item => {
+
+                            const numero =
+                                String(
+                                    item.numero || ""
+                                ).trim();
+
+
+                            const codigo =
+                                String(
+                                    item.codigoAluno || ""
+                                ).trim();
+
+
+                            const nome =
+                                String(
+                                    item.nome || ""
+                                )
+                                .trim()
+                                .toLowerCase();
+
+
+                            return (
+
+                                (
+                                    aluno.numero &&
+                                    numero ===
+                                    String(
+                                        aluno.numero
+                                    ).trim()
+                                )
+
+                                ||
+
+                                (
+                                    aluno.codigoAluno &&
+                                    codigo ===
+                                    String(
+                                        aluno.codigoAluno
+                                    ).trim()
+                                )
+
+                                ||
+
+                                (
+                                    aluno.nome &&
+                                    nome ===
+                                    String(
+                                        aluno.nome
+                                    )
+                                    .trim()
+                                    .toLowerCase()
+                                )
+
+                            );
+
+                        }
+                    );
+
+
+                if (!alunoNota) {
+
+                    return;
+
+                }
+
+
+                // -----------------------------------------
+                // ADICIONAR DISCIPLINA
+                // -----------------------------------------
+
+                disciplinas.push({
+
+                    disciplina:
+                        dados.disciplina ||
+                        documento.id,
+
+                    trimestre:
+                        nomeTrimestre(
+                            dados.trimestre
+                        ),
+
+                    anoLetivo:
+                        obterAnoLetivo(
+                            dados
+                        ),
+
+                    MAC:
+                        alunoNota.MAC ?? "",
+
+                    NPT:
+                        alunoNota.NPT ?? "",
+
+                    MF:
+                        alunoNota.MF ?? "",
+
+                    classificacao:
+                        alunoNota.classificacao ||
+                        ""
+
+                });
+
+            }
+        );
+
+
+        // =================================================
+        // NENHUMA NOTA
+        // =================================================
+
+        if (
+            disciplinas.length === 0
+        ) {
+
+            alert(
+                "📄 Ainda não existem notas disponíveis para gerar o boletim."
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // CRIAR JANELA
+        // =================================================
+
+        const antiga =
+            document.getElementById(
+                "janelaBoletimAluno"
+            );
+
+
+        if (antiga) {
+
+            antiga.remove();
+
+        }
+
+
+        let linhas = "";
+
+
+        disciplinas.forEach(
+            item => {
+
+                linhas += `
+
+                    <tr>
+
+                        <td>
+                            ${escaparHTML(
+                                item.disciplina
+                            )}
+                        </td>
+
+                        <td>
+                            ${mostrarNota(
+                                item.MAC
+                            )}
+                        </td>
+
+                        <td>
+                            ${mostrarNota(
+                                item.NPT
+                            )}
+                        </td>
+
+                        <td>
+                            ${mostrarNota(
+                                item.MF
+                            )}
+                        </td>
+
+                        <td>
+                            ${escaparHTML(
+                                item.classificacao ||
+                                "—"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escaparHTML(
+                                item.trimestre
+                            )}
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        );
+
+
+        const html = `
+
+            <div
+                id="janelaBoletimAluno"
+                style="
+                    position:fixed;
+                    inset:0;
+                    z-index:99999;
+                    background:#f1f5f9;
+                    overflow:auto;
+                    padding:15px;
+                "
+            >
+
+                <div
+                    style="
+                        max-width:1000px;
+                        margin:15px auto;
+                        background:white;
+                        border-radius:16px;
+                        padding:25px;
+                        box-shadow:
+                            0 4px 18px
+                            rgba(0,0,0,.15);
+                    "
+                >
+
+                    <div
+                        style="
+                            text-align:center;
+                            border-bottom:
+                                2px solid #1e3a8a;
+                            padding-bottom:15px;
+                            margin-bottom:20px;
+                        "
+                    >
+
+                        <h2
+                            style="
+                                margin:0;
+                                color:#1e3a8a;
+                            "
+                        >
+                            BOLETIM DE AVALIAÇÃO
+                        </h2>
+
+                        <p>
+                            Ano Lectivo:
+                            ${
+                                escaparHTML(
+                                    disciplinas[0]
+                                        .anoLetivo
+                                )
+                            }
+                        </p>
+
+                    </div>
+
+
+                    <!-- DADOS DO ALUNO -->
+
+                    <div
+                        style="
+                            background:#f8fafc;
+                            padding:15px;
+                            border-radius:10px;
+                            margin-bottom:20px;
+                            line-height:1.8;
+                        "
+                    >
+
+                        <strong>Aluno:</strong>
+                        ${
+                            escaparHTML(
+                                aluno.nome || "—"
+                            )
+                        }
+
+                        <br>
+
+                        <strong>Código:</strong>
+                        ${
+                            escaparHTML(
+                                aluno.codigoAluno || "—"
+                            )
+                        }
+
+                        <br>
+
+                        <strong>Nº:</strong>
+                        ${
+                            escaparHTML(
+                                aluno.numero || "—"
+                            )
+                        }
+
+                        <br>
+
+                        <strong>Turma:</strong>
+                        ${
+                            escaparHTML(
+                                aluno.turmaNome || "—"
+                            )
+                        }
+
+                    </div>
+
+
+                    <!-- TABELA -->
+
+                    <div
+                        style="
+                            overflow-x:auto;
+                        "
+                    >
+
+                        <table
+                            style="
+                                width:100%;
+                                border-collapse:
+                                    collapse;
+                                min-width:700px;
+                            "
+                        >
+
+                            <thead>
+
+                                <tr>
+
+                                    <th
+                                        style="
+                                            border:1px solid #cbd5e1;
+                                            padding:10px;
+                                            background:#e2e8f0;
+                                        "
+                                    >
+                                        Disciplina
+                                    </th>
+
+                                    <th
+                                        style="
+                                            border:1px solid #cbd5e1;
+                                            padding:10px;
+                                            background:#e2e8f0;
+                                        "
+                                    >
+                                        MAC
+                                    </th>
+
+                                    <th
+                                        style="
+                                            border:1px solid #cbd5e1;
+                                            padding:10px;
+                                            background:#e2e8f0;
+                                        "
+                                    >
+                                        NPT
+                                    </th>
+
+                                    <th
+                                        style="
+                                            border:1px solid #cbd5e1;
+                                            padding:10px;
+                                            background:#e2e8f0;
+                                        "
+                                    >
+                                        MF
+                                    </th>
+
+                                    <th
+                                        style="
+                                            border:1px solid #cbd5e1;
+                                            padding:10px;
+                                            background:#e2e8f0;
+                                        "
+                                    >
+                                        Classificação
+                                    </th>
+
+                                    <th
+                                        style="
+                                            border:1px solid #cbd5e1;
+                                            padding:10px;
+                                            background:#e2e8f0;
+                                        "
+                                    >
+                                        Trimestre
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                ${linhas}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div
+                        style="
+                            margin-top:25px;
+                            display:flex;
+                            gap:10px;
+                            flex-wrap:wrap;
+                        "
+                    >
+
+                        <button
+                            id="fecharBoletimAluno"
+                            style="
+                                padding:12px 20px;
+                                border:none;
+                                border-radius:8px;
+                                background:#1e3a8a;
+                                color:white;
+                                cursor:pointer;
+                            "
+                        >
+                            ← Voltar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            html
+        );
+
+
+        // =================================================
+        // FECHAR
+        // =================================================
+
+        document
+            .getElementById(
+                "fecharBoletimAluno"
+            )
+            ?.addEventListener(
+                "click",
+                function () {
+
+                    document
+                        .getElementById(
+                            "janelaBoletimAluno"
+                        )
+                        ?.remove();
+
+                }
+            );
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "Erro ao carregar boletim:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível carregar o boletim.\n\n" +
+            erro.message
+        );
+
+    }
 
 };
 
