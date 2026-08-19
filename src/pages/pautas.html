@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Pauta Geral — SGE Angola</title>
+
+    <!-- =================================================
+         CSS DO SITE
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        /* =================================================
+           ESTRUTURA DA PAUTA
+        ================================================= */
+
+        .pauta-container {
+
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+
+        }
+
+        #tabelaPauta {
+
+            width: max-content;
+            min-width: 100%;
+
+            border-collapse: collapse;
+
+            background: white;
+
+        }
+
+        #tabelaPauta th,
+        #tabelaPauta td {
+
+            border: 1px solid #ccc;
+
+            padding: 8px;
+
+            text-align: center;
+
+            white-space: nowrap;
+
+        }
+
+        #tabelaPauta th {
+
+            background: #0d6efd;
+
+            color: white;
+
+            font-weight: bold;
+
+        }
+
+        #tabelaPauta th.disciplina {
+
+            background: #0d6efd;
+
+        }
+
+        #tabelaPauta th.subcoluna {
+
+            background: #0b5ed7;
+
+        }
+
+        #tabelaPauta th.trimestre {
+
+            background: #0b5ed7;
+
+        }
+
+        #tabelaPauta td.nome-aluno {
+
+            text-align: left;
+
+            min-width: 230px;
+
+        }
+
+        #tabelaPauta td.mf {
+
+            font-weight: bold;
+
+        }
+
+        #tabelaPauta td.media-final {
+
+            font-weight: bold;
+
+        }
+
+        #tabelaPauta td.aprovado {
+
+            color: green;
+
+            font-weight: bold;
+
+        }
+
+        #tabelaPauta td.reprovado {
+
+            color: red;
+
+            font-weight: bold;
+
+        }
+
+        .cabecalho-pauta {
+
+            margin-bottom: 20px;
+
+        }
+
+        .controles-pauta {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+        }
+
+        .controles-pauta select,
+        .controles-pauta button {
+
+            padding: 10px;
+
+            border-radius: 6px;
+
+        }
+
+        .estado-pauta {
+
+            margin: 15px 0;
+
+            font-weight: bold;
+
+        }
+
+        @media print {
+
+            .controles-pauta,
+            .estado-pauta,
+            nav,
+            header {
+
+                display: none !important;
+
+            }
+
+            .pauta-container {
+
+                overflow: visible;
+
+            }
+
+            #tabelaPauta {
+
+                width: 100%;
+
+                font-size: 8px;
+
+            }
+
+            #tabelaPauta th,
+            #tabelaPauta td {
+
+                padding: 4px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     CABEÇALHO
+====================================================== -->
+
+<header>
+
+    <div class="cabecalho-pauta">
+
+        <h1 id="nomeEscola">
+            Escola
+        </h1>
+
+        <p id="anoLetivo">
+            Ano Lectivo: —
+        </p>
+
+        <h2>
+            PAUTA GERAL
+        </h2>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     CONTEÚDO
+====================================================== -->
+
+<main>
+
+
+    <!-- =================================================
+         INFORMAÇÕES DA TURMA
+    ================================================== -->
+
+    <section>
+
+        <p id="classeInfo">
+            Classe: —
+        </p>
+
+        <p id="turmaInfo">
+            Turma: —
+        </p>
+
+    </section>
+
+
+    <!-- =================================================
+         SELEÇÃO
+    ================================================== -->
+
+    <section class="controles-pauta">
+
+
+        <select id="classeSelect">
+
+            <option value="">
+                Selecionar classe
+            </option>
+
+        </select>
+
+
+        <select id="turmaSelect">
+
+            <option value="">
+                Selecionar turma
+            </option>
+
+        </select>
+
+
+        <button
+            id="carregarPauta"
+            type="button"
+        >
+
+            Carregar Pauta
+
+        </button>
+
+
+        <button
+            id="exportarExcel"
+            type="button"
+        >
+
+            Exportar Excel
+
+        </button>
+
+
+        <button
+            id="exportarPDF"
+            type="button"
+        >
+
+            Exportar PDF
+
+        </button>
+
+
+        <button
+            id="imprimirPauta"
+            type="button"
+        >
+
+            Imprimir
+
+        </button>
+
+
+    </section>
+
+
+    <!-- =================================================
+         ESTADO
+    ================================================== -->
+
+    <div
+        id="estadoPauta"
+        class="estado-pauta"
+    >
+
+        Selecione uma classe e uma turma.
+
+    </div>
+
+
+    <!-- =================================================
+         TABELA
+    ================================================== -->
+
+    <section class="pauta-container">
+
+        <table
+            id="tabelaPauta"
+        >
+
+            <thead
+                id="cabecalhoPauta"
+            >
+
+            </thead>
+
+
+            <tbody
+                id="pautaLista"
+            >
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+
+</main>
+
+
+<!-- =====================================================
+     BIBLIOTECA EXCEL
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"
+></script>
+
+
+<!-- =====================================================
+     BIBLIOTECA PDF
+====================================================== -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+></script>
+
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+></script>
+
+
+<!-- =====================================================
+     PAUTAS.JS
+====================================================== -->
+
+<script
+    type="module"
+    src="../services/pautas.js"
+></script>
+
+
+</body>
+
+</html>
