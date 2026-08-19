@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-alert("🔥 NOTAS.JS CARREGOUDF!");
+alert("🔥 NOTAS.JS CARREGOUD!");
 
 alert("🔥 FIREBASE E FIRESTORE IMPORTADOS!");
 
@@ -844,6 +844,11 @@ async function lerLancamentoExistente() {
         const dados =
             snapshot.data();
 
+        lancamentoSelecionado = {
+    id: id,
+    ...dados
+};
+
         console.log(
             "📦 DADOS COMPLETOS DO LANÇAMENTO:",
             dados
@@ -1078,6 +1083,113 @@ async function mostrarNotasDoLancamento() {
     alert(
         "🔥 35 — TABELA PREENCHIDA!"
     );
+}
+
+// =====================================================
+// MOSTRAR INFORMAÇÃO DO LANÇAMENTO NA TABELA PRINCIPAL
+// =====================================================
+
+function mostrarInformacaoLancamento() {
+
+    alert("🔥 36 — VOU MOSTRAR A INFORMAÇÃO DO LANÇAMENTO!");
+
+    if (!notasLista) {
+        alert("❌ notasLista NÃO FOI ENCONTRADO!");
+        return;
+    }
+
+    const professor =
+        professorSelecionado?.nome ||
+        "—";
+
+    const classe =
+        filtroClasse?.value ||
+        "—";
+
+    const turma =
+        turmas.find(
+            t => t.id === filtroTurma?.value
+        );
+
+    const turmaNome =
+        turma?.nome ||
+        turma?.turma ||
+        turma?.designacao ||
+        "—";
+
+    const disciplina =
+        filtroDisciplina?.value ||
+        "—";
+
+    const trimestre =
+        filtroTrimestre?.value ||
+        "—";
+
+    const aberto =
+        lancamentoSelecionado?.abertoGeral === true;
+
+    notasLista.innerHTML = `
+
+        <tr>
+
+            <td>
+                ${professor}
+            </td>
+
+            <td>
+                ${classe}
+            </td>
+
+            <td>
+                ${turmaNome}
+            </td>
+
+            <td>
+                ${disciplina}
+            </td>
+
+            <td>
+                ${trimestre}.º Trimestre
+            </td>
+
+            <td>
+                ${
+                    aberto
+                        ? "🟢 Aberto"
+                        : "🔒 Fechado"
+                }
+            </td>
+
+            <td>
+
+                <button
+                    type="button"
+                    onclick="verLancamento()"
+                >
+                    👁️ Ver
+                </button>
+
+                <button
+                    type="button"
+                    onclick="baixarLancamento()"
+                >
+                    ⬇️ Baixar
+                </button>
+
+                <button
+                    type="button"
+                    onclick="imprimirLancamento()"
+                >
+                    🖨️ Imprimir
+                </button>
+
+            </td>
+
+        </tr>
+
+    `;
+
+    alert("🔥 37 — TABELA PRINCIPAL PREENCHIDA!");
 }
 
 // =====================================================
