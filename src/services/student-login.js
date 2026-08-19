@@ -25,7 +25,9 @@ const form =
 
 if (!form) {
 
-    alert("Formulário loginAluno não encontrado.");
+    alert(
+        "Formulário loginAluno não encontrado."
+    );
 
     throw new Error(
         "loginAluno não encontrado."
@@ -122,6 +124,10 @@ form.addEventListener(
                         id:
                             alunoDoc.id,
 
+                        // 🔥 ESCOLA
+                        escolaId:
+                            dados.escolaId || "",
+
                         nome:
                             dados.nome || "",
 
@@ -169,14 +175,17 @@ form.addEventListener(
 
 
             // =================================================
-            // 2. SE NÃO ENCONTROU, PROCURAR NAS TURMAS
+            // 2. PROCURAR NAS TURMAS
             // =================================================
 
             if (!alunoEncontrado) {
 
+                console.log(
+                    "Aluno não encontrado em alunos."
+                );
 
                 console.log(
-                    "Aluno não encontrado em alunos. Procurando nas turmas..."
+                    "Procurando nas turmas..."
                 );
 
 
@@ -194,9 +203,15 @@ form.addEventListener(
                     of turmasSnapshot.docs
                 ) {
 
-
                     const turmaDados =
                         turmaDoc.data();
+
+
+                    console.log(
+                        "🏫 Verificando turma:",
+                        turmaDoc.id,
+                        turmaDados
+                    );
 
 
                     const alunosTurmaSnapshot =
@@ -217,7 +232,6 @@ form.addEventListener(
                         of alunosTurmaSnapshot.docs
                     ) {
 
-
                         const dados =
                             alunoDoc.data();
 
@@ -230,7 +244,9 @@ form.addEventListener(
 
                         const senhaFirebase =
                             String(
-                                dados.senhaAcesso || ""
+                                dados.senhaAcesso ||
+                                dados.senha ||
+                                ""
                             ).trim();
 
 
@@ -239,29 +255,44 @@ form.addEventListener(
                             senhaFirebase === senha
                         ) {
 
-
                             alunoEncontrado = {
 
                                 id:
                                     alunoDoc.id,
 
+                                // =================================
+                                // 🔥 ESCOLA ID
+                                // =================================
+
+                                escolaId:
+                                    dados.escolaId ||
+                                    turmaDados.escolaId ||
+                                    "",
+
+
                                 turmaId:
                                     turmaDoc.id,
+
 
                                 nome:
                                     dados.nome || "",
 
+
                                 codigoAluno:
                                     codigo,
+
 
                                 numero:
                                     dados.numero || "",
 
+
                                 senhaAcesso:
                                     senhaFirebase,
 
+
                                 sexo:
                                     dados.sexo || "",
+
 
                                 estado:
                                     String(
@@ -269,25 +300,30 @@ form.addEventListener(
                                         "ativo"
                                     ).trim(),
 
+
                                 classe:
                                     dados.classe ||
                                     turmaDados.classe ||
                                     "",
+
 
                                 ensino:
                                     dados.ensino ||
                                     turmaDados.ensino ||
                                     "",
 
+
                                 anoLetivo:
                                     dados.anoLetivo ||
                                     turmaDados.anoLetivo ||
                                     "",
 
+
                                 turmaNome:
                                     dados.turmaNome ||
                                     turmaDados.nome ||
                                     "",
+
 
                                 origem:
                                     "turma"
@@ -329,7 +365,50 @@ form.addEventListener(
 
 
             // =================================================
-            // 4. GUARDAR SESSÃO
+            // 4. VERIFICAR ESCOLA
+            // =================================================
+
+            console.log(
+                "🏫 ESCOLA DO ALUNO:",
+                alunoEncontrado.escolaId
+            );
+
+
+            if (
+                !alunoEncontrado.escolaId
+            ) {
+
+                console.warn(
+                    "⚠️ O aluno foi encontrado, mas a escola não está associada."
+                );
+
+                alert(
+                    "⚠️ Aluno encontrado, mas a escola não está identificada."
+                );
+
+                // Não bloqueamos o login.
+                // Apenas avisamos.
+            }
+
+
+            // =================================================
+            // 5. GUARDAR ESCOLA TAMBÉM NA SESSÃO
+            // =================================================
+
+            if (
+                alunoEncontrado.escolaId
+            ) {
+
+                sessionStorage.setItem(
+                    "escolaId",
+                    alunoEncontrado.escolaId
+                );
+
+            }
+
+
+            // =================================================
+            // 6. GUARDAR SESSÃO DO ALUNO
             // =================================================
 
             localStorage.setItem(
@@ -341,13 +420,39 @@ form.addEventListener(
 
 
             console.log(
-                "ALUNO ENCONTRADO:",
+                "================================="
+            );
+
+            console.log(
+                "🎓 ALUNO ENCONTRADO"
+            );
+
+            console.log(
                 alunoEncontrado
+            );
+
+            console.log(
+                "🏫 escolaId:",
+                alunoEncontrado.escolaId
+            );
+
+            console.log(
+                "🏫 turmaId:",
+                alunoEncontrado.turmaId
+            );
+
+            console.log(
+                "👨‍🎓 alunoId:",
+                alunoEncontrado.id
+            );
+
+            console.log(
+                "================================="
             );
 
 
             // =================================================
-            // 5. CONFIRMAÇÃO
+            // 7. CONFIRMAÇÃO
             // =================================================
 
             alert(
@@ -366,17 +471,27 @@ form.addEventListener(
                     "não informado"
                 ) +
 
-                "\nTurma ID: " +
-                alunoEncontrado.turmaId
+                "\nTurma: " +
+                (
+                    alunoEncontrado.turmaNome ||
+                    "não informada"
+                ) +
+
+                "\nEscola ID: " +
+                (
+                    alunoEncontrado.escolaId ||
+                    "não identificada"
+                )
 
             );
 
 
             // =================================================
-            // 6. ÁREA DO ALUNO
+            // 8. ÁREA DO ALUNO
             // =================================================
 
-            window.location.href = "../pages/student-area.html";
+            window.location.href =
+                "../pages/student-area.html";
 
         }
 
