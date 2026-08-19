@@ -1363,7 +1363,7 @@ async function obterDadosMiniPauta() {
             : [];
 
 
-  // =================================================
+// =================================================
 // ASSOCIAR NOTAS AOS ALUNOS
 // =================================================
 
@@ -1373,35 +1373,44 @@ const alunosComNotas =
 
             const matriculaAluno =
                 String(
-                    aluno.matricula ??
-                    aluno.codigoAluno ??
-                    aluno.numeroMatricula ??
+                    aluno.matricula ||
+                    aluno.codigoAluno ||
+                    aluno.numeroMatricula ||
                     ""
                 )
                 .trim();
 
 
-            // =================================================
-            // PROCURAR NOTA DO ALUNO
-            // =================================================
+            const nomeAluno =
+                String(
+                    aluno.nome ||
+                    aluno.nomeAluno ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
 
-            const notaEncontrada =
+
+            // =============================================
+            // PROCURAR A NOTA PELA MATRÍCULA
+            // =============================================
+
+            let notaEncontrada =
                 notasLancadas.find(
                     nota => {
 
                         const matriculaNota =
                             String(
-                                nota.matricula ??
-                                nota.codigoAluno ??
-                                nota.numeroMatricula ??
+                                nota.matricula ||
+                                nota.codigoAluno ||
+                                nota.numeroMatricula ||
                                 ""
                             )
                             .trim();
 
-
                         return (
-                            matriculaAluno !== "" &&
-                            matriculaNota !== "" &&
+                            matriculaAluno &&
+                            matriculaNota &&
                             matriculaAluno ===
                             matriculaNota
                         );
@@ -1410,87 +1419,79 @@ const alunosComNotas =
                 );
 
 
-            // =================================================
-            // RECUPERAR MAC
-            // =================================================
+            // =============================================
+            // SE NÃO ENCONTROU PELA MATRÍCULA,
+            // PROCURAR PELO NOME
+            // =============================================
+
+            if (!notaEncontrada && nomeAluno) {
+
+                notaEncontrada =
+                    notasLancadas.find(
+                        nota => {
+
+                            const nomeNota =
+                                String(
+                                    nota.nome ||
+                                    nota.nomeAluno ||
+                                    ""
+                                )
+                                .trim()
+                                .toLowerCase();
+
+                            return (
+                                nomeNota &&
+                                nomeNota ===
+                                nomeAluno
+                            );
+
+                        }
+                    );
+            }
+
+
+            // =============================================
+            // RECUPERAR NOTAS
+            // =============================================
 
             const MAC =
                 notaEncontrada?.MAC ??
                 notaEncontrada?.mac ??
-                notaEncontrada?.Mac ??
                 aluno.MAC ??
-                aluno.mac ??
                 "";
-
-
-            // =================================================
-            // RECUPERAR NPT
-            // =================================================
 
             const NPT =
                 notaEncontrada?.NPT ??
                 notaEncontrada?.npt ??
-                notaEncontrada?.Npt ??
                 aluno.NPT ??
-                aluno.npt ??
                 "";
-
-
-            // =================================================
-            // RECUPERAR MF
-            // =================================================
 
             const MF =
                 notaEncontrada?.MF ??
                 notaEncontrada?.mf ??
-                notaEncontrada?.Mf ??
                 aluno.MF ??
-                aluno.mf ??
                 "";
 
 
-            // =================================================
-            // RECUPERAR CLASSIFICAÇÃO
-            // =================================================
-
             const classificacao =
                 notaEncontrada?.classificacao ??
-                notaEncontrada?.Classificacao ??
                 aluno.classificacao ??
                 "";
 
 
             console.log(
-                "📝 ALUNO + NOTAS:",
-                {
-                    nome:
-                        aluno.nome ||
-                        aluno.nomeAluno,
-
-                    matricula:
-                        matriculaAluno,
-
-                    notaEncontrada:
-                        notaEncontrada,
-
-                    MAC:
-                        MAC,
-
-                    NPT:
-                        NPT,
-
-                    MF:
-                        MF,
-
-                    classificacao:
-                        classificacao
-                }
+                "🔎 ALUNO:",
+                nomeAluno,
+                "| MATRÍCULA:",
+                matriculaAluno,
+                "| NOTA:",
+                notaEncontrada
             );
 
 
-            // =================================================
-            // DEVOLVER ALUNO COM AS NOTAS
-            // =================================================
+            // =============================================
+            // ALUNO FINAL
+            // =============================================
 
             return {
 
@@ -1517,7 +1518,6 @@ const alunosComNotas =
 
         }
     );
-
 
 // =================================================
 // RETORNAR DADOS COMPLETOS
