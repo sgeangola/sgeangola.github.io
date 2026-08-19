@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Pauta Geral — SGE Angola</title>
+
+    <link
+        rel="stylesheet"
+        href="../styles/pautas-gerais.css"
+    >
+
+</head>
+
+<body>
+
+<div class="pagina">
+
+    <!-- ================================================= -->
+    <!-- CABEÇALHO DA ESCOLA -->
+    <!-- ================================================= -->
+
+    <header class="cabecalho-escola">
+
+        <div class="logo-escola">
+
+            <img
+                id="logoEscola"
+                src="../assets/logo.png"
+                alt="Logo da escola"
+            >
+
+        </div>
+
+        <div class="dados-escola">
+
+            <h1 id="nomeEscola">
+                A carregar escola...
+            </h1>
+
+            <p id="enderecoEscola">
+                —
+            </p>
+
+            <p id="telefoneEscola">
+                —
+            </p>
+
+            <h2>
+                PAUTA GERAL
+            </h2>
+
+            <p id="anoLetivo">
+                Ano Lectivo: —
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
+
+    <section class="filtros">
+
+        <div class="campo">
+
+            <label for="ensinoSelect">
+                Ensino
+            </label>
+
+            <select id="ensinoSelect">
+
+                <option value="">
+                    Selecionar ensino
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="campo">
+
+            <label for="classeSelect">
+                Classe / Etapa
+            </label>
+
+            <select id="classeSelect">
+
+                <option value="">
+                    Selecionar classe
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="campo">
+
+            <label for="turmaSelect">
+                Turma
+            </label>
+
+            <select id="turmaSelect">
+
+                <option value="">
+                    Selecionar turma
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            id="carregarPauta"
+            type="button"
+        >
+
+            🔍 Carregar Pauta
+
+        </button>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- INFORMAÇÕES DA PAUTA -->
+    <!-- ================================================= -->
+
+    <section class="informacoes-pauta">
+
+        <div>
+
+            <strong>
+                Classe:
+            </strong>
+
+            <span id="classeInfo">
+                —
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Turma:
+            </strong>
+
+            <span id="turmaInfo">
+                —
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Nº de alunos:
+            </strong>
+
+            <span id="quantidadeAlunos">
+                —
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- ESTADO -->
+    <!-- ================================================= -->
+
+    <div
+        id="estado"
+        class="estado"
+    >
+
+        Selecione uma turma para carregar a pauta.
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- TABELA -->
+    <!-- ================================================= -->
+
+    <div class="tabela-container">
+
+        <table
+            id="tabelaPauta"
+            class="tabela-pauta"
+        >
+
+            <thead
+                id="cabecalhoPauta"
+            >
+
+            </thead>
+
+
+            <tbody
+                id="corpoPauta"
+            >
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- BOTÕES -->
+    <!-- ================================================= -->
+
+    <div class="acoes">
+
+        <button
+            id="exportarExcel"
+            type="button"
+        >
+
+            📊 Exportar Excel
+
+        </button>
+
+
+        <button
+            id="exportarPDF"
+            type="button"
+        >
+
+            📄 Exportar PDF
+
+        </button>
+
+
+        <button
+            id="imprimirPauta"
+            type="button"
+        >
+
+            🖨️ Imprimir
+
+        </button>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- RODAPÉ -->
+    <!-- ================================================= -->
+
+    <footer class="rodape">
+
+        <span id="rodapeEscola">
+            SGE Angola
+        </span>
+
+        <span>
+            Pauta Geral
+        </span>
+
+    </footer>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- BIBLIOTECA EXCEL -->
+<!-- ===================================================== -->
+
+<script
+    src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js">
+</script>
+
+
+<!-- ===================================================== -->
+<!-- jsPDF -->
+<!-- ===================================================== -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
+
+
+<!-- ===================================================== -->
+<!-- jsPDF AUTOTABLE -->
+<!-- ===================================================== -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js">
+</script>
+
+
+<!-- ===================================================== -->
+<!-- JAVASCRIPT DA PAUTA -->
+<!-- ===================================================== -->
+
+<script
+    type="module"
+    src="../services/pautas-gerais.js">
+</script>
+
+
+</body>
+</html>
