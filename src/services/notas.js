@@ -14,7 +14,7 @@
 // turmaId + disciplina + trimestre
 // =====================================================
 
-alert("🔥 NOTAS.JS 11 CARREGADO!");
+alert("🔥 NOTAS.JS CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1762,45 +1762,90 @@ function construirMiniPautaHTML(
     dados
 ) {
 
-    alert("🔥 ENTROU NA CONSTRUIR MINI-PAUTA");
+    const alunos =
+        dados.alunos || [];
 
-const alunos =
-    dados.alunos || [];
-
-alert(
-    "ALUNOS ENCONTRADOS: " +
-    alunos.length
+    alert(
+    "ENSINO RECEBIDO:\n\n" +
+    "Ensino: " +
+    (dados.ensino || "VAZIO") +
+    "\n\nTurma ID: " +
+    (dados.turmaId || "VAZIO") +
+    "\n\nTurma: " +
+    (dados.turmaNome || "VAZIO")
 );
     
 // =====================================================
 // ESTATÍSTICAS DA MINI-PAUTA
 // =====================================================
 
-const ensino =
+const ensinoNormalizado =
     String(
         dados.ensino || ""
     )
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim();
 
 
 // =====================================================
 // IDENTIFICAR O ENSINO
 // =====================================================
+//
+// Primeiro Ciclo:
+// 0–4    Mau
+// 5–9    Medíocre
+// 10–13  Suficiente
+// 14–16  Bom
+// 17–20  Muito Bom
+//
+// Ensino Primário:
+// 0–2    Mau
+// 3–4    Medíocre
+// 5–6    Suficiente
+// 7–8    Bom
+// 9–10   Muito Bom
+// =====================================================
 
 const primeiroCiclo =
-    ensino.includes("primeiro") &&
-    ensino.includes("ciclo");
+    ensinoNormalizado.includes("primeiro ciclo") ||
+    ensinoNormalizado.includes("primeirociclo") ||
+    (
+        ensinoNormalizado.includes("primeiro") &&
+        ensinoNormalizado.includes("ciclo")
+    );
 
+
+// =====================================================
+// MOSTRAR NO CONSOLE
+// =====================================================
 
 console.log(
-    "🎓 ENSINO:",
+    "======================================"
+);
+
+console.log(
+    "📊 ESTATÍSTICA DA MINI-PAUTA"
+);
+
+console.log(
+    "Ensino recebido:",
     dados.ensino
 );
 
 console.log(
-    "🎓 PRIMEIRO CICLO:",
+    "Ensino normalizado:",
+    ensinoNormalizado
+);
+
+console.log(
+    "É Primeiro Ciclo:",
     primeiroCiclo
+);
+
+console.log(
+    "======================================"
 );
 
 
@@ -1888,14 +1933,7 @@ const estatistica =
     classificacoes.map(
         item => ({
 
-            nome:
-                item.nome,
-
-            minimo:
-                item.minimo,
-
-            maximo:
-                item.maximo,
+            ...item,
 
             M: 0,
 
@@ -1919,21 +1957,11 @@ let semBomAproveitamento = 0;
 
 
 // =====================================================
-// ANALISAR TODOS OS ALUNOS
+// ANALISAR ALUNOS
 // =====================================================
 
 alunos.forEach(
     aluno => {
-
-        console.log(
-            "📊 ALUNO PARA ESTATÍSTICA:",
-            aluno
-        );
-
-
-        // ---------------------------------------------
-        // ESTADO
-        // ---------------------------------------------
 
         const estado =
             String(
@@ -1942,6 +1970,10 @@ alunos.forEach(
             .toLowerCase()
             .trim();
 
+
+        // =============================================
+        // DESISTIDO
+        // =============================================
 
         if (
             estado.includes("desist")
@@ -1954,6 +1986,10 @@ alunos.forEach(
         }
 
 
+        // =============================================
+        // TRANSFERIDO
+        // =============================================
+
         if (
             estado.includes("transfer")
         ) {
@@ -1965,62 +2001,23 @@ alunos.forEach(
         }
 
 
-        // ---------------------------------------------
-        // OBTER MF
-        // ---------------------------------------------
-
-        let valorMF =
-            aluno.MF;
-
-
-        // aceitar também mf caso exista
-
-        if (
-            valorMF === undefined ||
-            valorMF === null ||
-            valorMF === ""
-        ) {
-
-            valorMF =
-                aluno.mf;
-
-        }
-
-
-        // ---------------------------------------------
-        // CONVERTER MF
-        // ---------------------------------------------
+        // =============================================
+        // MF — MÉDIA FINAL
+        // =============================================
 
         const mf =
             Number(
                 String(
-                    valorMF ?? ""
+                    aluno.MF ?? ""
                 )
                 .replace(",", ".")
                 .trim()
             );
 
 
-        console.log(
-            "📌 MF:",
-            valorMF,
-            "→",
-            mf
-        );
-
-
-        // ---------------------------------------------
-        // MF INVÁLIDA
-        // ---------------------------------------------
-
         if (
             !Number.isFinite(mf)
         ) {
-
-            console.warn(
-                "⚠️ MF inválida:",
-                aluno
-            );
 
             return;
 
@@ -2030,9 +2027,9 @@ alunos.forEach(
         alunosValidos++;
 
 
-        // ---------------------------------------------
+        // =============================================
         // SEXO
-        // ---------------------------------------------
+        // =============================================
 
         const sexo =
             String(
@@ -2042,9 +2039,9 @@ alunos.forEach(
             .trim();
 
 
-        // ---------------------------------------------
-        // LOCALIZAR CLASSIFICAÇÃO
-        // ---------------------------------------------
+        // =============================================
+        // ENCONTRAR CLASSIFICAÇÃO
+        // =============================================
 
         const linha =
             estatistica.find(
@@ -2052,6 +2049,7 @@ alunos.forEach(
 
                     mf >= item.minimo &&
                     mf <= item.maximo
+
             );
 
 
@@ -2060,7 +2058,7 @@ alunos.forEach(
             console.warn(
                 "⚠️ MF fora da escala:",
                 mf,
-                aluno
+                aluno.nome
             );
 
             return;
@@ -2068,9 +2066,9 @@ alunos.forEach(
         }
 
 
-        // ---------------------------------------------
+        // =============================================
         // MASCULINO
-        // ---------------------------------------------
+        // =============================================
 
         if (
             sexo === "M" ||
@@ -2082,9 +2080,9 @@ alunos.forEach(
         }
 
 
-        // ---------------------------------------------
+        // =============================================
         // FEMININO
-        // ---------------------------------------------
+        // =============================================
 
         else if (
             sexo === "F" ||
@@ -2096,16 +2094,24 @@ alunos.forEach(
         }
 
 
-        // ---------------------------------------------
+        // =============================================
         // TOTAL
-        // ---------------------------------------------
+        // =============================================
 
         linha.total++;
 
 
-        // ---------------------------------------------
+        // =============================================
         // BOM APROVEITAMENTO
-        // ---------------------------------------------
+        // =============================================
+        //
+        // Primeiro Ciclo:
+        // Bom começa em 14
+        //
+        // Ensino Primário:
+        // Bom começa em 7
+        //
+        // =============================================
 
         const minimoBom =
             primeiroCiclo
@@ -2180,41 +2186,57 @@ const percentSemBom =
         : 0;
 
 
+// =====================================================
+// DEBUG FINAL
+// =====================================================
+
 console.log(
-    "📊 ESTATÍSTICA FINAL:",
-    estatistica
+    "📊 CLASSIFICAÇÕES:",
+    classificacoes
 );
 
 console.log(
-    "👨 M:",
+    "👨 Masculino:",
     totalM
 );
 
 console.log(
-    "👩 F:",
+    "👩 Feminino:",
     totalF
 );
 
 console.log(
-    "👥 TOTAL:",
+    "👥 Total:",
     totalClassificados
 );
 
 console.log(
-    "🎓 VÁLIDOS:",
+    "🎓 Alunos válidos:",
     alunosValidos
 );
 
 console.log(
-    "🚫 DESISTIDOS:",
+    "🟢 Bom aproveitamento:",
+    bomAproveitamento,
+    percentBom.toFixed(1) + "%"
+);
+
+console.log(
+    "🔴 Sem bom aproveitamento:",
+    semBomAproveitamento,
+    percentSemBom.toFixed(1) + "%"
+);
+
+console.log(
+    "🚫 Desistidos:",
     desistidos
 );
 
 console.log(
-    "🔄 TRANSFERIDOS:",
+    "🔄 Transferidos:",
     transferidos
 );
-    
+
     let linhas =
         "";
 
@@ -2968,13 +2990,10 @@ td.classificacao{
 window.verLancamento =
 async function () {
 
-    alert("TESTE A — ENTROU NO VER LANÇAMENTO");
-
-
     if (!lancamentoSelecionado) {
 
         alert(
-            "TESTE B — NÃO HÁ LANÇAMENTO"
+            "⚠️ Nenhum lançamento selecionado."
         );
 
         return;
@@ -2984,24 +3003,8 @@ async function () {
 
     try {
 
-        alert(
-            "TESTE C — ANTES DE obterDadosMiniPauta"
-        );
-
-
         const dados =
             await obterDadosMiniPauta();
-
-
-        alert(
-            "TESTE D — obterDadosMiniPauta TERMINOU"
-        );
-
-
-        console.log(
-            "DADOS RECEBIDOS:",
-            dados
-        );
 
 
         const janela =
@@ -3011,25 +3014,15 @@ async function () {
             );
 
 
-        alert(
-            "TESTE E — janela aberta"
-        );
-
-
         if (!janela) {
 
             alert(
-                "TESTE F — navegador bloqueou"
+                "⚠️ O navegador bloqueou a abertura da Mini-Pauta."
             );
 
             return;
 
         }
-
-
-        alert(
-            "TESTE G — ANTES DE construirMiniPautaHTML"
-        );
 
 
         janela.document.write(
@@ -3039,27 +3032,27 @@ async function () {
         );
 
 
-        alert(
-            "TESTE H — construirMiniPautaHTML TERMINOU"
-        );
-
-
         janela.document.close();
 
+
+        console.log(
+            "✅ MINI-PAUTA ABERTA:",
+            dados
+        );
 
     }
 
     catch (erro) {
 
-        alert(
-            "ERRO:\n\n" +
-            erro.message
+        console.error(
+            "❌ ERRO AO VER MINI-PAUTA:",
+            erro
         );
 
 
-        console.error(
-            "ERRO COMPLETO:",
-            erro
+        alert(
+            "❌ Não foi possível abrir a Mini-Pauta.\n\n" +
+            erro.message
         );
 
     }
