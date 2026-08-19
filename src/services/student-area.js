@@ -30,6 +30,9 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
+alert(
+    "🎓 SGE — student-area.js iniciado"
+);
 
 console.log(
     "🎓 SGE — student-area.js iniciado"
@@ -1566,6 +1569,92 @@ function criarJanelaNotas(
 
 }
 
+// =====================================================
+// VERIFICAR SITUAÇÃO FINANCEIRA DO ALUNO
+// =====================================================
+
+async function verificarFinanceiroAluno() {
+
+    const escolaId =
+        String(
+            aluno.escolaId ||
+            sessionStorage.getItem("escolaId") ||
+            ""
+        ).trim();
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+    if (!escolaId) {
+        throw new Error(
+            "Escola do aluno não identificada."
+        );
+    }
+
+    if (!alunoId) {
+        throw new Error(
+            "ID do aluno não identificado."
+        );
+    }
+
+    const financeiroId =
+        `${escolaId}_${alunoId}`;
+
+    const referencia =
+        doc(
+            db,
+            "financeiro",
+            financeiroId
+        );
+
+    const resultado =
+        await getDoc(
+            referencia
+        );
+
+    // Não existe documento financeiro
+    if (!resultado.exists()) {
+
+        return {
+            existe: false,
+            pago1: false,
+            pago2: false,
+            pago3: false,
+            temPagamento: false
+        };
+
+    }
+
+    const dados =
+        resultado.data();
+
+    const pago1 =
+        dados?.["1trimestre"]?.pago === true;
+
+    const pago2 =
+        dados?.["2trimestre"]?.pago === true;
+
+    const pago3 =
+        dados?.["3trimestre"]?.pago === true;
+
+    return {
+
+        existe: true,
+
+        pago1,
+        pago2,
+        pago3,
+
+        temPagamento:
+            pago1 ||
+            pago2 ||
+            pago3
+
+    };
+
+}
 
 // =====================================================
 // VER NOTAS
@@ -1576,6 +1665,47 @@ async function () {
 
     try {
 
+        // =============================================
+        // PRIMEIRO — VERIFICAR FINANCEIRO
+        // =============================================
+
+        const financeiro =
+            await verificarFinanceiroAluno();
+
+
+        console.log(
+            "💰 SITUAÇÃO FINANCEIRA:",
+            financeiro
+        );
+
+
+        // =============================================
+        // NÃO TEM NENHUM PAGAMENTO
+        // =============================================
+
+        if (
+            !financeiro.temPagamento
+        ) {
+
+            alert(
+                "🔒 ACESSO ÀS NOTAS BLOQUEADO\n\n" +
+
+                "A sua situação financeira " +
+                "não possui nenhum trimestre pago.\n\n" +
+
+                "Regularize a situação financeira " +
+                "para consultar as suas notas."
+            );
+
+            return;
+
+        }
+
+
+        // =============================================
+        // EXISTEM PAGAMENTOS
+        // =============================================
+
         const documentos =
             await carregarDocumentosNotas();
 
@@ -1585,7 +1715,8 @@ async function () {
         ) {
 
             alert(
-                "📊 Ainda não existem notas lançadas para a sua turma."
+                "📊 Ainda não existem notas lançadas " +
+                "para a sua turma."
             );
 
             return;
@@ -1608,14 +1739,13 @@ async function () {
 
 
         alert(
-            "❌ Não foi possível carregar as notas.\n\n" +
+            "❌ Não foi possível verificar o acesso às notas.\n\n" +
             erro.message
         );
 
     }
 
 };
-
 
 // =====================================================
 // IMPRIMIR / BAIXAR NOTAS
