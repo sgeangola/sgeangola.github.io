@@ -1,3 +1,5 @@
+alert("🔥 NOTAS.JS CARREGADO!");
+
 // =====================================================
 // NOTAS.JS — ADMINISTRADOR
 // SGE ANGOLA
