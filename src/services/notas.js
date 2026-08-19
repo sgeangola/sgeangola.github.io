@@ -3,7 +3,7 @@
 // SGE ANGOLA
 // =====================================================
 
-alert("🔥 NOTAS.JS DF CARREGADO!");
+alert("🔥 NOTAS.JS DG CARREGADO!");
 
 // =====================================================
 // FIREBASE
@@ -1361,145 +1361,225 @@ async function obterDadosMiniPauta() {
             : [];
 
 
-    // =================================================
-    // ASSOCIAR NOTAS AOS ALUNOS
-    // =================================================
+  // =================================================
+// ASSOCIAR NOTAS AOS ALUNOS
+// =================================================
 
-    const alunosComNotas =
-        alunosDaTurma.map(
-            (aluno, indice) => {
+const alunosComNotas =
+    alunosDaTurma.map(
+        (aluno, indice) => {
 
-                const matriculaAluno =
-                    String(
-                        aluno.matricula ||
-                        aluno.codigoAluno ||
-                        aluno.numeroMatricula ||
-                        ""
-                    )
-                    .trim();
-
-
-                const notaEncontrada =
-                    notasLancadas.find(
-                        nota => {
-
-                            const matriculaNota =
-                                String(
-                                    nota.matricula ||
-                                    nota.codigoAluno ||
-                                    nota.numeroMatricula ||
-                                    ""
-                                )
-                                .trim();
-
-                            return (
-                                matriculaAluno &&
-                                matriculaNota &&
-                                matriculaAluno ===
-                                matriculaNota
-                            );
-                        }
-                    );
+            const matriculaAluno =
+                String(
+                    aluno.matricula ??
+                    aluno.codigoAluno ??
+                    aluno.numeroMatricula ??
+                    ""
+                )
+                .trim();
 
 
-                return {
+            // =================================================
+            // PROCURAR NOTA DO ALUNO
+            // =================================================
 
-                    ...aluno,
+            const notaEncontrada =
+                notasLancadas.find(
+                    nota => {
 
-                    numero:
-                        aluno.numero ??
-                        aluno.n ??
-                        (indice + 1),
+                        const matriculaNota =
+                            String(
+                                nota.matricula ??
+                                nota.codigoAluno ??
+                                nota.numeroMatricula ??
+                                ""
+                            )
+                            .trim();
+
+
+                        return (
+                            matriculaAluno !== "" &&
+                            matriculaNota !== "" &&
+                            matriculaAluno ===
+                            matriculaNota
+                        );
+
+                    }
+                );
+
+
+            // =================================================
+            // RECUPERAR MAC
+            // =================================================
+
+            const MAC =
+                notaEncontrada?.MAC ??
+                notaEncontrada?.mac ??
+                notaEncontrada?.Mac ??
+                aluno.MAC ??
+                aluno.mac ??
+                "";
+
+
+            // =================================================
+            // RECUPERAR NPT
+            // =================================================
+
+            const NPT =
+                notaEncontrada?.NPT ??
+                notaEncontrada?.npt ??
+                notaEncontrada?.Npt ??
+                aluno.NPT ??
+                aluno.npt ??
+                "";
+
+
+            // =================================================
+            // RECUPERAR MF
+            // =================================================
+
+            const MF =
+                notaEncontrada?.MF ??
+                notaEncontrada?.mf ??
+                notaEncontrada?.Mf ??
+                aluno.MF ??
+                aluno.mf ??
+                "";
+
+
+            // =================================================
+            // RECUPERAR CLASSIFICAÇÃO
+            // =================================================
+
+            const classificacao =
+                notaEncontrada?.classificacao ??
+                notaEncontrada?.Classificacao ??
+                aluno.classificacao ??
+                "";
+
+
+            console.log(
+                "📝 ALUNO + NOTAS:",
+                {
+                    nome:
+                        aluno.nome ||
+                        aluno.nomeAluno,
+
+                    matricula:
+                        matriculaAluno,
+
+                    notaEncontrada:
+                        notaEncontrada,
 
                     MAC:
-                        notaEncontrada?.MAC ??
-                        notaEncontrada?.mac ??
-                        aluno.MAC ??
-                        "",
+                        MAC,
 
                     NPT:
-                        notaEncontrada?.NPT ??
-                        notaEncontrada?.npt ??
-                        aluno.NPT ??
-                        "",
+                        NPT,
 
                     MF:
-                        notaEncontrada?.MF ??
-                        notaEncontrada?.mf ??
-                        aluno.MF ??
-                        "",
+                        MF,
 
                     classificacao:
-                        notaEncontrada?.classificacao ??
-                        aluno.classificacao ??
-                        ""
-
-                };
-
-            }
-        );
+                        classificacao
+                }
+            );
 
 
-    return {
+            // =================================================
+            // DEVOLVER ALUNO COM AS NOTAS
+            // =================================================
 
-        escolaId:
+            return {
 
-            escolaId,
+                ...aluno,
 
-        nomeEscola:
+                numero:
+                    aluno.numero ??
+                    aluno.n ??
+                    (indice + 1),
 
-            nomeEscola,
+                MAC:
+                    MAC,
 
-        professorNome:
+                NPT:
+                    NPT,
 
-            notas.professorNome ||
-            dados.professorNome ||
-            "—",
+                MF:
+                    MF,
 
-        classe:
+                classificacao:
+                    classificacao
 
-            notas.classe ||
-            dados.classe ||
-            "—",
+            };
 
-        turmaId:
+        }
+    );
 
-            dados.turmaId,
 
-        turmaNome:
+// =================================================
+// RETORNAR DADOS COMPLETOS
+// =================================================
 
-            notas.turmaNome ||
-            dados.turmaNome ||
-            dadosTurma.nome ||
-            dadosTurma.turma ||
-            "—",
+return {
 
-        disciplina:
+    escolaId:
 
-            notas.disciplina ||
-            dados.disciplina ||
-            "—",
+        escolaId,
 
-        trimestre:
+    nomeEscola:
 
-            notas.trimestre ||
-            dados.trimestre ||
-            "—",
+        nomeEscola,
 
-        ensino:
+    professorNome:
 
-            ensino,
+        notas.professorNome ||
+        dados.professorNome ||
+        "—",
 
-        alunos:
+    classe:
 
-            alunosComNotas,
+        notas.classe ||
+        dados.classe ||
+        "—",
 
-        notasLancadas:
+    turmaId:
 
-            notasLancadas
+        dados.turmaId,
 
-    };
-}
+    turmaNome:
+
+        notas.turmaNome ||
+        dados.turmaNome ||
+        dadosTurma.nome ||
+        dadosTurma.turma ||
+        "—",
+
+    disciplina:
+
+        notas.disciplina ||
+        dados.disciplina ||
+        "—",
+
+    trimestre:
+
+        notas.trimestre ||
+        dados.trimestre ||
+        "—",
+
+    ensino:
+
+        ensino,
+
+    alunos:
+
+        alunosComNotas,
+
+    notasLancadas:
+
+        notasLancadas
+
+};
 
 // =====================================================
 // CONSTRUIR MINI-PAUTA HTML
