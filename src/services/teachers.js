@@ -363,110 +363,115 @@ async function carregarTurmas() {
         return;
     }
 
-
-    const ensino =
-        nivelEnsino.value;
-
+    const ensinoSelecionado =
+        String(nivelEnsino.value || "").trim();
 
     listaTurmas.innerHTML =
         "A carregar turmas...";
 
-
     turmas = [];
-
     atribuicoes = [];
 
-
-    if (!ensino) {
+    if (!ensinoSelecionado) {
 
         listaTurmas.innerHTML =
             "Selecione o nível de ensino.";
 
         return;
-
     }
-
-
-    // =============================================
-    // SEGURANÇA
-    // =============================================
-
-    if (
-        !ensinosDaEscola.includes(
-            ensino
-        )
-    ) {
-
-        listaTurmas.innerHTML =
-            "Este ensino não pertence a esta escola.";
-
-        return;
-
-    }
-
 
     try {
 
+        console.log(
+            "🏫 ESCOLA:",
+            escolaId
+        );
+
+        console.log(
+            "📚 ENSINO SELECIONADO:",
+            ensinoSelecionado
+        );
+
+        // =================================================
+        // BUSCAR TODAS AS TURMAS DA ESCOLA
+        // =================================================
+
         const consulta =
             query(
-
                 collection(
                     db,
                     "turmas"
                 ),
-
                 where(
                     "escolaId",
                     "==",
                     escolaId
-                ),
-
-                where(
-                    "ensino",
-                    "==",
-                    ensino
                 )
-
             );
-
 
         const snapshot =
             await getDocs(
                 consulta
             );
 
+        console.log(
+            "📦 TOTAL DE TURMAS DA ESCOLA:",
+            snapshot.size
+        );
 
-        listaTurmas.innerHTML = "";
-
-
-        // =============================================
-        // TURMAS ENCONTRADAS
-        // =============================================
+        // =================================================
+        // FILTRAR O ENSINO
+        // =================================================
 
         snapshot.forEach(
             turmaDoc => {
 
-                const turma = {
+                const dados =
+                    turmaDoc.data();
 
-                    id:
-                        turmaDoc.id,
+                const ensinoTurma =
+                    String(
+                        dados.ensino ||
+                        ""
+                    ).trim();
 
-                    ...turmaDoc.data()
-
-                };
-
-
-                turmas.push(
-                    turma
+                console.log(
+                    "TURMA:",
+                    dados.nome,
+                    "| ENSINO:",
+                    ensinoTurma
                 );
+
+                // Aceitar somente o ensino selecionado
+                if (
+                    ensinoTurma ===
+                    ensinoSelecionado
+                ) {
+
+                    turmas.push({
+
+                        id:
+                            turmaDoc.id,
+
+                        ...dados
+
+                    });
+
+                }
 
             }
         );
 
+        console.log(
+            "✅ TURMAS DO ENSINO:",
+            turmas
+        );
 
-        // =============================================
+        listaTurmas.innerHTML = "";
+
+        // =================================================
         // NENHUMA TURMA
-        // =============================================
+        // =================================================
 
         if (
             turmas.length === 0
@@ -480,99 +485,104 @@ async function carregarTurmas() {
                         color:#64748b;
                     "
                 >
-
                     Nenhuma turma encontrada
-                    para este ensino.
-
+                    para ${nomeEnsino(ensinoSelecionado)}.
                 </div>
 
             `;
 
             return;
-
         }
 
-
-        // =============================================
+        // =================================================
         // MOSTRAR TURMAS
-        // =============================================
+        // =================================================
 
         turmas.forEach(
             turma => {
 
-                listaTurmas.innerHTML += `
+                const div =
+                    document.createElement(
+                        "div"
+                    );
 
-                    <div class="checkBox">
+                div.className =
+                    "checkBox";
 
-                        <label>
+                const label =
+                    document.createElement(
+                        "label"
+                    );
 
-                            <input
-                                type="checkbox"
-                                class="turmaCheck"
-                                value="${turma.id}"
-                            >
+                const checkbox =
+                    document.createElement(
+                        "input"
+                    );
 
-                            <b>
-                                ${turma.nome || ""}
-                            </b>
+                checkbox.type =
+                    "checkbox";
 
-                            ${
-                                turma.classe
-                                    ? " (" +
-                                      turma.classe +
-                                      ")"
-                                    : ""
-                            }
+                checkbox.className =
+                    "turmaCheck";
 
-                        </label>
+                checkbox.value =
+                    turma.id;
 
-                    </div>
+                const texto =
+                    document.createElement(
+                        "span"
+                    );
 
-                `;
+                texto.innerHTML =
+                    `<b>${turma.nome || ""}</b>` +
+                    (
+                        turma.classe
+                            ? ` (${turma.classe})`
+                            : ""
+                    );
+
+                label.appendChild(
+                    checkbox
+                );
+
+                label.appendChild(
+                    texto
+                );
+
+                div.appendChild(
+                    label
+                );
+
+                listaTurmas.appendChild(
+                    div
+                );
+
+                checkbox.addEventListener(
+                    "change",
+                    carregarAtribuicoes
+                );
 
             }
         );
-
-
-        // =============================================
-        // EVENTOS
-        // =============================================
-
-        document
-            .querySelectorAll(
-                ".turmaCheck"
-            )
-            .forEach(
-                checkbox => {
-
-                    checkbox.addEventListener(
-                        "change",
-                        carregarAtribuicoes
-                    );
-
-                }
-            );
 
     }
 
     catch (erro) {
 
         console.error(
-            "Erro ao carregar turmas:",
+            "❌ ERRO AO CARREGAR TURMAS:",
             erro
         );
-
 
         listaTurmas.innerHTML = `
 
             <div
                 style="
                     color:#dc2626;
+                    padding:10px;
                 "
             >
-
                 Erro ao carregar turmas.
-
             </div>
 
         `;
