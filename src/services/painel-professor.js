@@ -5,8 +5,6 @@ import { db } from "./firebase.js";
 import {
     collection,
     getDocs,
-    query,
-    where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 // =====================================================
