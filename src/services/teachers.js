@@ -5,14 +5,7 @@
 
 alert("GESTÃO DE PROFESSORES CARREGADO");
 
-import {
-    db,
-    auth
-} from "./firebase.js";
-
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+import { db } from "./firebase.js";
 
 import {
     collection,
@@ -363,115 +356,110 @@ async function carregarTurmas() {
         return;
     }
 
-    const ensinoSelecionado =
-        String(nivelEnsino.value || "").trim();
+
+    const ensino =
+        nivelEnsino.value;
+
 
     listaTurmas.innerHTML =
         "A carregar turmas...";
 
+
     turmas = [];
+
     atribuicoes = [];
 
-    if (!ensinoSelecionado) {
+
+    if (!ensino) {
 
         listaTurmas.innerHTML =
             "Selecione o nível de ensino.";
 
         return;
+
     }
+
+
+    // =============================================
+    // SEGURANÇA
+    // =============================================
+
+    if (
+        !ensinosDaEscola.includes(
+            ensino
+        )
+    ) {
+
+        listaTurmas.innerHTML =
+            "Este ensino não pertence a esta escola.";
+
+        return;
+
+    }
+
 
     try {
 
-        console.log(
-            "🏫 ESCOLA:",
-            escolaId
-        );
-
-        console.log(
-            "📚 ENSINO SELECIONADO:",
-            ensinoSelecionado
-        );
-
-        // =================================================
-        // BUSCAR TODAS AS TURMAS DA ESCOLA
-        // =================================================
-
         const consulta =
             query(
+
                 collection(
                     db,
                     "turmas"
                 ),
+
                 where(
                     "escolaId",
                     "==",
                     escolaId
+                ),
+
+                where(
+                    "ensino",
+                    "==",
+                    ensino
                 )
+
             );
+
 
         const snapshot =
             await getDocs(
                 consulta
             );
 
-        console.log(
-            "📦 TOTAL DE TURMAS DA ESCOLA:",
-            snapshot.size
-        );
 
-        // =================================================
-        // FILTRAR O ENSINO
-        // =================================================
+        listaTurmas.innerHTML = "";
+
+
+        // =============================================
+        // TURMAS ENCONTRADAS
+        // =============================================
 
         snapshot.forEach(
             turmaDoc => {
 
-                const dados =
-                    turmaDoc.data();
+                const turma = {
 
-                const ensinoTurma =
-                    String(
-                        dados.ensino ||
-                        ""
-                    ).trim();
+                    id:
+                        turmaDoc.id,
 
-                console.log(
-                    "TURMA:",
-                    dados.nome,
-                    "| ENSINO:",
-                    ensinoTurma
+                    ...turmaDoc.data()
+
+                };
+
+
+                turmas.push(
+                    turma
                 );
-
-                // Aceitar somente o ensino selecionado
-                if (
-                    ensinoTurma ===
-                    ensinoSelecionado
-                ) {
-
-                    turmas.push({
-
-                        id:
-                            turmaDoc.id,
-
-                        ...dados
-
-                    });
-
-                }
 
             }
         );
 
-        console.log(
-            "✅ TURMAS DO ENSINO:",
-            turmas
-        );
 
-        listaTurmas.innerHTML = "";
-
-        // =================================================
+        // =============================================
         // NENHUMA TURMA
-        // =================================================
+        // =============================================
 
         if (
             turmas.length === 0
@@ -485,104 +473,99 @@ async function carregarTurmas() {
                         color:#64748b;
                     "
                 >
+
                     Nenhuma turma encontrada
-                    para ${nomeEnsino(ensinoSelecionado)}.
+                    para este ensino.
+
                 </div>
 
             `;
 
             return;
+
         }
 
-        // =================================================
+
+        // =============================================
         // MOSTRAR TURMAS
-        // =================================================
+        // =============================================
 
         turmas.forEach(
             turma => {
 
-                const div =
-                    document.createElement(
-                        "div"
-                    );
+                listaTurmas.innerHTML += `
 
-                div.className =
-                    "checkBox";
+                    <div class="checkBox">
 
-                const label =
-                    document.createElement(
-                        "label"
-                    );
+                        <label>
 
-                const checkbox =
-                    document.createElement(
-                        "input"
-                    );
+                            <input
+                                type="checkbox"
+                                class="turmaCheck"
+                                value="${turma.id}"
+                            >
 
-                checkbox.type =
-                    "checkbox";
+                            <b>
+                                ${turma.nome || ""}
+                            </b>
 
-                checkbox.className =
-                    "turmaCheck";
+                            ${
+                                turma.classe
+                                    ? " (" +
+                                      turma.classe +
+                                      ")"
+                                    : ""
+                            }
 
-                checkbox.value =
-                    turma.id;
+                        </label>
 
-                const texto =
-                    document.createElement(
-                        "span"
-                    );
+                    </div>
 
-                texto.innerHTML =
-                    `<b>${turma.nome || ""}</b>` +
-                    (
-                        turma.classe
-                            ? ` (${turma.classe})`
-                            : ""
-                    );
-
-                label.appendChild(
-                    checkbox
-                );
-
-                label.appendChild(
-                    texto
-                );
-
-                div.appendChild(
-                    label
-                );
-
-                listaTurmas.appendChild(
-                    div
-                );
-
-                checkbox.addEventListener(
-                    "change",
-                    carregarAtribuicoes
-                );
+                `;
 
             }
         );
+
+
+        // =============================================
+        // EVENTOS
+        // =============================================
+
+        document
+            .querySelectorAll(
+                ".turmaCheck"
+            )
+            .forEach(
+                checkbox => {
+
+                    checkbox.addEventListener(
+                        "change",
+                        carregarAtribuicoes
+                    );
+
+                }
+            );
 
     }
 
     catch (erro) {
 
         console.error(
-            "❌ ERRO AO CARREGAR TURMAS:",
+            "Erro ao carregar turmas:",
             erro
         );
+
 
         listaTurmas.innerHTML = `
 
             <div
                 style="
                     color:#dc2626;
-                    padding:10px;
                 "
             >
+
                 Erro ao carregar turmas.
+
             </div>
 
         `;
@@ -1119,143 +1102,203 @@ function limparFormulario() {
 
 }
 
+
 // =====================================================
-// CARREGAR PROFESSORES CADASTRADOS
+// LISTAR PROFESSORES
 // =====================================================
 
 async function carregarProfessores() {
 
     if (!tabelaProfessores) {
-        console.error("❌ tabelaProfessores não encontrada.");
         return;
     }
 
+
     tabelaProfessores.innerHTML = `
+
         <tr>
-            <td colspan="7">A carregar professores...</td>
+
+            <td colspan="7">
+
+                A carregar professores...
+
+            </td>
+
         </tr>
+
     `;
+
 
     try {
 
-        const consulta = query(
-            collection(db, "professores"),
-            where("escolaId", "==", escolaId)
-        );
+        const consulta =
+            query(
 
-        const snapshot = await getDocs(consulta);
+                collection(
+                    db,
+                    "professores"
+                ),
+
+                where(
+                    "escolaId",
+                    "==",
+                    escolaId
+                )
+
+            );
+
+
+        const dados =
+            await getDocs(
+                consulta
+            );
+
 
         tabelaProfessores.innerHTML = "";
 
-        if (snapshot.empty) {
+
+        if (
+            dados.empty
+        ) {
 
             tabelaProfessores.innerHTML = `
+
                 <tr>
+
                     <td colspan="7">
+
                         Nenhum professor cadastrado.
+
                     </td>
+
                 </tr>
+
             `;
 
             return;
+
         }
 
-        snapshot.forEach(professorDoc => {
 
-            const professor =
-                professorDoc.data();
+        dados.forEach(
+            item => {
 
-            const atribuicoesProfessor =
-                Array.isArray(professor.atribuicoes)
-                    ? professor.atribuicoes
-                    : [];
+                const professor =
+                    item.data();
 
-            const atribuicoesTexto =
-                atribuicoesProfessor.length > 0
-                    ? atribuicoesProfessor
-                        .map(item =>
-                            `${item.turmaNome || item.turmaId} - ${item.disciplina}`
-                        )
-                        .join("<br>")
-                    : "Nenhuma";
 
-            tabelaProfessores.innerHTML += `
+                let lista =
+                    "";
 
-                <tr>
 
-                    <td>
-                        ${professor.codigoProfessor || "-"}
-                    </td>
+                if (
+                    Array.isArray(
+                        professor.atribuicoes
+                    )
+                ) {
 
-                    <td>
-                        ${professor.nome || "-"}
-                    </td>
+                    professor
+                        .atribuicoes
+                        .forEach(
+                            a => {
 
-                    <td>
-                        ${professor.email || "-"}
-                    </td>
+                                lista +=
+                                    `${a.turmaNome || ""} - ${a.disciplina || ""}<br>`;
 
-                    <td>
-                        ${nomeEnsino(professor.ensino || "-")}
-                    </td>
+                            }
+                        );
 
-                    <td>
-                        ${atribuicoesTexto}
-                    </td>
+                }
 
-                    <td>
-                        ${professor.senhaAcesso || "-"}
-                    </td>
 
-                    <td>
+                tabelaProfessores.innerHTML += `
 
-                        <button
-                            type="button"
-                            onclick="alert('Professor: ${professor.nome || ""}\\nCódigo: ${professor.codigoProfessor || ""}')"
-                        >
-                            Ver
-                        </button>
+                    <tr>
 
-                    </td>
+                        <td>
+                            ${professor.codigoProfessor || ""}
+                        </td>
 
-                </tr>
+                        <td>
+                            ${professor.nome || ""}
+                        </td>
 
-            `;
+                        <td>
+                            ${professor.email || ""}
+                        </td>
 
-        });
+                        <td>
+                            ${nomeEnsino(
+                                professor.ensino
+                            )}
+                        </td>
 
-        console.log(
-            "✅ PROFESSORES CARREGADOS:",
-            snapshot.size
+                        <td>
+                            ${lista}
+                        </td>
+
+                        <td>
+                            ${professor.senhaAcesso || ""}
+                        </td>
+
+                        <td>
+
+                            <button
+                                onclick="verProfessor('${item.id}')"
+                            >
+                                👁️
+                            </button>
+
+                            <button
+                                onclick="editarProfessor('${item.id}')"
+                            >
+                                ✏️
+                            </button>
+
+                            <button
+                                onclick="apagarProfessor('${item.id}')"
+                            >
+                                🗑️
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
         );
 
     }
+
     catch (erro) {
 
         console.error(
-            "❌ ERRO AO CARREGAR PROFESSORES:",
+            "Erro ao carregar professores:",
             erro
         );
 
+
         tabelaProfessores.innerHTML = `
+
             <tr>
+
                 <td colspan="7">
-                    Erro ao carregar professores.
+
+                    ❌ Erro ao carregar professores:
+
+                    ${erro.message}
+
                 </td>
+
             </tr>
+
         `;
 
     }
 
 }
-
-
-// =====================================================
-// INICIAR
-// =====================================================
-
-carregarEnsinosDaEscola();
-carregarProfessores();
 
 
 // =====================================================
@@ -1593,3 +1636,6 @@ window.editarProfessor =
 // INICIAR
 // =====================================================
 
+carregarEnsinosDaEscola();
+
+carregarProfessores();
