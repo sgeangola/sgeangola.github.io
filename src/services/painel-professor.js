@@ -619,7 +619,11 @@ console.log(
     idLancamento
 );
 
-
+localStorage.setItem(
+    "turmaId",
+    turmaId
+);
+            
             localStorage.setItem(
                 "turmaNome",
                 atribuicao.turmaNome || ""
