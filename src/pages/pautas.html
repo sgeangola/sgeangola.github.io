@@ -10,11 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Pauta Geral — SGE Angola</title>
-
-    <!-- =================================================
-         CSS DO SITE
-    ================================================== -->
+    <title>Pauta Geral | SGE Angola</title>
 
     <link
         rel="stylesheet"
@@ -23,171 +19,350 @@
 
     <style>
 
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fb;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1f2937;
+        }
+
         /* =================================================
-           ESTRUTURA DA PAUTA
+           TOPO
         ================================================= */
 
-        .pauta-container {
+        .topo {
+            background: #0d6efd;
+            color: white;
+            padding: 18px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.12);
+        }
 
+        .topo-conteudo {
+            max-width: 1500px;
+            margin: auto;
+        }
+
+        #nomeEscola {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        #anoLetivo {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: .9;
+        }
+
+        /* =================================================
+           CONTEÚDO
+        ================================================= */
+
+        .pagina {
+            max-width: 1500px;
+            margin: 25px auto;
+            padding: 0 18px;
+        }
+
+        .titulo-area {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 18px;
+            border-left: 5px solid #0d6efd;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        }
+
+        .titulo-area h2 {
+            margin: 0 0 6px;
+            color: #0d6efd;
+            font-size: 22px;
+        }
+
+        .titulo-area p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* =================================================
+           SELEÇÃO
+        ================================================= */
+
+        .painel-controle {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            margin-bottom: 18px;
+        }
+
+        .controle-titulo {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        .controles-pauta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .controles-pauta select {
+            min-width: 190px;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            background: white;
+            color: #374151;
+            outline: none;
+        }
+
+        .controles-pauta select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,.12);
+        }
+
+        .controles-pauta button {
+            height: 42px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 7px;
+            background: #0d6efd;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .controles-pauta button:hover {
+            background: #0b5ed7;
+            transform: translateY(-1px);
+        }
+
+        /* =================================================
+           INFORMAÇÕES DA TURMA
+        ================================================= */
+
+        .info-turma {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 15px 18px;
+            border-radius: 9px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-card strong {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .info-card span {
+            color: #0d6efd;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* =================================================
+           ESTADO
+        ================================================= */
+
+        .estado-pauta {
+            background: white;
+            border-radius: 8px;
+            padding: 13px 16px;
+            margin-bottom: 18px;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        /* =================================================
+           TABELA
+        ================================================= */
+
+        .tabela-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+
+        .tabela-topo {
+            padding: 15px 18px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tabela-topo h3 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 17px;
+        }
+
+        .tabela-topo small {
+            color: #6b7280;
+        }
+
+        .pauta-container {
             width: 100%;
             overflow-x: auto;
-            margin-top: 20px;
-
+            overflow-y: auto;
+            max-height: 70vh;
         }
 
         #tabelaPauta {
-
             width: max-content;
             min-width: 100%;
-
-            border-collapse: collapse;
-
+            border-collapse: separate;
+            border-spacing: 0;
             background: white;
-
         }
 
         #tabelaPauta th,
         #tabelaPauta td {
-
-            border: 1px solid #ccc;
-
-            padding: 8px;
-
+            border-right: 1px solid #dbe2ea;
+            border-bottom: 1px solid #dbe2ea;
+            padding: 9px 10px;
             text-align: center;
-
             white-space: nowrap;
-
+            font-size: 13px;
         }
 
         #tabelaPauta th {
-
             background: #0d6efd;
-
             color: white;
-
-            font-weight: bold;
-
+            font-weight: 600;
         }
 
         #tabelaPauta th.disciplina {
-
             background: #0d6efd;
-
+            min-width: 130px;
         }
 
         #tabelaPauta th.subcoluna {
-
             background: #0b5ed7;
-
-        }
-
-        #tabelaPauta th.trimestre {
-
-            background: #0b5ed7;
-
+            font-size: 12px;
         }
 
         #tabelaPauta td.nome-aluno {
-
             text-align: left;
-
-            min-width: 230px;
-
+            min-width: 240px;
+            font-weight: 500;
         }
 
-        #tabelaPauta td.mf {
-
-            font-weight: bold;
-
-        }
-
+        #tabelaPauta td.mf,
         #tabelaPauta td.media-final {
+            font-weight: 700;
+        }
 
-            font-weight: bold;
+        #tabelaPauta tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
 
+        #tabelaPauta tbody tr:hover {
+            background: #eef5ff;
         }
 
         #tabelaPauta td.aprovado {
-
-            color: green;
-
-            font-weight: bold;
-
+            color: #087f23;
+            font-weight: 700;
         }
 
         #tabelaPauta td.reprovado {
+            color: #c62828;
+            font-weight: 700;
+        }
 
-            color: red;
+        /* =================================================
+           RESPONSIVO
+        ================================================= */
 
-            font-weight: bold;
+        @media (max-width: 700px) {
+
+            .pagina {
+                padding: 0 10px;
+                margin-top: 15px;
+            }
+
+            .info-turma {
+                grid-template-columns: 1fr;
+            }
+
+            .controles-pauta {
+                flex-direction: column;
+            }
+
+            .controles-pauta select,
+            .controles-pauta button {
+                width: 100%;
+            }
+
+            .titulo-area h2 {
+                font-size: 19px;
+            }
 
         }
 
-        .cabecalho-pauta {
-
-            margin-bottom: 20px;
-
-        }
-
-        .controles-pauta {
-
-            display: flex;
-
-            flex-wrap: wrap;
-
-            gap: 10px;
-
-            margin-bottom: 20px;
-
-        }
-
-        .controles-pauta select,
-        .controles-pauta button {
-
-            padding: 10px;
-
-            border-radius: 6px;
-
-        }
-
-        .estado-pauta {
-
-            margin: 15px 0;
-
-            font-weight: bold;
-
-        }
+        /* =================================================
+           IMPRESSÃO
+        ================================================= */
 
         @media print {
 
-            .controles-pauta,
+            body {
+                background: white;
+            }
+
+            .topo,
+            .painel-controle,
+            .titulo-area,
+            .info-turma,
             .estado-pauta,
-            nav,
-            header {
-
+            .tabela-topo {
                 display: none !important;
+            }
 
+            .pagina {
+                max-width: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .tabela-card {
+                box-shadow: none;
             }
 
             .pauta-container {
-
+                max-height: none;
                 overflow: visible;
-
             }
 
             #tabelaPauta {
-
                 width: 100%;
-
                 font-size: 8px;
-
             }
 
             #tabelaPauta th,
             #tabelaPauta td {
-
                 padding: 4px;
-
+                font-size: 8px;
             }
 
         }
@@ -201,12 +376,12 @@
 
 
 <!-- =====================================================
-     CABEÇALHO
+     TOPO
 ====================================================== -->
 
-<header>
+<header class="topo">
 
-    <div class="cabecalho-pauta">
+    <div class="topo-conteudo">
 
         <h1 id="nomeEscola">
             Escola
@@ -216,102 +391,132 @@
             Ano Lectivo: —
         </p>
 
-        <h2>
-            PAUTA GERAL
-        </h2>
-
     </div>
 
 </header>
 
 
 <!-- =====================================================
-     CONTEÚDO
+     PÁGINA
 ====================================================== -->
 
-<main>
+<main class="pagina">
 
 
     <!-- =================================================
-         INFORMAÇÕES DA TURMA
+         TÍTULO
     ================================================== -->
 
-    <section>
+    <section class="titulo-area">
 
-        <p id="classeInfo">
-            Classe: —
-        </p>
+        <h2>
+            Pauta Geral
+        </h2>
 
-        <p id="turmaInfo">
-            Turma: —
+        <p>
+            Consulta e visualização da pauta geral da turma.
         </p>
 
     </section>
 
 
     <!-- =================================================
-         SELEÇÃO
+         CONTROLOS
     ================================================== -->
 
-    <section class="controles-pauta">
+    <section class="painel-controle">
+
+        <div class="controle-titulo">
+            Selecionar turma
+        </div>
+
+        <div class="controles-pauta">
+
+            <select id="classeSelect">
+
+                <option value="">
+                    Selecionar classe
+                </option>
+
+            </select>
 
 
-        <select id="classeSelect">
+            <select id="turmaSelect">
 
-            <option value="">
-                Selecionar classe
-            </option>
+                <option value="">
+                    Selecionar turma
+                </option>
 
-        </select>
-
-
-        <select id="turmaSelect">
-
-            <option value="">
-                Selecionar turma
-            </option>
-
-        </select>
+            </select>
 
 
-        <button
-            id="carregarPauta"
-            type="button"
-        >
-
-            Carregar Pauta
-
-        </button>
+            <button
+                id="carregarPauta"
+                type="button"
+            >
+                Carregar Pauta
+            </button>
 
 
-        <button
-            id="exportarExcel"
-            type="button"
-        >
-
-            Exportar Excel
-
-        </button>
+            <button
+                id="exportarExcel"
+                type="button"
+            >
+                Excel
+            </button>
 
 
-        <button
-            id="exportarPDF"
-            type="button"
-        >
-
-            Exportar PDF
-
-        </button>
+            <button
+                id="exportarPDF"
+                type="button"
+            >
+                PDF
+            </button>
 
 
-        <button
-            id="imprimirPauta"
-            type="button"
-        >
+            <button
+                id="imprimirPauta"
+                type="button"
+            >
+                Imprimir
+            </button>
 
-            Imprimir
+        </div>
 
-        </button>
+    </section>
+
+
+    <!-- =================================================
+         INFORMAÇÕES
+    ================================================== -->
+
+    <section class="info-turma">
+
+
+        <div class="info-card">
+
+            <strong>
+                CLASSE
+            </strong>
+
+            <span id="classeInfo">
+                Classe: —
+            </span>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <strong>
+                TURMA
+            </strong>
+
+            <span id="turmaInfo">
+                Turma: —
+            </span>
+
+        </div>
 
 
     </section>
@@ -325,36 +530,51 @@
         id="estadoPauta"
         class="estado-pauta"
     >
-
         Selecione uma classe e uma turma.
-
     </div>
 
 
     <!-- =================================================
-         TABELA
+         PAUTA
     ================================================== -->
 
-    <section class="pauta-container">
+    <section class="tabela-card">
 
-        <table
-            id="tabelaPauta"
-        >
 
-            <thead
-                id="cabecalhoPauta"
+        <div class="tabela-topo">
+
+            <h3>
+                Pauta Geral
+            </h3>
+
+            <small>
+                MDF · MF
+            </small>
+
+        </div>
+
+
+        <div class="pauta-container">
+
+            <table
+                id="tabelaPauta"
             >
 
-            </thead>
+                <thead
+                    id="cabecalhoPauta"
+                >
+                </thead>
 
 
-            <tbody
-                id="pautaLista"
-            >
+                <tbody
+                    id="pautaLista"
+                >
+                </tbody>
 
-            </tbody>
+            </table>
 
-        </table>
+        </div>
+
 
     </section>
 
@@ -363,7 +583,7 @@
 
 
 <!-- =====================================================
-     BIBLIOTECA EXCEL
+     EXCEL
 ====================================================== -->
 
 <script
@@ -372,7 +592,7 @@
 
 
 <!-- =====================================================
-     BIBLIOTECA PDF
+     PDF
 ====================================================== -->
 
 <script
@@ -386,7 +606,7 @@
 
 
 <!-- =====================================================
-     PAUTAS.JS
+     JAVASCRIPT DA PAUTA
 ====================================================== -->
 
 <script
