@@ -1,11 +1,12 @@
-alert("PAINEL PROFESSOR CARREGADO ok.✅");
+alert("PAINEL PROFESSOR CARREGADO.✅");
 
 import { db } from "./firebase.js";
 
 import {
     collection,
-    getDocs,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
 
 // =====================================================
 // PROFESSOR LOGADO
@@ -618,11 +619,7 @@ console.log(
     idLancamento
 );
 
-localStorage.setItem(
-    "turmaId",
-    turmaId
-);
-            
+
             localStorage.setItem(
                 "turmaNome",
                 atribuicao.turmaNome || ""
