@@ -5,7 +5,14 @@
 
 alert("GESTÃO DE PROFESSORES CARREGADO");
 
-import { db } from "./firebase.js";
+import {
+    db,
+    auth
+} from "./firebase.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
 import {
     collection,
@@ -1636,6 +1643,3 @@ window.editarProfessor =
 // INICIAR
 // =====================================================
 
-carregarEnsinosDaEscola();
-
-carregarProfessores();
