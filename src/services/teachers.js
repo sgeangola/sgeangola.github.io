@@ -1119,72 +1119,102 @@ function limparFormulario() {
 
 }
 
-
 // =====================================================
-// LISTAR PROFESSORES
+// CARREGAR PROFESSORES CADASTRADOS
 // =====================================================
 
 async function carregarProfessores() {
 
     if (!tabelaProfessores) {
+        console.error("❌ tabelaProfessores não encontrada.");
         return;
     }
 
-
     tabelaProfessores.innerHTML = `
-
         <tr>
-
-            <td colspan="7">
-
-                A carregar professores...
-
-            </td>
-
+            <td colspan="7">A carregar professores...</td>
         </tr>
-
     `;
-
 
     try {
 
-        const consulta =
-            query(
+        const consulta = query(
+            collection(db, "professores"),
+            where("escolaId", "==", escolaId)
+        );
 
-                collection(
-                    db,
-                    "professores"
-                ),
-
-                where(
-                    "escolaId",
-                    "==",
-                    escolaId
-                )
-
-            );
-
-
-        const dados =
-            await getDocs(
-                consulta
-            );
-
+        const snapshot = await getDocs(consulta);
 
         tabelaProfessores.innerHTML = "";
 
-
-        if (
-            dados.empty
-        ) {
+        if (snapshot.empty) {
 
             tabelaProfessores.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        Nenhum professor cadastrado.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(professorDoc => {
+
+            const professor =
+                professorDoc.data();
+
+            const atribuicoesProfessor =
+                Array.isArray(professor.atribuicoes)
+                    ? professor.atribuicoes
+                    : [];
+
+            const atribuicoesTexto =
+                atribuicoesProfessor.length > 0
+                    ? atribuicoesProfessor
+                        .map(item =>
+                            `${item.turmaNome || item.turmaId} - ${item.disciplina}`
+                        )
+                        .join("<br>")
+                    : "Nenhuma";
+
+            tabelaProfessores.innerHTML += `
 
                 <tr>
 
-                    <td colspan="7">
+                    <td>
+                        ${professor.codigoProfessor || "-"}
+                    </td>
 
-                        Nenhum professor cadastrado.
+                    <td>
+                        ${professor.nome || "-"}
+                    </td>
+
+                    <td>
+                        ${professor.email || "-"}
+                    </td>
+
+                    <td>
+                        ${nomeEnsino(professor.ensino || "-")}
+                    </td>
+
+                    <td>
+                        ${atribuicoesTexto}
+                    </td>
+
+                    <td>
+                        ${professor.senhaAcesso || "-"}
+                    </td>
+
+                    <td>
+
+                        <button
+                            type="button"
+                            onclick="alert('Professor: ${professor.nome || ""}\\nCódigo: ${professor.codigoProfessor || ""}')"
+                        >
+                            Ver
+                        </button>
 
                     </td>
 
@@ -1192,130 +1222,40 @@ async function carregarProfessores() {
 
             `;
 
-            return;
+        });
 
-        }
-
-
-        dados.forEach(
-            item => {
-
-                const professor =
-                    item.data();
-
-
-                let lista =
-                    "";
-
-
-                if (
-                    Array.isArray(
-                        professor.atribuicoes
-                    )
-                ) {
-
-                    professor
-                        .atribuicoes
-                        .forEach(
-                            a => {
-
-                                lista +=
-                                    `${a.turmaNome || ""} - ${a.disciplina || ""}<br>`;
-
-                            }
-                        );
-
-                }
-
-
-                tabelaProfessores.innerHTML += `
-
-                    <tr>
-
-                        <td>
-                            ${professor.codigoProfessor || ""}
-                        </td>
-
-                        <td>
-                            ${professor.nome || ""}
-                        </td>
-
-                        <td>
-                            ${professor.email || ""}
-                        </td>
-
-                        <td>
-                            ${nomeEnsino(
-                                professor.ensino
-                            )}
-                        </td>
-
-                        <td>
-                            ${lista}
-                        </td>
-
-                        <td>
-                            ${professor.senhaAcesso || ""}
-                        </td>
-
-                        <td>
-
-                            <button
-                                onclick="verProfessor('${item.id}')"
-                            >
-                                👁️
-                            </button>
-
-                            <button
-                                onclick="editarProfessor('${item.id}')"
-                            >
-                                ✏️
-                            </button>
-
-                            <button
-                                onclick="apagarProfessor('${item.id}')"
-                            >
-                                🗑️
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
+        console.log(
+            "✅ PROFESSORES CARREGADOS:",
+            snapshot.size
         );
 
     }
-
     catch (erro) {
 
         console.error(
-            "Erro ao carregar professores:",
+            "❌ ERRO AO CARREGAR PROFESSORES:",
             erro
         );
 
-
         tabelaProfessores.innerHTML = `
-
             <tr>
-
                 <td colspan="7">
-
-                    ❌ Erro ao carregar professores:
-
-                    ${erro.message}
-
+                    Erro ao carregar professores.
                 </td>
-
             </tr>
-
         `;
 
     }
 
 }
+
+
+// =====================================================
+// INICIAR
+// =====================================================
+
+carregarEnsinosDaEscola();
+carregarProfessores();
 
 
 // =====================================================
