@@ -10,9 +10,19 @@
     content="width=device-width, initial-scale=1.0"
 >
 
+<meta
+    name="description"
+    content="Cadastro de escolas — SGE Angola"
+>
+
 <title>Cadastrar Escola — SGE Angola</title>
 
+
 <style>
+
+/* =====================================================
+   RESET
+===================================================== */
 
 *{
     box-sizing:border-box;
@@ -20,143 +30,342 @@
     padding:0;
 }
 
+
+html{
+    scroll-behavior:smooth;
+}
+
+
 body{
 
-    font-family:Arial,sans-serif;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
-    background:#f4f9fc;
+    background:
+        linear-gradient(
+            135deg,
+            #eef8ff 0%,
+            #f8fcff 50%,
+            #eef7fb 100%
+        );
 
     color:#17324d;
 
     min-height:100vh;
+
 }
+
+
+/* =====================================================
+   CABEÇALHO
+===================================================== */
 
 header{
 
-    background:white;
+    width:100%;
 
-    border-bottom:1px solid #dceaf2;
+    background:#ffffff;
 
-    padding:18px 25px;
+    border-bottom:
+        1px solid #dceaf2;
+
+    box-shadow:
+        0 3px 15px
+        rgba(25,80,110,.06);
+
+    padding:
+        14px 25px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+
+.marca{
 
     display:flex;
 
     align-items:center;
 
     gap:12px;
+
 }
+
+
+/* =====================================================
+   LOGOTIPO SGE
+===================================================== */
 
 .logo{
 
-    width:48px;
-    height:48px;
+    width:52px;
 
-    border-radius:12px;
+    height:52px;
 
-    background:#0b78b5;
+    border-radius:13px;
+
+    overflow:hidden;
 
     display:flex;
 
     align-items:center;
+
     justify-content:center;
 
-    color:white;
+    background:#0b78b5;
 
-    font-weight:bold;
+    flex-shrink:0;
 
-    font-size:18px;
-
-    overflow:hidden;
 }
+
 
 .logo img{
 
     width:100%;
+
     height:100%;
 
-    object-fit:cover;
+    object-fit:contain;
+
 }
 
-header h1{
+
+.logo-fallback{
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+}
+
+
+/* =====================================================
+   TEXTO DO CABEÇALHO
+===================================================== */
+
+.marca-texto h1{
 
     font-size:20px;
+
+    color:#123c59;
+
+    line-height:1.2;
+
 }
 
-header p{
+
+.marca-texto p{
+
+    margin-top:4px;
 
     font-size:13px;
 
-    color:#688196;
+    color:#71899a;
 
-    margin-top:3px;
 }
+
+
+.estado-cadastro{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    padding:
+        8px 12px;
+
+    border-radius:20px;
+
+    background:#fff8e8;
+
+    border:
+        1px solid #f3d48b;
+
+    color:#8a6200;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+}
+
+
+.estado-ponto{
+
+    width:8px;
+
+    height:8px;
+
+    border-radius:50%;
+
+    background:#e8a900;
+
+}
+
+
+/* =====================================================
+   CONTEÚDO PRINCIPAL
+===================================================== */
 
 main{
 
     width:100%;
 
-    max-width:900px;
+    max-width:960px;
 
-    margin:35px auto;
+    margin:
+        38px auto;
 
-    padding:0 18px;
+    padding:
+        0 18px 50px;
+
 }
+
+
+/* =====================================================
+   CARD PRINCIPAL
+===================================================== */
 
 .card{
 
-    background:white;
+    background:#ffffff;
 
-    border-radius:18px;
+    border:
+        1px solid #e0edf4;
 
-    padding:30px;
+    border-radius:20px;
+
+    padding:34px;
 
     box-shadow:
-        0 8px 30px
-        rgba(30,80,110,.08);
+        0 12px 40px
+        rgba(30,80,110,.09);
+
 }
+
+
+/* =====================================================
+   TÍTULO
+===================================================== */
 
 .title{
 
     text-align:center;
 
-    margin-bottom:28px;
+    margin-bottom:30px;
+
 }
+
 
 .title h2{
 
-    font-size:26px;
+    font-size:28px;
 
-    margin-bottom:8px;
+    color:#123c59;
+
+    margin-bottom:9px;
+
 }
+
 
 .title p{
 
     color:#70879a;
 
     font-size:14px;
+
+    line-height:1.6;
+
 }
+
+
+/* =====================================================
+   AVISO DE APROVAÇÃO
+===================================================== */
+
+.aviso-aprovacao{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:15px 17px;
+
+    margin-bottom:28px;
+
+    background:#fff9eb;
+
+    border:
+        1px solid #f1d58e;
+
+    border-radius:12px;
+
+    color:#725300;
+
+    font-size:13px;
+
+    line-height:1.6;
+
+}
+
+
+.aviso-icone{
+
+    font-size:20px;
+
+    flex-shrink:0;
+
+}
+
+
+/* =====================================================
+   LOGOTIPO DA ESCOLA
+===================================================== */
 
 .logo-area{
 
     text-align:center;
 
-    margin-bottom:28px;
+    margin-bottom:30px;
+
+    padding-bottom:25px;
+
+    border-bottom:
+        1px solid #edf3f6;
+
 }
+
 
 .logo-preview{
 
-    width:110px;
-    height:110px;
+    width:120px;
 
-    border:2px dashed #b8d4e4;
+    height:120px;
+
+    border:
+        2px dashed #b8d4e4;
 
     border-radius:18px;
 
-    margin:0 auto 12px;
+    margin:
+        0 auto 14px;
 
     display:flex;
 
     align-items:center;
+
     justify-content:center;
 
     overflow:hidden;
@@ -166,15 +375,33 @@ main{
     color:#7893a5;
 
     font-size:13px;
+
 }
+
 
 .logo-preview img{
 
     width:100%;
+
     height:100%;
 
     object-fit:contain;
+
 }
+
+
+.logo-area label{
+
+    display:block;
+
+    margin-bottom:10px;
+
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
 
 .grid{
 
@@ -184,7 +411,9 @@ main{
         repeat(2,1fr);
 
     gap:18px;
+
 }
+
 
 .campo{
 
@@ -193,28 +422,43 @@ main{
     flex-direction:column;
 
     gap:7px;
+
 }
+
 
 .full{
 
-    grid-column:1/-1;
+    grid-column:
+        1 / -1;
+
 }
+
 
 label{
 
     font-weight:bold;
 
     font-size:14px;
+
+    color:#294c63;
+
 }
+
+
+/* =====================================================
+   INPUTS
+===================================================== */
 
 input,
 select{
 
     width:100%;
 
-    padding:13px 14px;
+    padding:
+        13px 14px;
 
-    border:1px solid #cbdde8;
+    border:
+        1px solid #cbdde8;
 
     border-radius:10px;
 
@@ -222,8 +466,23 @@ select{
 
     outline:none;
 
-    background:white;
+    background:#ffffff;
+
+    color:#17324d;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
+
 }
+
+
+input::placeholder{
+
+    color:#9aaebb;
+
+}
+
 
 input:focus,
 select:focus{
@@ -233,27 +492,59 @@ select:focus{
     box-shadow:
         0 0 0 3px
         rgba(22,135,196,.10);
+
 }
+
+
+/* =====================================================
+   INPUT FILE
+===================================================== */
+
+input[type="file"]{
+
+    padding:10px;
+
+    cursor:pointer;
+
+    background:#fafdff;
+
+}
+
+
+/* =====================================================
+   BLOCOS
+===================================================== */
 
 .bloco{
 
-    margin-top:25px;
+    margin-top:28px;
 
-    padding:20px;
+    padding:22px;
 
-    border:1px solid #dceaf2;
+    border:
+        1px solid #dceaf2;
 
-    border-radius:14px;
+    border-radius:15px;
 
     background:#fafdff;
+
 }
+
 
 .bloco h3{
 
-    margin-bottom:15px;
+    margin-bottom:17px;
 
     color:#0b6f9f;
+
+    font-size:17px;
+
 }
+
+
+/* =====================================================
+   OPÇÕES
+===================================================== */
 
 .opcoes{
 
@@ -263,7 +554,9 @@ select:focus{
         repeat(2,1fr);
 
     gap:12px;
+
 }
+
 
 .opcao{
 
@@ -275,44 +568,66 @@ select:focus{
 
     padding:13px;
 
-    border:1px solid #d5e4ec;
+    border:
+        1px solid #d5e4ec;
 
     border-radius:10px;
 
-    background:white;
+    background:#ffffff;
 
     cursor:pointer;
 
-    transition:.2s;
+    transition:
+        .2s;
+
 }
+
 
 .opcao:hover{
 
     border-color:#1687c4;
 
     background:#f5fbff;
+
+    transform:translateY(-1px);
+
 }
+
 
 .opcao input{
 
     width:auto;
+
+    cursor:pointer;
+
 }
+
 
 .subtitulo{
 
-    margin-top:20px;
+    margin-top:21px;
 
-    margin-bottom:10px;
+    margin-bottom:11px;
 
     font-size:14px;
 
+    font-weight:bold;
+
     color:#50697b;
+
 }
+
+
+/* =====================================================
+   AÇÕES
+===================================================== */
 
 .acoes{
 
-    margin-top:28px;
+    margin-top:30px;
+
 }
+
 
 button{
 
@@ -324,28 +639,56 @@ button{
 
     border-radius:11px;
 
-    background:#087bb8;
+    background:
+        linear-gradient(
+            135deg,
+            #087bb8,
+            #096a9e
+        );
 
-    color:white;
+    color:#ffffff;
 
     font-size:16px;
 
     font-weight:bold;
 
     cursor:pointer;
+
+    box-shadow:
+        0 5px 15px
+        rgba(8,123,184,.18);
+
+    transition:
+        .2s;
+
 }
+
 
 button:hover{
 
-    background:#066b9f;
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 7px 18px
+        rgba(8,123,184,.25);
+
 }
+
 
 button:disabled{
 
     opacity:.6;
 
     cursor:not-allowed;
+
+    transform:none;
+
 }
+
+
+/* =====================================================
+   MENSAGEM
+===================================================== */
 
 #mensagem{
 
@@ -360,7 +703,11 @@ button:disabled{
     text-align:center;
 
     font-size:14px;
+
+    line-height:1.5;
+
 }
+
 
 #mensagem.sucesso{
 
@@ -369,7 +716,12 @@ button:disabled{
     background:#e8f7ed;
 
     color:#18743a;
+
+    border:
+        1px solid #b9e4c5;
+
 }
+
 
 #mensagem.erro{
 
@@ -378,430 +730,636 @@ button:disabled{
     background:#fdecec;
 
     color:#a52626;
+
+    border:
+        1px solid #efc0c0;
+
 }
+
+
+/* =====================================================
+   RESULTADO
+===================================================== */
 
 #resultadoCadastro{
 
     display:none;
 
-    margin-top:20px;
+    margin-top:22px;
 
-    padding:20px;
+    padding:22px;
 
-    border-radius:12px;
+    border-radius:14px;
 
     background:#eef8ff;
 
-    border:1px solid #b9dff2;
+    border:
+        1px solid #b9dff2;
+
 }
+
 
 #resultadoCadastro h3{
 
     color:#087bb8;
 
-    margin-bottom:12px;
+    margin-bottom:15px;
+
+    font-size:18px;
+
 }
+
 
 .resultado-linha{
 
-    margin:7px 0;
+    margin:9px 0;
+
+    line-height:1.5;
 
 }
+
 
 .resultado-linha strong{
 
     color:#17324d;
+
 }
+
 
 .aviso{
 
-    margin-top:10px;
+    margin-top:12px;
 
     font-size:13px;
 
+    line-height:1.6;
+
     color:#63798a;
+
 }
 
-@media(max-width:650px){
+
+/* =====================================================
+   RODAPÉ
+===================================================== */
+
+footer{
+
+    text-align:center;
+
+    padding:
+        0 20px 25px;
+
+    color:#7890a0;
+
+    font-size:12px;
+
+}
+
+
+footer strong{
+
+    color:#0b78b5;
+
+}
+
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+
+@media(max-width:700px){
+
+    header{
+
+        padding:
+            13px 16px;
+
+    }
+
+
+    .estado-cadastro{
+
+        display:none;
+
+    }
+
+
+    main{
+
+        margin-top:22px;
+
+    }
+
+
+    .card{
+
+        padding:
+            24px 17px;
+
+        border-radius:16px;
+
+    }
+
 
     .grid{
 
         grid-template-columns:1fr;
+
     }
+
 
     .full{
 
         grid-column:auto;
+
     }
+
 
     .opcoes{
 
         grid-template-columns:1fr;
+
     }
 
-    .card{
-
-        padding:22px 17px;
-    }
 
     .title h2{
 
-        font-size:22px;
+        font-size:23px;
+
     }
+
+
+    .title p{
+
+        font-size:13px;
+
+    }
+
 }
+
 
 </style>
 
 </head>
 
+
 <body>
+
+
+<!-- =====================================================
+     CABEÇALHO
+===================================================== -->
 
 <header>
 
-    <div class="logo">
+    <div class="marca">
 
-        SGE
+        <div class="logo">
+
+            <!--
+                LOGOTIPO REAL DO SGE
+
+                Como esta página está em:
+                src/pages/
+
+                e o logotipo está em:
+                src/assets/logo.png
+
+                o caminho é:
+                ../assets/logo.png
+            -->
+
+            <img
+                src="../assets/logo.png"
+                alt="Logotipo SGE"
+                onerror="
+                    this.style.display='none';
+                    document.getElementById('logoFallback').style.display='block';
+                "
+            >
+
+            <span
+                id="logoFallback"
+                class="logo-fallback"
+                style="display:none;"
+            >
+                SGE
+            </span>
+
+        </div>
+
+
+        <div class="marca-texto">
+
+            <h1>
+                SGE Angola
+            </h1>
+
+            <p>
+                Sistema de Gestão Escolar
+            </p>
+
+        </div>
 
     </div>
 
-    <div>
 
-        <h1>SGE Angola</h1>
+    <div class="estado-cadastro">
 
-        <p>Sistema de Gestão Escolar</p>
+        <span class="estado-ponto"></span>
+
+        Cadastro de escola
 
     </div>
 
 </header>
 
 
+<!-- =====================================================
+     CONTEÚDO
+===================================================== -->
+
 <main>
 
 <section class="card">
 
-<div class="title">
 
-    <h2>Cadastro da Escola</h2>
+    <div class="title">
 
-    <p>
-        Registe a escola e defina a estrutura que ela irá utilizar.
-    </p>
+        <h2>
+            Cadastro da Escola
+        </h2>
 
-</div>
-
-
-<form id="formEscola">
-
-
-<!-- =====================================================
-     LOGOTIPO
-===================================================== -->
-
-<div class="logo-area">
-
-    <div
-        class="logo-preview"
-        id="logoPreview"
-    >
-        Logotipo
-    </div>
-
-    <label for="logo">
-        Logotipo da escola
-    </label>
-
-    <br><br>
-
-    <input
-        type="file"
-        id="logo"
-        accept="image/png,image/jpeg,image/webp"
-    >
-
-    <div class="aviso">
-        Opcional.
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     DADOS DA ESCOLA
-===================================================== -->
-
-<div class="grid">
-
-    <div class="campo full">
-
-        <label for="nome">
-            Nome da escola *
-        </label>
-
-        <input
-            type="text"
-            id="nome"
-            placeholder="Ex.: Complexo Escolar Nº 29M Dário Franco"
-            required
-        >
-
-    </div>
-
-
-    <div class="campo">
-
-        <label for="provincia">
-            Província *
-        </label>
-
-        <input
-            type="text"
-            id="provincia"
-            placeholder="Ex.: Namibe"
-            required
-        >
-
-    </div>
-
-
-    <div class="campo">
-
-        <label for="municipio">
-            Município *
-        </label>
-
-        <input
-            type="text"
-            id="municipio"
-            placeholder="Ex.: Moçâmedes"
-            required
-        >
-
-    </div>
-
-
-    <div class="campo">
-
-        <label for="telefone">
-            Telefone
-        </label>
-
-        <input
-            type="tel"
-            id="telefone"
-            placeholder="923 000 000"
-        >
-
-    </div>
-
-
-    <div class="campo">
-
-        <label for="emailEscola">
-            E-mail da escola
-        </label>
-
-        <input
-            type="email"
-            id="emailEscola"
-            placeholder="escola@email.com"
-        >
-
-    </div>
-
-
-    <div class="campo">
-
-        <label for="anoLetivo">
-            Ano letivo *
-        </label>
-
-        <input
-            type="text"
-            id="anoLetivo"
-            value="2026"
-            required
-        >
+        <p>
+            Registe a escola e defina a estrutura
+            que ela irá utilizar no SGE.
+        </p>
 
     </div>
 
 
     <!-- =================================================
-         TIPO
-    ================================================= -->
+         AVISO DE APROVAÇÃO
+    ================================================== -->
 
-    <div class="campo">
+    <div class="aviso-aprovacao">
 
-        <label for="tipoEscola">
-            Tipo de escola *
-        </label>
-
-        <select id="tipoEscola" required>
-
-            <option value="">
-                Selecione
-            </option>
-
-            <option value="publica">
-                Pública
-            </option>
-
-            <option value="privada">
-                Privada
-            </option>
-
-        </select>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     ENSINO
-===================================================== -->
-
-<div class="bloco">
-
-    <h3>
-        Ensino que a escola utiliza *
-    </h3>
-
-    <div class="opcoes">
-
-        <label class="opcao">
-
-            <input
-                type="checkbox"
-                name="ensino"
-                value="ensinoPrimario"
-            >
-
-            <span>
-                Ensino Primário
-            </span>
-
-        </label>
-
-
-        <label class="opcao">
-
-            <input
-                type="checkbox"
-                name="ensino"
-                value="primeiroCiclo"
-            >
-
-            <span>
-                Primeiro Ciclo
-            </span>
-
-        </label>
-
-    </div>
-
-
-    <!-- =================================================
-         PRIMÁRIO
-    ================================================= -->
-
-    <div
-        id="opcoesPrimario"
-        style="display:none;"
-    >
-
-        <div class="subtitulo">
-            Estrutura do Ensino Primário
+        <div class="aviso-icone">
+            ⏳
         </div>
 
-        <div class="opcoes">
+        <div>
 
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="1classe"
-                >
-                1ª classe
-            </label>
+            <strong>
+                Cadastro sujeito a aprovação
+            </strong>
 
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="2classe"
-                >
-                2ª classe
-            </label>
+            <br>
 
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="3classe"
-                >
-                3ª classe
-            </label>
-
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="4classe"
-                >
-                4ª classe
-            </label>
-
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="5classe"
-                >
-                5ª classe
-            </label>
-
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="6classe"
-                >
-                6ª classe
-            </label>
-
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="1etapa"
-                >
-                1ª Etapa
-            </label>
-
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="2etapa"
-                >
-                2ª Etapa
-            </label>
-
-            <label class="opcao">
-                <input
-                    type="checkbox"
-                    name="estruturaPrimario"
-                    value="3etapa"
-                >
-                3ª Etapa
-            </label>
+            Após o cadastro, a escola ficará
+            <strong>pendente de aprovação</strong>.
+            O acesso ao sistema será liberado
+            somente depois da aprovação pelo
+            administrador.
 
         </div>
 
     </div>
 
 
-    <!-- =================================================
+    <form id="formEscola">
+
+
+        <!-- =================================================
+             LOGOTIPO
+        ================================================== -->
+
+        <div class="logo-area">
+
+            <div
+                class="logo-preview"
+                id="logoPreview"
+            >
+                Logotipo da escola
+            </div>
+
+
+            <label for="logo">
+                Logotipo da escola
+            </label>
+
+
+            <input
+                type="file"
+                id="logo"
+                accept="image/png,image/jpeg,image/webp"
+            >
+
+
+            <div class="aviso">
+                Opcional. Formatos aceites:
+                PNG, JPG ou WEBP.
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DADOS DA ESCOLA
+        ================================================== -->
+
+        <div class="grid">
+
+
+            <div class="campo full">
+
+                <label for="nome">
+                    Nome da escola *
+                </label>
+
+                <input
+                    type="text"
+                    id="nome"
+                    placeholder="Ex.: Complexo Escolar Nº 29M Dário Franco"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="provincia">
+                    Província *
+                </label>
+
+                <input
+                    type="text"
+                    id="provincia"
+                    placeholder="Ex.: Namibe"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="municipio">
+                    Município *
+                </label>
+
+                <input
+                    type="text"
+                    id="municipio"
+                    placeholder="Ex.: Moçâmedes"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="telefone">
+                    Telefone
+                </label>
+
+                <input
+                    type="tel"
+                    id="telefone"
+                    placeholder="923 000 000"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="emailEscola">
+                    E-mail da escola
+                </label>
+
+                <input
+                    type="email"
+                    id="emailEscola"
+                    placeholder="escola@email.com"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="anoLetivo">
+                    Ano letivo *
+                </label>
+
+                <input
+                    type="text"
+                    id="anoLetivo"
+                    value="2026"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="tipoEscola">
+                    Tipo de escola *
+                </label>
+
+                <select
+                    id="tipoEscola"
+                    required
+                >
+
+                    <option value="">
+                        Selecione
+                    </option>
+
+                    <option value="publica">
+                        Pública
+                    </option>
+
+                    <option value="privada">
+                        Privada
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ENSINO
+        ================================================== -->
+
+        <div class="bloco">
+
+            <h3>
+                Ensino que a escola utiliza *
+            </h3>
+
+
+            <div class="opcoes">
+
+
+                <label class="opcao">
+
+                    <input
+                        type="checkbox"
+                        name="ensino"
+                        value="ensinoPrimario"
+                    >
+
+                    <span>
+                        Ensino Primário
+                    </span>
+
+                </label>
+
+
+                <label class="opcao">
+
+                    <input
+                        type="checkbox"
+                        name="ensino"
+                        value="primeiroCiclo"
+                    >
+
+                    <span>
+                        Primeiro Ciclo
+                    </span>
+
+                </label>
+
+
+            </div>
+
+
+            <!-- =============================================
+                 PRIMÁRIO
+            ============================================== -->
+
+            <div
+                id="opcoesPrimario"
+                style="display:none;"
+            >
+
+                <div class="subtitulo">
+                    Estrutura do Ensino Primário
+                </div>
+
+
+                <div class="opcoes">
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="1classe"
+                        >
+                        1ª classe
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="2classe"
+                        >
+                        2ª classe
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="3classe"
+                        >
+                        3ª classe
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="4classe"
+                        >
+                        4ª classe
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="5classe"
+                        >
+                        5ª classe
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="6classe"
+                        >
+                        6ª classe
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="1etapa"
+                        >
+                        1ª Etapa
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="2etapa"
+                        >
+                        2ª Etapa
+                    </label>
+
+
+                    <label class="opcao">
+                        <input
+                            type="checkbox"
+                            name="estruturaPrimario"
+                            value="3etapa"
+                        >
+                        3ª Etapa
+                    </label>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PRIMEIRO CICLO
+            ============================================== -->
+
+            <!-- =================================================
          PRIMEIRO CICLO
     ================================================= -->
 
@@ -864,8 +1422,6 @@ button:disabled{
         </div>
 
     </div>
-
-</div>
 
 
 <!-- =====================================================
@@ -950,6 +1506,10 @@ button:disabled{
 </div>
 
 
+<!-- =====================================================
+     BOTÃO CADASTRAR
+===================================================== -->
+
 <div class="acoes">
 
     <button
@@ -962,11 +1522,15 @@ button:disabled{
 </div>
 
 
+<!-- =====================================================
+     MENSAGEM
+===================================================== -->
+
 <div id="mensagem"></div>
 
 
 <!-- =====================================================
-     RESULTADO
+     RESULTADO DO CADASTRO
 ===================================================== -->
 
 <div id="resultadoCadastro">
@@ -983,6 +1547,7 @@ button:disabled{
 
     </div>
 
+
     <div class="resultado-linha">
 
         <strong>Gestor:</strong>
@@ -990,6 +1555,7 @@ button:disabled{
         <span id="resultadoNomeGestor"></span>
 
     </div>
+
 
     <div class="resultado-linha">
 
@@ -999,6 +1565,7 @@ button:disabled{
 
     </div>
 
+
     <div class="resultado-linha">
 
         <strong>Tipo:</strong>
@@ -1006,6 +1573,7 @@ button:disabled{
         <span id="resultadoTipo"></span>
 
     </div>
+
 
     <div class="resultado-linha">
 
@@ -1015,10 +1583,12 @@ button:disabled{
 
     </div>
 
+
     <div class="aviso">
 
-        O gestor deve entrar no sistema usando
-        o e-mail e a senha definidos acima.
+        A escola foi registada e está
+        a aguardar a aprovação do
+        Super Administrador.
 
     </div>
 
@@ -1032,11 +1602,16 @@ button:disabled{
 </main>
 
 
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
 <script
     type="module"
-    src="../services/registerSchool.js?v=4"
+    src="../services/registerSchool.js?v=5"
 ></script>
+
 
 </body>
 
-    </html>
+</html>
