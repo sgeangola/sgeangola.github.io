@@ -1,11 +1,12 @@
 // =====================================================
 // SUPER ADMIN - SGE ANGOLA
-// Gestão completa das escolas da plataforma
 // =====================================================
 
 import {
-    onAuthStateChanged
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
 
 import {
     collection,
@@ -17,6 +18,7 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
+
 import {
     auth,
     db
@@ -24,7 +26,7 @@ import {
 
 
 // =====================================================
-// CONFIGURAÇÃO
+// UID DO SUPER ADMIN
 // =====================================================
 
 const SUPER_ADMIN_UID =
@@ -47,6 +49,12 @@ const painel =
 const nomeAdmin =
     document.getElementById("nomeAdmin");
 
+const emailAdmin =
+    document.getElementById("emailAdmin");
+
+const btnSair =
+    document.getElementById("btnSair");
+
 const listaEscolas =
     document.getElementById("listaEscolas");
 
@@ -67,55 +75,90 @@ const mensagem =
 
 
 // =====================================================
-// CONTROLO DA INTERFACE
+// MOSTRAR CARREGAMENTO
 // =====================================================
 
 function mostrarCarregando() {
 
     if (carregando) {
-        carregando.style.display = "flex";
+
+        carregando.style.display =
+            "flex";
+
     }
 
     if (acessoNegado) {
-        acessoNegado.style.display = "none";
+
+        acessoNegado.style.display =
+            "none";
+
     }
 
     if (painel) {
-        painel.style.display = "none";
+
+        painel.style.display =
+            "none";
+
     }
 
 }
 
+
+// =====================================================
+// MOSTRAR ACESSO NEGADO
+// =====================================================
 
 function mostrarAcessoNegado() {
 
     if (carregando) {
-        carregando.style.display = "none";
+
+        carregando.style.display =
+            "none";
+
     }
 
     if (painel) {
-        painel.style.display = "none";
+
+        painel.style.display =
+            "none";
+
     }
 
     if (acessoNegado) {
-        acessoNegado.style.display = "flex";
+
+        acessoNegado.style.display =
+            "flex";
+
     }
 
 }
 
 
+// =====================================================
+// MOSTRAR PAINEL
+// =====================================================
+
 function mostrarPainel() {
 
     if (carregando) {
-        carregando.style.display = "none";
+
+        carregando.style.display =
+            "none";
+
     }
 
     if (acessoNegado) {
-        acessoNegado.style.display = "none";
+
+        acessoNegado.style.display =
+            "none";
+
     }
 
     if (painel) {
-        painel.style.display = "block";
+
+        painel.style.display =
+            "block";
+
     }
 
 }
@@ -132,9 +175,14 @@ function mostrarMensagem(
 
     if (!mensagem) return;
 
-    mensagem.textContent = texto;
 
-    mensagem.style.display = "block";
+    mensagem.textContent =
+        texto;
+
+
+    mensagem.style.display =
+        "block";
+
 
     if (tipo === "erro") {
 
@@ -144,7 +192,9 @@ function mostrarMensagem(
         mensagem.style.color =
             "#a52626";
 
-    } else {
+    }
+
+    else {
 
         mensagem.style.background =
             "#e5f7eb";
@@ -154,9 +204,11 @@ function mostrarMensagem(
 
     }
 
+
     setTimeout(() => {
 
-        mensagem.style.display = "none";
+        mensagem.style.display =
+            "none";
 
     }, 4000);
 
@@ -169,12 +221,34 @@ function mostrarMensagem(
 
 function escaparHTML(texto) {
 
-    return String(texto || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return String(
+        texto || ""
+    )
+
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+
+    .replace(
+        /</g,
+        "&lt;"
+    )
+
+    .replace(
+        />/g,
+        "&gt;"
+    )
+
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
 
@@ -183,7 +257,9 @@ function escaparHTML(texto) {
 // VERIFICAR SUPER ADMIN
 // =====================================================
 
-async function verificarSuperAdmin(usuario) {
+async function verificarSuperAdmin(
+    usuario
+) {
 
     try {
 
@@ -191,6 +267,7 @@ async function verificarSuperAdmin(usuario) {
             "Utilizador autenticado:",
             usuario.email
         );
+
 
         console.log(
             "UID:",
@@ -213,7 +290,7 @@ async function verificarSuperAdmin(usuario) {
 
             mostrarAcessoNegado();
 
-            return false;
+            return;
 
         }
 
@@ -236,28 +313,20 @@ async function verificarSuperAdmin(usuario) {
             );
 
 
-        // =============================================
-        // DOCUMENTO NÃO EXISTE
-        // =============================================
-
         if (
             !resultado.exists()
         ) {
 
             console.error(
-                "Documento superAdmins não encontrado."
+                "Documento Super Admin não encontrado."
             );
 
             mostrarAcessoNegado();
 
-            return false;
+            return;
 
         }
 
-
-        // =============================================
-        // DADOS
-        // =============================================
 
         const dados =
             resultado.data();
@@ -278,32 +347,40 @@ async function verificarSuperAdmin(usuario) {
         ) {
 
             console.warn(
-                "Super Admin está desativado."
+                "Super Admin desativado."
             );
 
             mostrarAcessoNegado();
 
-            return false;
+            return;
 
         }
 
 
         // =============================================
-        // MOSTRAR NOME
+        // MOSTRAR DADOS
         // =============================================
 
         if (nomeAdmin) {
 
             nomeAdmin.textContent =
                 dados.nome ||
-                usuario.email ||
                 "Super Admin";
 
         }
 
 
+        if (emailAdmin) {
+
+            emailAdmin.textContent =
+                usuario.email ||
+                "";
+
+        }
+
+
         // =============================================
-        // ACESSO AUTORIZADO
+        // AUTORIZADO
         // =============================================
 
         console.log(
@@ -314,27 +391,18 @@ async function verificarSuperAdmin(usuario) {
         mostrarPainel();
 
 
-        // =============================================
-        // CARREGAR ESCOLAS
-        // =============================================
-
         await carregarEscolas();
-
-
-        return true;
 
     }
 
     catch (erro) {
 
         console.error(
-            "Erro na verificação:",
+            "Erro ao verificar Super Admin:",
             erro
         );
 
         mostrarAcessoNegado();
-
-        return false;
 
     }
 
@@ -473,10 +541,6 @@ async function carregarEscolas() {
         }
 
 
-        // =============================================
-        // MOSTRAR TABELA
-        // =============================================
-
         mostrarTabela(
             escolas
         );
@@ -497,7 +561,10 @@ async function carregarEscolas() {
 
                 <tr>
 
-                    <td colspan="6">
+                    <td
+                        colspan="6"
+                        style="color:#a52626;text-align:center;"
+                    >
 
                         Erro ao carregar escolas.
 
@@ -524,7 +591,9 @@ async function carregarEscolas() {
 // MOSTRAR TABELA
 // =====================================================
 
-function mostrarTabela(escolas) {
+function mostrarTabela(
+    escolas
+) {
 
     if (!listaEscolas) return;
 
@@ -559,7 +628,8 @@ function mostrarTabela(escolas) {
     }
 
 
-    listaEscolas.innerHTML = "";
+    listaEscolas.innerHTML =
+        "";
 
 
     escolas.forEach(
@@ -638,9 +708,11 @@ function mostrarTabela(escolas) {
             tr.innerHTML = `
 
                 <td>
+
                     <strong>
                         ${nome}
                     </strong>
+
                 </td>
 
 
@@ -686,7 +758,9 @@ function mostrarTabela(escolas) {
 
 
                         ${
-                            escola.estado === "pendente"
+                            escola.estado ===
+                            "pendente"
+
                             ?
 
                             `
@@ -741,11 +815,13 @@ function mostrarTabela(escolas) {
 
 
     // =============================================
-    // EVENTOS DOS BOTÕES
+    // EVENTOS
     // =============================================
 
     listaEscolas
-        .querySelectorAll("button")
+        .querySelectorAll(
+            "button"
+        )
         .forEach(
             botao => {
 
@@ -812,7 +888,9 @@ function mostrarTabela(escolas) {
 // VER ESCOLA
 // =====================================================
 
-async function verEscola(id) {
+async function verEscola(
+    id
+) {
 
     try {
 
@@ -852,10 +930,16 @@ async function verEscola(id) {
             Array.isArray(
                 escola.ensinos
             )
-                ?
-                escola.ensinos.join(", ")
-                :
-                "—";
+
+            ?
+
+            escola.ensinos.join(
+                ", "
+            )
+
+            :
+
+            "—";
 
 
         alert(
@@ -896,7 +980,9 @@ Estado:
 ${escola.estado || "—"}
 
 Ativo:
-${escola.ativo === true ? "Sim" : "Não"}
+${escola.ativo === true
+    ? "Sim"
+    : "Não"}
 
 ID:
 ${id}`
@@ -908,6 +994,7 @@ ${id}`
     catch (erro) {
 
         console.error(
+            "Erro ao ver escola:",
             erro
         );
 
@@ -925,7 +1012,9 @@ ${id}`
 // APROVAR ESCOLA
 // =====================================================
 
-async function aprovarEscola(id) {
+async function aprovarEscola(
+    id
+) {
 
     try {
 
@@ -964,16 +1053,20 @@ async function aprovarEscola(id) {
         const confirmar =
             confirm(
 
-`Aprovar esta escola?
+`Deseja aprovar a escola?
 
 ${escola.nome || "Sem nome"}
 
-Depois da aprovação, o gestor poderá utilizar o sistema.`
+O gestor poderá utilizar a escola após a aprovação.`
 
             );
 
 
-        if (!confirmar) return;
+        if (!confirmar) {
+
+            return;
+
+        }
 
 
         await updateDoc(
@@ -1008,8 +1101,10 @@ Depois da aprovação, o gestor poderá utilizar o sistema.`
     catch (erro) {
 
         console.error(
+            "Erro ao aprovar:",
             erro
         );
+
 
         mostrarMensagem(
             "Erro ao aprovar escola: " +
@@ -1026,7 +1121,9 @@ Depois da aprovação, o gestor poderá utilizar o sistema.`
 // REJEITAR ESCOLA
 // =====================================================
 
-async function rejeitarEscola(id) {
+async function rejeitarEscola(
+    id
+) {
 
     try {
 
@@ -1121,15 +1218,17 @@ Digite o motivo:`
         );
 
 
-        await carregarEscolas();
+       await carregarEscolas();
 
     }
 
     catch (erro) {
 
         console.error(
+            "Erro ao rejeitar:",
             erro
         );
+
 
         mostrarMensagem(
             "Erro ao rejeitar escola: " +
@@ -1143,10 +1242,12 @@ Digite o motivo:`
 
 
 // =====================================================
-// ELIMINAR ESCOLA
+// APAGAR ESCOLA
 // =====================================================
 
-async function eliminarEscola(id) {
+async function eliminarEscola(
+    id
+) {
 
     try {
 
@@ -1187,7 +1288,7 @@ async function eliminarEscola(id) {
             "Sem nome";
 
 
-        const primeiraConfirmacao =
+        const confirmar =
             confirm(
 
 `ATENÇÃO!
@@ -1196,28 +1297,26 @@ Você está prestes a apagar:
 
 ${nome}
 
-Esta ação remove o cadastro da escola da coleção "escolas".
+O cadastro da escola será removido da coleção "escolas".
 
 Deseja continuar?`
 
             );
 
 
-        if (
-            !primeiraConfirmacao
-        ) {
+        if (!confirmar) {
 
             return;
 
         }
 
 
-        const confirmacao =
+        const palavra =
             prompt(
 
 `CONFIRMAÇÃO FINAL
 
-Digite exatamente:
+Digite:
 
 ELIMINAR
 
@@ -1228,7 +1327,7 @@ ${nome}`
 
 
         if (
-            confirmacao !==
+            palavra !==
             "ELIMINAR"
         ) {
 
@@ -1275,6 +1374,74 @@ ${nome}`
 
 
 // =====================================================
+// BOTÃO SAIR
+// =====================================================
+
+if (btnSair) {
+
+    btnSair.addEventListener(
+        "click",
+        async () => {
+
+            const confirmar =
+                confirm(
+                    "Deseja terminar a sessão?"
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            try {
+
+                await signOut(
+                    auth
+                );
+
+
+                console.log(
+                    "Sessão terminada."
+                );
+
+
+                /*
+                 * Não dependemos de uma página
+                 * de login específica aqui.
+                 *
+                 * Voltamos para a página
+                 * de login do sistema.
+                 */
+
+                window.location.href =
+                    "./login.html";
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "Erro ao terminar sessão:",
+                    erro
+                );
+
+
+                alert(
+                    "Não foi possível terminar a sessão."
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================================
 // INICIALIZAÇÃO
 // =====================================================
 
@@ -1289,15 +1456,11 @@ onAuthStateChanged(
             "AUTH STATE:",
             usuario
                 ? usuario.email
-                : "não autenticado"
+                : "nenhum utilizador"
         );
 
 
         if (!usuario) {
-
-            console.warn(
-                "Nenhum utilizador autenticado."
-            );
 
             mostrarAcessoNegado();
 
