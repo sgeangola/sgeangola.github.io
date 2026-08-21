@@ -23,6 +23,7 @@ import {
     db
 } from "./firebase.js";
 
+alert("CARREGOU");
 
 // =====================================================
 // ELEMENTOS
