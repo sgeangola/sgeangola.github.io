@@ -1,566 +1,700 @@
-<!DOCTYPE html>
-<html lang="pt">
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<head>
+<title>Super Admin — SGE Angola</title><style>
 
-    <meta charset="UTF-8">
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f9fc;
+    color:#17324d;
+    min-height:100vh;
+}
+
+
+/* =====================================================
+   CABEÇALHO
+===================================================== */
+
+header{
+    background:white;
+    border-bottom:1px solid #dceaf2;
+    padding:15px 25px;
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.logo{
+    width:48px;
+    height:48px;
+
+    border-radius:12px;
+
+    background:#0b78b5;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+    font-weight:bold;
+    font-size:17px;
+
+    overflow:hidden;
+}
+
+.logo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+header h1{
+    font-size:20px;
+}
+
+header p{
+    margin-top:3px;
+    font-size:13px;
+    color:#688196;
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.container{
+    width:100%;
+    max-width:1250px;
+
+    margin:30px auto;
+
+    padding:0 18px;
+}
+
+
+/* =====================================================
+   TÍTULO
+===================================================== */
+
+.titulo{
+    margin-bottom:25px;
+}
+
+.titulo h2{
+    font-size:26px;
+    margin-bottom:6px;
+}
+
+.titulo p{
+    color:#71879a;
+    font-size:14px;
+}
+
+
+/* =====================================================
+   ESTATÍSTICAS
+===================================================== */
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:16px;
+
+    margin-bottom:25px;
+}
+
+.card{
+
+    background:white;
+
+    border:1px solid #e1edf3;
+
+    border-radius:14px;
+
+    padding:20px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(30,80,110,.06);
+}
+
+.card h3{
+
+    font-size:13px;
+
+    color:#71879a;
+
+    margin-bottom:10px;
+
+    font-weight:normal;
+}
+
+.numero{
+
+    font-size:30px;
+
+    font-weight:bold;
+}
+
+.pendente{
+    color:#d97706;
+}
+
+.ativo{
+    color:#16a34a;
+}
+
+.rejeitado{
+    color:#dc2626;
+}
+
+
+/* =====================================================
+   MENSAGEM
+===================================================== */
+
+#mensagem{
+
+    display:none;
+
+    margin-bottom:18px;
+
+    padding:13px 16px;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    border:1px solid transparent;
+}
+
+
+/* =====================================================
+   ÁREA DA TABELA
+===================================================== */
+
+.secao{
+
+    background:white;
+
+    border:1px solid #e1edf3;
+
+    border-radius:16px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(30,80,110,.06);
+
+    overflow:hidden;
+}
+
+.secao-cabecalho{
+
+    padding:20px;
+
+    border-bottom:1px solid #e5edf2;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:15px;
+}
+
+.secao-cabecalho h2{
+
+    font-size:19px;
+}
+
+.secao-cabecalho span{
+
+    font-size:13px;
+
+    color:#71879a;
+}
+
+
+/* =====================================================
+   TABELA
+===================================================== */
+
+.tabela-container{
+
+    width:100%;
+
+    overflow-x:auto;
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:900px;
+}
+
+thead{
+
+    background:#f4f9fc;
+}
+
+th{
+
+    padding:14px 16px;
+
+    text-align:left;
+
+    font-size:13px;
+
+    color:#587083;
+
+    border-bottom:
+        1px solid #dce8ee;
+
+    white-space:nowrap;
+}
+
+td{
+
+    padding:15px 16px;
+
+    border-bottom:
+        1px solid #edf2f5;
+
+    font-size:14px;
+
+    vertical-align:middle;
+}
+
+tbody tr:hover{
+
+    background:#fafdff;
+}
+
+
+/* =====================================================
+   NOME DA ESCOLA
+===================================================== */
+
+.nome-escola{
+
+    font-weight:bold;
+
+    color:#17324d;
+}
+
+.sub-info{
+
+    display:block;
+
+    margin-top:4px;
+
+    font-size:12px;
+
+    color:#8195a4;
+}
+
+
+/* =====================================================
+   ESTADOS
+===================================================== */
+
+.estado{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 10px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    white-space:nowrap;
+}
+
+.estado-pendente{
+
+    background:#fff7df;
+
+    color:#b45309;
+}
+
+.estado-ativo{
+
+    background:#e9f8ef;
+
+    color:#15803d;
+}
+
+.estado-rejeitado{
+
+    background:#fdecec;
+
+    color:#b91c1c;
+}
+
+
+/* =====================================================
+   AÇÕES
+===================================================== */
+
+.acoes{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    flex-wrap:wrap;
+}
+
+.btn{
+
+    border:none;
+
+    border-radius:8px;
+
+    padding:8px 10px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    white-space:nowrap;
+
+    transition:.2s;
+}
+
+.btn:hover{
+
+    transform:translateY(-1px);
+
+    opacity:.9;
+}
+
+.btn-ver{
+
+    background:#e8f3f9;
+
+    color:#075985;
+}
+
+.btn-aprovar{
+
+    background:#16a34a;
+
+    color:white;
+}
+
+.btn-rejeitar{
+
+    background:#dc2626;
+
+    color:white;
+}
+
+.btn-eliminar{
+
+    background:#7f1d1d;
+
+    color:white;
+}
+
+
+/* =====================================================
+   ESTADO VAZIO
+===================================================== */
+
+.vazio{
+
+    padding:45px 20px;
+
+    text-align:center;
+
+    color:#71879a;
+
+    font-size:14px;
+}
+
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+
+@media(max-width:900px){
+
+    .cards{
+
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:600px){
+
+    header{
+
+        padding:13px 16px;
+    }
+
+    header h1{
+
+        font-size:18px;
+    }
+
+    .container{
+
+        margin:20px auto;
+
+        padding:0 12px;
+    }
+
+    .titulo h2{
+
+        font-size:22px;
+    }
+
+    .cards{
+
+        grid-template-columns:1fr 1fr;
+
+        gap:10px;
+    }
+
+    .card{
+
+        padding:15px;
+    }
+
+    .numero{
+
+        font-size:25px;
+    }
+
+    .secao-cabecalho{
+
+        padding:16px;
+
+        align-items:flex-start;
+
+        flex-direction:column;
+    }
+
+}
+
+</style></head><body><!-- =====================================================
+     CABEÇALHO
+===================================================== --><header><div class="logo">
+
+    SGE
+
+</div>
+
+<div>
+
+    <h1>
+        SGE Angola
+    </h1>
+
+    <p>
+        Super Admin — Gestão da Plataforma
+    </p>
+
+</div>
+
+</header><main class="container"><!-- =====================================================
+     TÍTULO
+===================================================== --><div class="titulo"><h2>
+    Gestão das Escolas
+</h2>
+
+<p>
+    Consulte, aprove, rejeite ou elimine as escolas
+    registadas na plataforma.
+</p>
+
+</div><!-- =====================================================
+     ESTATÍSTICAS
+===================================================== --><section class="cards"><div class="card">
+
+    <h3>
+        Escolas Pendentes
+    </h3>
+
+    <div
+        id="totalPendentes"
+        class="numero pendente"
     >
+        0
+    </div>
 
-    <title>Super Admin - SGE</title>
+</div>
 
 
-    <style>
+<div class="card">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    <h3>
+        Escolas Ativas
+    </h3>
 
+    <div
+        id="totalAtivas"
+        class="numero ativo"
+    >
+        0
+    </div>
 
-        body {
+</div>
 
-            font-family:
-                Arial,
-                sans-serif;
 
-            background:
-                #f4f7fb;
+<div class="card">
 
-            color:
-                #1f2937;
+    <h3>
+        Escolas Rejeitadas
+    </h3>
 
-        }
+    <div
+        id="totalRejeitadas"
+        class="numero rejeitado"
+    >
+        0
+    </div>
 
+</div>
 
-        /* =========================================
-           CABEÇALHO
-        ========================================== */
 
-        header {
+<div class="card">
 
-            background:
-                #0d6efd;
+    <h3>
+        Total de Escolas
+    </h3>
 
-            color:
-                white;
+    <div
+        id="totalEscolas"
+        class="numero"
+    >
+        0
+    </div>
 
-            padding:
-                20px;
+</div>
 
-        }
+</section><!-- =====================================================
+     MENSAGEM
+===================================================== --><div id="mensagem"></div><!-- =====================================================
+     TABELA DE ESCOLAS
+===================================================== --><section class="secao"><div class="secao-cabecalho">
 
+    <div>
 
-        header h1 {
+        <h2>
+            Escolas registadas
+        </h2>
 
-            font-size:
-                22px;
+        <span>
+            Gestão e aprovação das escolas da plataforma
+        </span>
 
-        }
+    </div>
 
+</div>
 
-        header p {
 
-            margin-top:
-                5px;
 
-            opacity:
-                0.9;
+<div class="tabela-container">
 
-        }
+    <table>
 
+        <thead>
 
-        /* =========================================
-           CONTAINER
-        ========================================== */
+            <tr>
 
-        .container {
+                <th>
+                    Nome da Escola
+                </th>
 
-            max-width:
-                1200px;
+                <th>
+                    Gestor
+                </th>
 
-            margin:
-                auto;
+                <th>
+                    E-mail
+                </th>
 
-            padding:
-                20px;
+                <th>
+                    Telefone
+                </th>
 
-        }
+                <th>
+                    Estado
+                </th>
 
+                <th>
+                    Ações
+                </th>
 
-        /* =========================================
-           CARDS
-        ========================================== */
+            </tr>
 
-        .cards {
+        </thead>
 
-            display:
-                grid;
 
-            grid-template-columns:
-                repeat(
-                    auto-fit,
-                    minmax(
-                        200px,
-                        1fr
-                    )
-                );
+        <tbody id="listaEscolas">
 
-            gap:
-                15px;
+            <tr>
 
-            margin-bottom:
-                25px;
-
-        }
-
-
-        .card {
-
-            background:
-                white;
-
-            padding:
-                20px;
-
-            border-radius:
-                12px;
-
-            box-shadow:
-                0 2px 8px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    0.08
-                );
-
-        }
-
-
-        .card h3 {
-
-            font-size:
-                15px;
-
-            color:
-                #6b7280;
-
-            margin-bottom:
-                10px;
-
-        }
-
-
-        .numero {
-
-            font-size:
-                30px;
-
-            font-weight:
-                bold;
-
-        }
-
-
-        .pendente {
-
-            color:
-                #f59e0b;
-
-        }
-
-
-        .ativo {
-
-            color:
-                #16a34a;
-
-        }
-
-
-        .rejeitado {
-
-            color:
-                #dc2626;
-
-        }
-
-
-        /* =========================================
-           SEÇÃO
-        ========================================== */
-
-        .secao {
-
-            background:
-                white;
-
-            padding:
-                20px;
-
-            border-radius:
-                12px;
-
-            box-shadow:
-                0 2px 8px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    0.08
-                );
-
-        }
-
-
-        .secao h2 {
-
-            margin-bottom:
-                20px;
-
-        }
-
-
-        /* =========================================
-           ESCOLA
-        ========================================== */
-
-        .escola {
-
-            border:
-                1px solid #e5e7eb;
-
-            border-radius:
-                10px;
-
-            padding:
-                18px;
-
-            margin-bottom:
-                15px;
-
-        }
-
-
-        .escola h3 {
-
-            margin-bottom:
-                10px;
-
-        }
-
-
-        .dados {
-
-            display:
-                grid;
-
-            gap:
-                6px;
-
-            color:
-                #4b5563;
-
-            margin-bottom:
-                15px;
-
-        }
-
-
-        /* =========================================
-           BOTÕES
-        ========================================== */
-
-        .acoes {
-
-            display:
-                flex;
-
-            gap:
-                10px;
-
-            flex-wrap:
-                wrap;
-
-        }
-
-
-        button {
-
-            border:
-                none;
-
-            padding:
-                10px 15px;
-
-            border-radius:
-                7px;
-
-            cursor:
-                pointer;
-
-            font-weight:
-                bold;
-
-        }
-
-
-        button:hover {
-
-            opacity:
-                0.9;
-
-        }
-
-
-        .btn-ver {
-
-            background:
-                #e5e7eb;
-
-            color:
-                #111827;
-
-        }
-
-
-        .btn-aprovar {
-
-            background:
-                #16a34a;
-
-            color:
-                white;
-
-        }
-
-
-        .btn-rejeitar {
-
-            background:
-                #dc2626;
-
-            color:
-                white;
-
-        }
-
-
-        .btn-eliminar {
-
-            background:
-                #7f1d1d;
-
-            color:
-                white;
-
-        }
-
-
-        /* =========================================
-           MENSAGEM
-        ========================================== */
-
-        #mensagem {
-
-            margin-bottom:
-                15px;
-
-            padding:
-                12px;
-
-            border-radius:
-                8px;
-
-            display:
-                none;
-
-        }
-
-
-        /* =========================================
-           RESPONSIVO
-        ========================================== */
-
-        @media (
-            max-width: 600px
-        ) {
-
-            .container {
-
-                padding:
-                    12px;
-
-            }
-
-
-            .acoes button {
-
-                width:
-                    100%;
-
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    <!-- =========================================
-         CABEÇALHO
-    ========================================== -->
-
-    <header>
-
-        <h1>
-            SGE — Super Admin
-        </h1>
-
-        <p>
-            Gestão geral das escolas
-        </p>
-
-    </header>
-
-
-
-    <main class="container">
-
-
-        <!-- =====================================
-             ESTATÍSTICAS
-        ====================================== -->
-
-        <section class="cards">
-
-
-            <div class="card">
-
-                <h3>
-                    Escolas Pendentes
-                </h3>
-
-                <div
-                    id="totalPendentes"
-                    class="numero pendente"
+                <td
+                    colspan="6"
+                    class="vazio"
                 >
-                    0
-                </div>
+                    A carregar escolas...
+                </td>
 
-            </div>
+            </tr>
 
+        </tbody>
 
+    </table>
 
-            <div class="card">
+</div>
 
-                <h3>
-                    Escolas Ativas
-                </h3>
-
-                <div
-                    id="totalAtivas"
-                    class="numero ativo"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-
-            <div class="card">
-
-                <h3>
-                    Escolas Rejeitadas
-                </h3>
-
-                <div
-                    id="totalRejeitadas"
-                    class="numero rejeitado"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-
-            <div class="card">
-
-                <h3>
-                    Total de Escolas
-                </h3>
-
-                <div
-                    id="totalEscolas"
-                    class="numero"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-        </section>
-
-
-
-        <!-- =====================================
-             MENSAGEM
-        ====================================== -->
-
-        <div
-            id="mensagem"
-        ></div>
-
-
-
-        <!-- =====================================
-             ESCOLAS PENDENTES
-        ====================================== -->
-
-        <section class="secao">
-
-            <h2>
-                Escolas Pendentes
-            </h2>
-
-
-            <div
-                id="listaEscolas"
-            >
-
-                A carregar escolas...
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-
-    <!-- =========================================
-         JAVASCRIPT
-    ========================================== -->
-
-    <script
-        type="module"
-        src="../services/super-admin.js"
-    ></script>
-
+</section></main><
+    !-- =====================================================
+     JAVASCRIPT
+===================================================== --><script
+    type="module"
+    src="../services/super-admin.js">
+    
+    </script>
 
 </body>
 
-        </html>
+</html>
