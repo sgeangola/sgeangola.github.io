@@ -25,7 +25,7 @@ import {
 
 
 // =====================================================
-// CONFIGURAÇÃO
+// CONFIGURAÇÃO DO SUPER ADMIN
 // =====================================================
 
 const SUPER_ADMIN_UID =
@@ -33,7 +33,7 @@ const SUPER_ADMIN_UID =
 
 
 // =====================================================
-// ELEMENTOS
+// ELEMENTOS DO HTML
 // =====================================================
 
 const carregando =
@@ -42,8 +42,11 @@ const carregando =
 const acessoNegado =
     document.getElementById("acessoNegado");
 
-const painel =
+const painelAdmin =
     document.getElementById("painelAdmin");
+
+const nomeAdmin =
+    document.getElementById("nomeAdmin");
 
 const listaEscolas =
     document.getElementById("listaEscolas");
@@ -63,54 +66,9 @@ const totalEscolas =
 const mensagem =
     document.getElementById("mensagem");
 
-const nomeAdmin =
-    document.getElementById("nomeAdmin");
-
 
 // =====================================================
-// MENSAGEM
-// =====================================================
-
-function mostrarMensagem(
-    texto,
-    tipo = "sucesso"
-) {
-
-    if (!mensagem) return;
-
-    mensagem.textContent = texto;
-
-    mensagem.style.display = "block";
-
-    if (tipo === "erro") {
-
-        mensagem.style.background =
-            "#fde8e8";
-
-        mensagem.style.color =
-            "#a52626";
-
-    } else {
-
-        mensagem.style.background =
-            "#e5f7eb";
-
-        mensagem.style.color =
-            "#18743a";
-
-    }
-
-    setTimeout(() => {
-
-        mensagem.style.display = "none";
-
-    }, 4000);
-
-}
-
-
-// =====================================================
-// ESTADOS DA PÁGINA
+// MOSTRAR CARREGAMENTO
 // =====================================================
 
 function mostrarCarregando() {
@@ -129,15 +87,19 @@ function mostrarCarregando() {
 
     }
 
-    if (painel) {
+    if (painelAdmin) {
 
-        painel.style.display =
+        painelAdmin.style.display =
             "none";
 
     }
 
 }
 
+
+// =====================================================
+// MOSTRAR PAINEL
+// =====================================================
 
 function mostrarPainel() {
 
@@ -155,15 +117,19 @@ function mostrarPainel() {
 
     }
 
-    if (painel) {
+    if (painelAdmin) {
 
-        painel.style.display =
+        painelAdmin.style.display =
             "block";
 
     }
 
 }
 
+
+// =====================================================
+// MOSTRAR ACESSO NEGADO
+// =====================================================
 
 function mostrarAcessoNegado() {
 
@@ -174,9 +140,9 @@ function mostrarAcessoNegado() {
 
     }
 
-    if (painel) {
+    if (painelAdmin) {
 
-        painel.style.display =
+        painelAdmin.style.display =
             "none";
 
     }
@@ -192,59 +158,303 @@ function mostrarAcessoNegado() {
 
 
 // =====================================================
+// MENSAGEM
+// =====================================================
+
+function mostrarMensagem(
+    texto,
+    tipo = "sucesso"
+) {
+
+    if (!mensagem) return;
+
+
+    mensagem.textContent =
+        texto;
+
+
+    mensagem.style.display =
+        "block";
+
+
+    if (tipo === "erro") {
+
+        mensagem.style.background =
+            "#fde8e8";
+
+        mensagem.style.color =
+            "#a52626";
+
+    }
+
+    else {
+
+        mensagem.style.background =
+            "#e5f7eb";
+
+        mensagem.style.color =
+            "#18743a";
+
+    }
+
+
+    setTimeout(() => {
+
+        mensagem.style.display =
+            "none";
+
+    }, 4000);
+
+}
+
+
+// =====================================================
 // ESCAPAR HTML
 // =====================================================
 
 function escaparHTML(texto) {
 
     return String(texto || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
 // =====================================================
-// ESTADO VISUAL
+// VERIFICAR SUPER ADMIN
 // =====================================================
 
-function textoEstado(estado) {
+async function verificarSuperAdmin(
+    usuario
+) {
 
-    if (estado === "ativo") {
+    console.log(
+        "===================================="
+    );
 
-        return "Ativo";
+    console.log(
+        "SUPER ADMIN — VERIFICAÇÃO"
+    );
+
+    console.log(
+        "E-mail:",
+        usuario?.email
+    );
+
+    console.log(
+        "UID:",
+        usuario?.uid
+    );
+
+
+    // -------------------------------------------------
+    // VERIFICAR LOGIN
+    // -------------------------------------------------
+
+    if (!usuario) {
+
+        console.warn(
+            "Nenhum utilizador autenticado."
+        );
+
+        window.location.href =
+            "./login.html";
+
+        return false;
 
     }
 
-    if (estado === "rejeitado") {
 
-        return "Rejeitado";
+    // -------------------------------------------------
+    // VERIFICAR UID
+    // -------------------------------------------------
 
-    }
+    if (
+        usuario.uid !==
+        SUPER_ADMIN_UID
+    ) {
 
-    return "Pendente";
+        console.warn(
+            "UID não pertence ao Super Admin."
+        );
 
-}
+        mostrarAcessoNegado();
 
-
-function classeEstado(estado) {
-
-    if (estado === "ativo") {
-
-        return "estado-ativo";
-
-    }
-
-    if (estado === "rejeitado") {
-
-        return "estado-rejeitado";
+        return false;
 
     }
 
-    return "estado-pendente";
+
+    // -------------------------------------------------
+    // BUSCAR SUPER ADMIN NO FIRESTORE
+    // -------------------------------------------------
+
+    try {
+
+        const referencia =
+            doc(
+                db,
+                "superAdmins",
+                SUPER_ADMIN_UID
+            );
+
+
+        const resultado =
+            await getDoc(
+                referencia
+            );
+
+
+        if (!resultado.exists()) {
+
+            console.error(
+                "Documento superAdmins não existe."
+            );
+
+            mostrarAcessoNegado();
+
+            return false;
+
+        }
+
+
+        const dados =
+            resultado.data();
+
+
+        console.log(
+            "Dados do Super Admin:",
+            dados
+        );
+
+
+        // -------------------------------------------------
+        // VERIFICAR ATIVO
+        // -------------------------------------------------
+
+        if (
+            dados.ativo !== true
+        ) {
+
+            console.warn(
+                "Super Admin está desativado."
+            );
+
+            mostrarAcessoNegado();
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // MOSTRAR NOME
+        // -------------------------------------------------
+
+        if (nomeAdmin) {
+
+            nomeAdmin.textContent =
+                dados.nome ||
+                usuario.email ||
+                "Super Admin";
+
+        }
+
+
+        console.log(
+            "SUPER ADMIN AUTORIZADO."
+        );
+
+
+        mostrarPainel();
+
+
+        // -------------------------------------------------
+        // CARREGAR ESCOLAS
+        // -------------------------------------------------
+
+        await carregarEscolas();
+
+
+        return true;
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "ERRO AO VERIFICAR SUPER ADMIN:",
+            erro
+        );
+
+
+        if (
+            erro.code ===
+            "unavailable"
+        ) {
+
+            mostrarMensagem(
+                "Não foi possível ligar ao Firebase. Verifique a Internet.",
+                "erro"
+            );
+
+        }
+
+        else {
+
+            mostrarMensagem(
+                "Erro ao verificar o Super Admin: " +
+                erro.message,
+                "erro"
+            );
+
+        }
+
+
+        // Não confundir erro de ligação
+        // com acesso negado.
+
+        if (carregando) {
+
+            carregando.style.display =
+                "none";
+
+        }
+
+        if (painelAdmin) {
+
+            painelAdmin.style.display =
+                "none";
+
+        }
+
+        return false;
+
+    }
 
 }
 
@@ -257,19 +467,23 @@ async function carregarEscolas() {
 
     try {
 
-        if (!listaEscolas) return;
+        if (listaEscolas) {
 
-        listaEscolas.innerHTML = `
+            listaEscolas.innerHTML = `
 
-            <tr>
+                <tr>
 
-                <td colspan="6">
-                    A carregar escolas...
-                </td>
+                    <td colspan="6">
 
-            </tr>
+                        A carregar escolas...
 
-        `;
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
 
 
         const resultado =
@@ -286,27 +500,7 @@ async function carregarEscolas() {
         let rejeitadas = 0;
 
 
-        listaEscolas.innerHTML = "";
-
-
-        if (resultado.empty) {
-
-            listaEscolas.innerHTML = `
-
-                <tr>
-
-                    <td colspan="6">
-
-                        Ainda não existem
-                        escolas registadas.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
+        const escolas = [];
 
 
         resultado.forEach(
@@ -316,186 +510,50 @@ async function carregarEscolas() {
                     documento.data();
 
 
-                const id =
-                    documento.id;
+                escolas.push({
+
+                    id:
+                        documento.id,
+
+                    ...escola
+
+                });
 
 
-                const estado =
-                    escola.estado ||
-                    "pendente";
-
-
-                // =====================================
-                // ESTATÍSTICAS
-                // =====================================
-
-                if (estado === "pendente") {
+                if (
+                    escola.estado ===
+                    "pendente"
+                ) {
 
                     pendentes++;
 
                 }
 
-                else if (estado === "ativo") {
+                else if (
+                    escola.estado ===
+                    "ativo"
+                ) {
 
                     ativas++;
 
                 }
 
-                else if (estado === "rejeitado") {
+                else if (
+                    escola.estado ===
+                    "rejeitado"
+                ) {
 
                     rejeitadas++;
 
                 }
 
-
-                // =====================================
-                // DADOS
-                // =====================================
-
-                const nome =
-                    escaparHTML(
-                        escola.nome ||
-                        "Sem nome"
-                    );
-
-
-                const gestor =
-                    escaparHTML(
-                        escola.nomeGestor ||
-                        "—"
-                    );
-
-
-                const email =
-                    escaparHTML(
-                        escola.emailGestor ||
-                        escola.email ||
-                        "—"
-                    );
-
-
-                const telefone =
-                    escaparHTML(
-                        escola.telefone ||
-                        "—"
-                    );
-
-
-                const estadoTexto =
-                    textoEstado(
-                        estado
-                    );
-
-
-                const estadoClasse =
-                    classeEstado(
-                        estado
-                    );
-
-
-                // =====================================
-                // LINHA
-                // =====================================
-
-                const linha =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                linha.innerHTML = `
-
-                    <td>
-                        <strong>
-                            ${nome}
-                        </strong>
-                    </td>
-
-                    <td>
-                        ${gestor}
-                    </td>
-
-                    <td>
-                        ${email}
-                    </td>
-
-                    <td>
-                        ${telefone}
-                    </td>
-
-                    <td>
-
-                        <span
-                            class="estado ${estadoClasse}"
-                        >
-
-                            ${estadoTexto}
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <div class="acoes">
-
-                            <button
-                                class="btn-ver"
-                                onclick="verEscola('${id}')"
-                            >
-                                Ver
-                            </button>
-
-
-                            ${
-                                estado === "pendente"
-                                ? `
-
-                                <button
-                                    class="btn-aprovar"
-                                    onclick="aprovarEscola('${id}')"
-                                >
-                                    Aprovar
-                                </button>
-
-
-                                <button
-                                    class="btn-rejeitar"
-                                    onclick="rejeitarEscola('${id}')"
-                                >
-                                    Rejeitar
-                                </button>
-
-                                `
-                                : ""
-                            }
-
-
-                            <button
-                                class="btn-eliminar"
-                                onclick="eliminarEscola('${id}')"
-                            >
-                                Eliminar
-                            </button>
-
-                        </div>
-
-                    </td>
-
-                `;
-
-
-                listaEscolas.appendChild(
-                    linha
-                );
-
             }
         );
 
 
-        // =============================================
-        // ATUALIZAR NÚMEROS
-        // =============================================
+        // -------------------------------------------------
+        // ESTATÍSTICAS
+        // -------------------------------------------------
 
         if (totalPendentes) {
 
@@ -524,10 +582,18 @@ async function carregarEscolas() {
         if (totalEscolas) {
 
             totalEscolas.textContent =
-                resultado.size;
+                escolas.length;
 
         }
 
+
+        // -------------------------------------------------
+        // TABELA
+        // -------------------------------------------------
+
+        mostrarEscolas(
+            escolas
+        );
 
     }
 
@@ -549,12 +615,6 @@ async function carregarEscolas() {
 
                         Erro ao carregar escolas.
 
-                        <br><br>
-
-                        ${escaparHTML(
-                            erro.message
-                        )}
-
                     </td>
 
                 </tr>
@@ -565,11 +625,233 @@ async function carregarEscolas() {
 
 
         mostrarMensagem(
-            "Não foi possível carregar as escolas.",
+            "Erro ao carregar escolas: " +
+            erro.message,
             "erro"
         );
 
     }
+
+}
+
+
+// =====================================================
+// MOSTRAR ESCOLAS NA TABELA
+// =====================================================
+
+function mostrarEscolas(
+    escolas
+) {
+
+    if (!listaEscolas) return;
+
+
+    if (!escolas.length) {
+
+        listaEscolas.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="text-align:center;"
+                >
+
+                    Nenhuma escola registada.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    listaEscolas.innerHTML = "";
+
+
+    escolas.forEach(
+        escola => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const nome =
+                escaparHTML(
+                    escola.nome ||
+                    "Sem nome"
+                );
+
+
+            const gestor =
+                escaparHTML(
+                    escola.nomeGestor ||
+                    escola.gestor ||
+                    "—"
+                );
+
+
+            const email =
+                escaparHTML(
+                    escola.emailGestor ||
+                    escola.email ||
+                    "—"
+                );
+
+
+            const telefone =
+                escaparHTML(
+                    escola.telefone ||
+                    escola.telefoneGestor ||
+                    "—"
+                );
+
+
+            const estado =
+                escola.estado ||
+                "pendente";
+
+
+            let estadoTexto =
+                "Pendente";
+
+
+            let estadoClasse =
+                "estado-pendente";
+
+
+            if (
+                estado ===
+                "ativo"
+            ) {
+
+                estadoTexto =
+                    "Ativo";
+
+                estadoClasse =
+                    "estado-ativo";
+
+            }
+
+            else if (
+                estado ===
+                "rejeitado"
+            ) {
+
+                estadoTexto =
+                    "Rejeitado";
+
+                estadoClasse =
+                    "estado-rejeitado";
+
+            }
+
+
+            tr.innerHTML = `
+
+                <td>
+
+                    <strong>
+                        ${nome}
+                    </strong>
+
+                </td>
+
+
+                <td>
+                    ${gestor}
+                </td>
+
+
+                <td>
+                    ${email}
+                </td>
+
+
+                <td>
+                    ${telefone}
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="estado ${estadoClasse}"
+                    >
+
+                        ${estadoTexto}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <div class="acoes">
+
+                        <button
+                            class="btn-ver"
+                            onclick="verEscola('${escola.id}')"
+                        >
+                            👁️ Ver
+                        </button>
+
+
+                        ${
+                            estado !== "ativo"
+                            ? `
+                                <button
+                                    class="btn-aprovar"
+                                    onclick="aprovarEscola('${escola.id}')"
+                                >
+                                    ✓ Aprovar
+                                </button>
+                            `
+                            : ""
+                        }
+
+
+                        ${
+                            estado !== "rejeitado"
+                            ? `
+                                <button
+                                    class="btn-rejeitar"
+                                    onclick="rejeitarEscola('${escola.id}')"
+                                >
+                                    ✕ Rejeitar
+                                </button>
+                            `
+                            : ""
+                        }
+
+
+                        <button
+                            class="btn-eliminar"
+                            onclick="eliminarEscola('${escola.id}')"
+                        >
+                            🗑️ Eliminar
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            listaEscolas.appendChild(
+                tr
+            );
+
+        }
+    );
 
 }
 
@@ -599,9 +881,8 @@ async function(id) {
 
         if (!resultado.exists()) {
 
-            mostrarMensagem(
-                "Escola não encontrada.",
-                "erro"
+            alert(
+                "Escola não encontrada."
             );
 
             return;
@@ -618,58 +899,58 @@ async function(id) {
                 escola.ensinos
             )
                 ? escola.ensinos.join(", ")
-                : "—";
+                : (
+                    escola.ensinos ||
+                    ""
+                );
 
 
         alert(
 
-`========================================
-             DADOS DA ESCOLA
-========================================
+`================================
+          ESCOLA
+================================
 
 Nome:
-${escola.nome || "—"}
+${escola.nome || ""}
 
 Província:
-${escola.provincia || "—"}
+${escola.provincia || ""}
 
 Município:
-${escola.municipio || "—"}
+${escola.municipio || ""}
 
 Telefone:
-${escola.telefone || "—"}
+${escola.telefone || ""}
 
 E-mail:
-${escola.email || "—"}
+${escola.email || ""}
 
 Tipo:
-${escola.tipoEscola || "—"}
+${escola.tipoEscola || ""}
 
 Ano letivo:
-${escola.anoLetivoAtual || "—"}
+${escola.anoLetivoAtual || ""}
 
 Ensinos:
 ${ensinos}
 
-GESTOR
-----------------------------------------
+Gestor:
+${escola.nomeGestor || ""}
 
-Nome:
-${escola.nomeGestor || "—"}
-
-E-mail:
-${escola.emailGestor || "—"}
+E-mail do gestor:
+${escola.emailGestor || ""}
 
 Estado:
-${escola.estado || "—"}
+${escola.estado || ""}
 
-Ativo:
-${escola.ativo === true ? "Sim" : "Não"}
+Motivo da rejeição:
+${escola.motivoRejeicao || ""}
 
 ID:
 ${id}
 
-========================================`
+================================`
 
         );
 
@@ -683,7 +964,7 @@ ${id}
         );
 
         mostrarMensagem(
-            erro.message,
+            "Erro ao consultar escola.",
             "erro"
         );
 
@@ -734,17 +1015,20 @@ async function(id) {
         const confirmar =
             confirm(
 
-`Deseja aprovar a escola?
+`Deseja aprovar esta escola?
 
 ${escola.nome || "Sem nome"}
 
-O gestor poderá utilizar a escola
-após a aprovação.`
+O gestor poderá utilizar a escola após a aprovação.`
 
             );
 
 
-        if (!confirmar) return;
+        if (!confirmar) {
+
+            return;
+
+        }
 
 
         await updateDoc(
@@ -782,9 +1066,10 @@ após a aprovação.`
     catch (erro) {
 
         console.error(
-            "Erro ao aprovar escola:",
+            "Erro ao aprovar:",
             erro
         );
+
 
         mostrarMensagem(
             "Erro ao aprovar escola: " +
@@ -849,14 +1134,18 @@ Digite o motivo da rejeição:`
             );
 
 
-        if (motivo === null) {
+        if (
+            motivo === null
+        ) {
 
             return;
 
         }
 
 
-        if (!motivo.trim()) {
+        if (
+            motivo.trim() === ""
+        ) {
 
             alert(
                 "Informe o motivo da rejeição."
@@ -902,9 +1191,10 @@ Digite o motivo da rejeição:`
     catch (erro) {
 
         console.error(
-            "Erro ao rejeitar escola:",
+            "Erro ao rejeitar:",
             erro
         );
+
 
         mostrarMensagem(
             "Erro ao rejeitar escola: " +
@@ -970,8 +1260,7 @@ Você está prestes a eliminar:
 
 ${nome}
 
-Esta ação elimina o cadastro da escola
-na coleção "escolas".
+Apenas o documento desta escola na coleção "escolas" será eliminado.
 
 Deseja continuar?`
 
@@ -993,6 +1282,8 @@ Deseja continuar?`
 Digite exatamente:
 
 ELIMINAR
+
+para confirmar a eliminação.
 
 Escola:
 ${nome}`
@@ -1031,12 +1322,13 @@ ${nome}`
     catch (erro) {
 
         console.error(
-            "Erro ao eliminar escola:",
+            "Erro ao eliminar:",
             erro
         );
 
+
         mostrarMensagem(
-            "Não foi possível eliminar a escola: " +
+            "Erro ao eliminar escola: " +
             erro.message,
             "erro"
         );
@@ -1050,11 +1342,15 @@ ${nome}`
 // TERMINAR SESSÃO
 // =====================================================
 
-async function terminarSessao() {
+window.terminarSessao =
+async function() {
 
     try {
 
-        await signOut(auth);
+        await signOut(
+            auth
+        );
+
 
         window.location.href =
             "./login.html";
@@ -1068,162 +1364,14 @@ async function terminarSessao() {
             erro
         );
 
-        mostrarMensagem(
-            "Não foi possível terminar a sessão.",
-            "erro"
+
+        alert(
+            "Não foi possível terminar a sessão."
         );
 
     }
 
-}
-
-
-// =====================================================
-// DISPONIBILIZAR BOTÃO DE LOGOUT
-// =====================================================
-
-window.terminarSessao =
-    terminarSessao;
-
-
-// =====================================================
-// VERIFICAR SUPER ADMIN
-// =====================================================
-
-async function verificarSuperAdmin(
-    usuario
-) {
-
-    console.log(
-        "===================================="
-    );
-
-    console.log(
-        "SUPER ADMIN — VERIFICAÇÃO"
-    );
-
-    console.log(
-        "E-mail:",
-        usuario.email
-    );
-
-    console.log(
-        "UID:",
-        usuario.uid
-    );
-
-
-    // =============================================
-    // VERIFICAR UID
-    // =============================================
-
-    if (
-        usuario.uid !==
-        SUPER_ADMIN_UID
-    ) {
-
-        console.warn(
-            "UID não pertence ao Super Admin."
-        );
-
-        mostrarAcessoNegado();
-
-        return;
-
-    }
-
-
-    // =============================================
-    // BUSCAR SUPER ADMIN
-    // =============================================
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "superAdmins",
-                usuario.uid
-            );
-
-
-        const resultado =
-            await getDoc(
-                referencia
-            );
-
-
-        if (!resultado.exists()) {
-
-            console.error(
-                "Documento superAdmins não encontrado."
-            );
-
-            mostrarAcessoNegado();
-
-            return;
-
-        }
-
-
-        const dados =
-            resultado.data();
-
-
-        if (
-            dados.ativo !== true
-        ) {
-
-            console.error(
-                "Super Admin está desativado."
-            );
-
-            mostrarAcessoNegado();
-
-            return;
-
-        }
-
-
-        // =========================================
-        // NOME
-        // =========================================
-
-if (nomeAdmin) {
-
-            nomeAdmin.textContent =
-                dados.nome ||
-                usuario.email ||
-                "Super Admin";
-
-        }
-
-
-        console.log(
-            "SUPER ADMIN AUTORIZADO!"
-        );
-
-
-        mostrarPainel();
-
-
-        await carregarEscolas();
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao verificar Super Admin:",
-            erro
-        );
-
-
-        mostrarAcessoNegado();
-
-    }
-
-}
+};
 
 
 // =====================================================
@@ -1233,8 +1381,23 @@ if (nomeAdmin) {
 mostrarCarregando();
 
 
+console.log(
+    "===================================="
+);
+
+console.log(
+    "INICIANDO SUPER ADMIN"
+);
+
+console.log(
+    "===================================="
+);
+
+
 onAuthStateChanged(
+
     auth,
+
     async usuario => {
 
         console.log(
@@ -1244,10 +1407,6 @@ onAuthStateChanged(
                 : "não autenticado"
         );
 
-
-        // =============================================
-        // NÃO ESTÁ LOGADO
-        // =============================================
 
         if (!usuario) {
 
@@ -1264,13 +1423,10 @@ onAuthStateChanged(
         }
 
 
-        // =============================================
-        // ESTÁ LOGADO
-        // =============================================
-
         await verificarSuperAdmin(
             usuario
         );
 
     }
+
 );
