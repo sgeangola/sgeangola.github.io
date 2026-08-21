@@ -1,4 +1,9 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
 
 <meta
     name="viewport"
@@ -10,877 +15,777 @@
 
 <style>
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+
+    font-family: Arial, sans-serif;
+
+    background: #f4f9fc;
+
+    color: #17324d;
+
+    min-height: 100vh;
+
+}
+
+
+/* =====================================================
+   CARREGANDO
+===================================================== */
+
+#carregando {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    color: #60798b;
+
+}
+
+.carregando-box {
+
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 30px
+        rgba(30,80,110,.08);
+
+}
+
+.carregando-logo {
+
+    width: 70px;
+
+    height: 70px;
+
+    margin: 0 auto 15px;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    background: #087bb8;
+
+}
+
+.carregando-logo img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+}
+
+
+/* =====================================================
+   ACESSO NEGADO
+===================================================== */
+
+#acessoNegado {
+
+    min-height: 100vh;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+}
+
+.acesso-card {
+
+    background: white;
+
+    max-width: 450px;
+
+    width: 100%;
+
+    padding: 35px;
+
+    border-radius: 18px;
+
+    text-align: center;
+
+    box-shadow:
+        0 8px 30px
+        rgba(30,80,110,.08);
+
+}
+
+.acesso-card h2 {
+
+    color: #c62828;
+
+    margin-bottom: 12px;
+
+}
+
+.acesso-card p {
+
+    color: #687f91;
+
+    line-height: 1.6;
+
+}
+
+
+/* =====================================================
+   PAINEL
+===================================================== */
+
+#painelAdmin {
+
+    display: none;
+
+}
+
+
+/* =====================================================
+   CABEÇALHO
+===================================================== */
+
+header {
+
+    background: white;
+
+    border-bottom:
+        1px solid #dceaf2;
+
+    padding:
+        15px 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+}
+
+
+.marca {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+.logo {
+
+    width: 48px;
+
+    height: 48px;
+
+    border-radius: 12px;
+
+    background: #087bb8;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+.logo img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+}
+
+
+.marca h1 {
+
+    font-size: 20px;
+
+    color: #17324d;
+
+}
+
+
+.marca p {
+
+    margin-top: 3px;
+
+    color: #70879a;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   ADMIN INFO
+===================================================== */
+
+.admin-info {
+
+    text-align: right;
+
+    font-size: 13px;
+
+    color: #60798b;
+
+}
+
+
+#nomeAdmin {
+
+    font-weight: bold;
+
+    color: #087bb8;
+
+    margin-top: 3px;
+
+}
+
+
+#emailAdmin {
+
+    font-size: 12px;
+
+    margin-top: 2px;
+
+}
+
+
+#btnSair {
+
+    margin-top: 9px;
+
+    background: #f1f5f9;
+
+    color: #17324d;
+
+    border:
+        1px solid #dceaf2;
+
+    padding:
+        7px 14px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    font-size: 12px;
+
+}
+
+
+#btnSair:hover {
+
+    background: #e4edf3;
+
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.container {
+
+    width: 100%;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 30px 20px;
+
+}
+
+
+.titulo {
+
+    margin-bottom: 25px;
+
+}
+
+
+.titulo h2 {
+
+    font-size: 26px;
+
+    margin-bottom: 7px;
+
+}
+
+
+.titulo p {
+
+    color: #70879a;
+
+    font-size: 14px;
+
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.cards {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.card {
+
+    background: white;
+
+    padding: 20px;
+
+    border-radius: 14px;
+
+    border:
+        1px solid #e0edf3;
+
+    box-shadow:
+        0 5px 20px
+        rgba(30,80,110,.05);
+
+}
+
+
+.card h3 {
+
+    font-size: 13px;
+
+    color: #718697;
+
+    margin-bottom: 10px;
+
+}
+
+
+.numero {
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+}
+
+
+.pendente {
+
+    color: #d99000;
+
+}
+
+
+.ativo {
+
+    color: #159447;
+
+}
+
+
+.rejeitado {
+
+    color: #d12d2d;
+
+}
+
+
+/* =====================================================
+   MENSAGEM
+===================================================== */
+
+#mensagem {
+
+    display: none;
+
+    padding: 12px;
+
+    margin-bottom: 15px;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+}
+
+
+/* =====================================================
+   SEÇÃO
+===================================================== */
+
+.secao {
+
+    background: white;
+
+    border:
+        1px solid #e0edf3;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(30,80,110,.05);
+
+}
+
+
+.secao-header {
+
+    margin-bottom: 20px;
+
+}
+
+
+.secao-header h2 {
+
+    font-size: 20px;
+
+    margin-bottom: 5px;
+
+}
+
+
+.secao-header p {
+
+    color: #718697;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   TABELA
+===================================================== */
+
+.tabela-container {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+}
+
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 850px;
+
+}
+
+
+th {
+
+    background: #f1f8fc;
+
+    color: #456477;
+
+    text-align: left;
+
+    font-size: 13px;
+
+    padding: 13px;
+
+    border-bottom:
+        1px solid #dceaf2;
+
+}
+
+
+td {
+
+    padding: 13px;
+
+    border-bottom:
+        1px solid #edf2f5;
+
+    font-size: 14px;
+
+}
+
+
+tr:hover td {
+
+    background: #fafdff;
+
+}
+
+
+/* =====================================================
+   ESTADOS
+===================================================== */
+
+.estado {
+
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+}
+
+
+.estado-pendente {
+
+    background: #fff4d6;
+
+    color: #9a6700;
+
+}
+
+
+.estado-ativo {
+
+    background: #e5f7eb;
+
+    color: #18743a;
+
+}
+
+
+.estado-rejeitado {
+
+    background: #fde8e8;
+
+    color: #a52626;
+
+}
+
+
+/* =====================================================
+   AÇÕES
+===================================================== */
+
+.acoes {
+
+    display: flex;
+
+    gap: 6px;
+
+    flex-wrap: wrap;
+
+}
+
+
+button {
+
+    border: none;
+
+    border-radius: 7px;
+
+    padding: 8px 10px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+}
+
+
+button:hover {
+
+    opacity: .9;
+
+}
+
+
+.btn-ver {
+
+    background: #e8f2f8;
+
+    color: #12618c;
+
+}
+
+
+.btn-aprovar {
+
+    background: #e5f7eb;
+
+    color: #18743a;
+
+}
+
+
+.btn-rejeitar {
+
+    background: #fde8e8;
+
+    color: #a52626;
+
+}
+
+
+.btn-eliminar {
+
+    background: #7f1d1d;
+
+    color: white;
+
+}
+
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+
+@media (max-width: 800px) {
+
+    .cards {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
     }
 
-
-    body {
-
-        font-family:
-            Arial,
-            sans-serif;
-
-        background:
-            #f4f9fc;
-
-        color:
-            #17324d;
-
-        min-height: 100vh;
-
-    }
+}
 
 
-    /* =========================================
-       CABEÇALHO
-    ========================================== */
+@media (max-width: 600px) {
 
     header {
 
-        background:
-            white;
-
-        border-bottom:
-            1px solid #dceaf2;
-
         padding:
-            15px 25px;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            space-between;
-
-        gap:
-            15px;
-
-    }
-
-
-    .marca {
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        gap:
-            12px;
-
-    }
-
-
-    .logo {
-
-        width:
-            48px;
-
-        height:
-            48px;
-
-        border-radius:
-            12px;
-
-        background:
-            #087bb8;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        color:
-            white;
-
-        font-weight:
-            bold;
-
-        font-size:
-            18px;
-
-        overflow:
-            hidden;
-
-    }
-
-
-    .logo img {
-
-        width:
-            100%;
-
-        height:
-            100%;
-
-        object-fit:
-            contain;
-
-    }
-
-
-    .marca h1 {
-
-        font-size:
-            20px;
-
-        color:
-            #17324d;
-
-    }
-
-
-    .marca p {
-
-        margin-top:
-            3px;
-
-        color:
-            #70879a;
-
-        font-size:
-            13px;
+            13px 15px;
 
     }
 
 
     .admin-info {
 
-        text-align:
-            right;
-
-        font-size:
-            13px;
-
-        color:
-            #60798b;
-
-    }
-
-
-    #nomeAdmin {
-
-        font-weight:
-            bold;
-
-        color:
-            #087bb8;
-
-    }
-
-
-    /* =========================================
-       CARREGAMENTO
-    ========================================== */
-
-    #carregando {
-
-        min-height:
-            100vh;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        text-align:
-            center;
-
-        color:
-            #60798b;
-
-    }
-
-
-    /* =========================================
-       ACESSO NEGADO
-    ========================================== */
-
-    #acessoNegado {
-
-        min-height:
-            100vh;
-
-        display:
-            none;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        padding:
-            20px;
-
-    }
-
-
-    .acesso-card {
-
-        background:
-            white;
-
-        max-width:
-            450px;
-
-        width:
-            100%;
-
-        padding:
-            35px;
-
-        border-radius:
-            18px;
-
-        text-align:
-            center;
-
-        box-shadow:
-            0 8px 30px
-            rgba(
-                30,
-                80,
-                110,
-                .08
-            );
-
-    }
-
-
-    .acesso-card h2 {
-
-        color:
-            #c62828;
-
-        margin-bottom:
-            12px;
-
-    }
-
-
-    .acesso-card p {
-
-        color:
-            #687f91;
-
-        line-height:
-            1.6;
-
-    }
-
-
-    /* =========================================
-       PAINEL
-    ========================================== */
-
-    #painelAdmin {
-
-        display:
-            none;
+        display: none;
 
     }
 
 
     .container {
 
-        width:
-            100%;
-
-        max-width:
-            1200px;
-
-        margin:
-            0 auto;
-
         padding:
-            30px 20px;
+            20px 12px;
 
     }
 
-
-    .titulo {
-
-        margin-bottom:
-            25px;
-
-    }
-
-
-    .titulo h2 {
-
-        font-size:
-            26px;
-
-        margin-bottom:
-            7px;
-
-    }
-
-
-    .titulo p {
-
-        color:
-            #70879a;
-
-        font-size:
-            14px;
-
-    }
-
-
-    /* =========================================
-       ESTATÍSTICAS
-    ========================================== */
 
     .cards {
 
-        display:
-            grid;
-
         grid-template-columns:
-            repeat(
-                4,
-                1fr
-            );
-
-        gap:
-            15px;
-
-        margin-bottom:
-            25px;
+            1fr 1fr;
 
     }
 
 
     .card {
 
-        background:
-            white;
-
-        padding:
-            20px;
-
-        border-radius:
-            14px;
-
-        border:
-            1px solid #e0edf3;
-
-        box-shadow:
-            0 5px 20px
-            rgba(
-                30,
-                80,
-                110,
-                .05
-            );
-
-    }
-
-
-    .card h3 {
-
-        font-size:
-            13px;
-
-        color:
-            #718697;
-
-        margin-bottom:
-            10px;
+        padding: 15px;
 
     }
 
 
     .numero {
 
-        font-size:
-            30px;
-
-        font-weight:
-            bold;
+        font-size: 25px;
 
     }
 
-
-    .pendente {
-
-        color:
-            #d99000;
-
-    }
-
-
-    .ativo {
-
-        color:
-            #159447;
-
-    }
-
-
-    .rejeitado {
-
-        color:
-            #d12d2d;
-
-    }
-
-
-    /* =========================================
-       SEÇÃO
-    ========================================== */
 
     .secao {
 
-        background:
-            white;
-
-        border:
-            1px solid #e0edf3;
-
-        border-radius:
-            16px;
-
-        padding:
-            22px;
-
-        box-shadow:
-            0 5px 20px
-            rgba(
-                30,
-                80,
-                110,
-                .05
-            );
+        padding: 15px;
 
     }
 
-
-    .secao-header {
-
-        margin-bottom:
-            20px;
-
-    }
-
-
-    .secao-header h2 {
-
-        font-size:
-            20px;
-
-        margin-bottom:
-            5px;
-
-    }
-
-
-    .secao-header p {
-
-        color:
-            #718697;
-
-        font-size:
-            13px;
-
-    }
-
-
-    /* =========================================
-       TABELA
-    ========================================== */
-
-    .tabela-container {
-
-        width:
-            100%;
-
-        overflow-x:
-            auto;
-
-    }
-
-
-    table {
-
-        width:
-            100%;
-
-        border-collapse:
-            collapse;
-
-        min-width:
-            800px;
-
-    }
-
-
-    th {
-
-        background:
-            #f1f8fc;
-
-        color:
-            #456477;
-
-        text-align:
-            left;
-
-        font-size:
-            13px;
-
-        padding:
-            13px;
-
-        border-bottom:
-            1px solid #dceaf2;
-
-    }
-
-
-    td {
-
-        padding:
-            13px;
-
-        border-bottom:
-            1px solid #edf2f5;
-
-        font-size:
-            14px;
-
-    }
-
-
-    tr:hover td {
-
-        background:
-            #fafdff;
-
-    }
-
-
-    /* =========================================
-       ESTADO
-    ========================================== */
-
-    .estado {
-
-        display:
-            inline-block;
-
-        padding:
-            5px 10px;
-
-        border-radius:
-            20px;
-
-        font-size:
-            12px;
-
-        font-weight:
-            bold;
-
-    }
-
-
-    .estado-pendente {
-
-        background:
-            #fff4d6;
-
-        color:
-            #9a6700;
-
-    }
-
-
-    .estado-ativo {
-
-        background:
-            #e5f7eb;
-
-        color:
-            #18743a;
-
-    }
-
-
-    .estado-rejeitado {
-
-        background:
-            #fde8e8;
-
-        color:
-            #a52626;
-
-    }
-
-
-    /* =========================================
-       AÇÕES
-    ========================================== */
-
-    .acoes {
-
-        display:
-            flex;
-
-        gap:
-            6px;
-
-        flex-wrap:
-            wrap;
-
-    }
-
-
-    button {
-
-        border:
-            none;
-
-        border-radius:
-            7px;
-
-        padding:
-            8px 10px;
-
-        cursor:
-            pointer;
-
-        font-size:
-            12px;
-
-        font-weight:
-            bold;
-
-    }
-
-
-    .btn-ver {
-
-        background:
-            #e8f2f8;
-
-        color:
-            #12618c;
-
-    }
-
-
-    .btn-aprovar {
-
-        background:
-            #e5f7eb;
-
-        color:
-            #18743a;
-
-    }
-
-
-    .btn-rejeitar {
-
-        background:
-            #fde8e8;
-
-        color:
-            #a52626;
-
-    }
-
-
-    .btn-eliminar {
-
-        background:
-            #7f1d1d;
-
-        color:
-            white;
-
-    }
-
-
-    /* =========================================
-       MENSAGEM
-    ========================================== */
-
-    #mensagem {
-
-        display:
-            none;
-
-        padding:
-            12px;
-
-        margin-bottom:
-            15px;
-
-        border-radius:
-            9px;
-
-        font-size:
-            14px;
-
-    }
-
-
-    /* =========================================
-       RESPONSIVO
-    ========================================== */
-
-    @media (
-        max-width: 800px
-    ) {
-
-        .cards {
-
-            grid-template-columns:
-                repeat(
-                    2,
-                    1fr
-                );
-
-        }
-
-    }
-
-
-    @media (
-        max-width: 600px
-    ) {
-
-        header {
-
-            padding:
-                13px 15px;
-
-        }
-
-
-        .admin-info {
-
-            display:
-                none;
-
-        }
-
-
-        .container {
-
-            padding:
-                20px 12px;
-
-        }
-
-
-        .cards {
-
-            grid-template-columns:
-                1fr 1fr;
-
-        }
-
-
-        .card {
-
-            padding:
-                15px;
-
-        }
-
-
-        .numero {
-
-            font-size:
-                25px;
-
-        }
-
-
-        .secao {
-
-            padding:
-                15px;
-
-        }
-
-    }
+}
 
 </style>
 
-</head><body><!-- =====================================================
-     CARREGAMENTO
-===================================================== --><div id="carregando"><div>
-
-    <h2>SGE</h2>
-
-    <p>
-        A verificar acesso ao Super Admin...
-    </p>
-
-</div>
-
-</div><!-- =====================================================
-     ACESSO NEGADO
-===================================================== --><div id="acessoNegado"><div class="acesso-card">
-
-    <h2>
-        Acesso negado
-    </h2>
-
-    <p>
-        Esta área é exclusiva do
-        Super Administrador do SGE.
-    </p>
-
-</div>
-
-</div><!-- =====================================================
-     PAINEL
-===================================================== --><div id="painelAdmin"><header><div class="marca">
-
-    <div class="logo">
-
-        <!--
-            COLOQUE AQUI O MESMO LOGOTIPO
-            UTILIZADO NO RESTANTE DO SITE.
-        -->
-
-        <img
-            src="../assets/logo.png"
-            alt="SGE Angola"
-        >
-
-    </div>
+</head>
 
 
-    <div>
+<body>
 
-        <h1>
+
+<!-- =====================================================
+     CARREGANDO
+===================================================== -->
+
+<div id="carregando">
+
+    <div class="carregando-box">
+
+        <div class="carregando-logo">
+
+            <img
+                src="../assets/logo.png"
+                alt="SGE Angola"
+            >
+
+        </div>
+
+        <h2>
             SGE Angola
-        </h1>
+        </h2>
 
         <p>
-            Super Admin — Gestão da Plataforma
+            A verificar acesso ao Super Admin...
         </p>
 
     </div>
@@ -888,19 +793,92 @@
 </div>
 
 
-<div class="admin-info">
+<!-- =====================================================
+     ACESSO NEGADO
+===================================================== -->
 
-    <div>
-        Administrador
-    </div>
+<div id="acessoNegado">
 
-    <div id="nomeAdmin">
-        Super Admin
+    <div class="acesso-card">
+
+        <h2>
+            Acesso negado
+        </h2>
+
+        <p>
+            Esta área é exclusiva do
+            Super Administrador do SGE.
+        </p>
+
     </div>
 
 </div>
 
-</header><main class="container"><div class="titulo">
+
+<!-- =====================================================
+     PAINEL
+===================================================== -->
+
+<div id="painelAdmin">
+
+
+<header>
+
+    <div class="marca">
+
+        <div class="logo">
+
+            <img
+                src="../assets/logo.png"
+                alt="SGE Angola"
+            >
+
+        </div>
+
+
+        <div>
+
+            <h1>
+                SGE Angola
+            </h1>
+
+            <p>
+                Super Admin — Gestão da Plataforma
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="admin-info">
+
+        <div>
+            Administrador
+        </div>
+
+        <div id="nomeAdmin">
+            Super Admin
+        </div>
+
+        <div id="emailAdmin"></div>
+
+        <button
+            id="btnSair"
+            type="button"
+        >
+            Sair
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+
+
+<div class="titulo">
 
     <h2>
         Gestão das Escolas
@@ -914,75 +892,75 @@
 </div>
 
 
-<!-- ===============================================
+<!-- =====================================================
      ESTATÍSTICAS
-================================================ -->
+===================================================== -->
 
 <section class="cards">
 
 
-    <div class="card">
+<div class="card">
 
-        <h3>
-            Escolas Pendentes
-        </h3>
+    <h3>
+        Escolas Pendentes
+    </h3>
 
-        <div
-            id="totalPendentes"
-            class="numero pendente"
-        >
-            0
-        </div>
-
+    <div
+        id="totalPendentes"
+        class="numero pendente"
+    >
+        0
     </div>
 
+</div>
 
-    <div class="card">
 
-        <h3>
-            Escolas Ativas
-        </h3>
+<div class="card">
 
-        <div
-            id="totalAtivas"
-            class="numero ativo"
-        >
-            0
-        </div>
+    <h3>
+        Escolas Ativas
+    </h3>
 
+    <div
+        id="totalAtivas"
+        class="numero ativo"
+    >
+        0
     </div>
 
+</div>
 
-    <div class="card">
 
-        <h3>
-            Escolas Rejeitadas
-        </h3>
+<div class="card">
 
-        <div
-            id="totalRejeitadas"
-            class="numero rejeitado"
-        >
-            0
-        </div>
+    <h3>
+        Escolas Rejeitadas
+    </h3>
 
+    <div
+        id="totalRejeitadas"
+        class="numero rejeitado"
+    >
+        0
     </div>
 
+</div>
 
-    <div class="card">
 
-        <h3>
-            Total de Escolas
-        </h3>
+<div class="card">
 
-        <div
-            id="totalEscolas"
-            class="numero"
-        >
-            0
-        </div>
+    <h3>
+        Total de Escolas
+    </h3>
 
+    <div
+        id="totalEscolas"
+        class="numero"
+    >
+        0
     </div>
+
+</div>
 
 </section>
 
@@ -990,88 +968,100 @@
 <div id="mensagem"></div>
 
 
-<!-- ===============================================
+<!-- =====================================================
      ESCOLAS
-================================================ -->
+===================================================== -->
 
 <section class="secao">
 
-    <div class="secao-header">
 
-        <h2>
-            Escolas registadas
-        </h2>
+<div class="secao-header">
 
-        <p>
-            Gestão e aprovação das escolas
-            da plataforma.
-        </p>
+    <h2>
+        Escolas registadas
+    </h2>
 
-    </div>
+    <p>
+        Gestão e aprovação das escolas
+        da plataforma.
+    </p>
 
-
-    <div class="tabela-container">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Nome da Escola
-                    </th>
-
-                    <th>
-                        Gestor
-                    </th>
-
-                    <th>
-                        E-mail
-                    </th>
-
-                    <th>
-                        Telefone
-                    </th>
-
-                    <th>
-                        Estado
-                    </th>
-
-                    <th>
-                        Ações
-                    </th>
-
-                </tr>
-
-            </thead>
+</div>
 
 
-            <tbody
-                id="listaEscolas"
-            >
+<div class="tabela-container">
 
-                <tr>
+<table>
 
-                    <td colspan="6">
+<thead>
 
-                        A carregar escolas...
+<tr>
 
-                    </td>
+    <th>
+        Nome da Escola
+    </th>
 
-                </tr>
+    <th>
+        Gestor
+    </th>
 
-            </tbody>
+    <th>
+        E-mail
+    </th>
 
-        </table>
+    <th>
+        Telefone
+    </th>
 
-    </div>
+    <th>
+        Estado
+    </th>
+
+    <th>
+        Ações
+    </th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="listaEscolas">
+
+<tr>
+
+    <td colspan="6">
+
+        A carregar escolas...
+
+    </td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
 
 </section>
 
-</main></div><!-- =====================================================
+
+</main>
+
+</div>
+
+
+<!-- =====================================================
      JAVASCRIPT
-===================================================== --><script
+===================================================== -->
+
+<script
     type="module"
-    src="../services/super-admin.js?v=2"
-></script></body></html>
+    src="../services/super-admin.js?v=3"
+></script>
+
+
+</body>
+
+</html>
