@@ -35,7 +35,7 @@ const SUPER_ADMIN_EMAIL =
 
 // ⚠️ COLOQUE AQUI A SENHA DA CONTA
 const SUPER_ADMIN_PASSWORD =
-    "123456";
+    "correia123df.";
 
 
 const SUPER_ADMIN_UID =
