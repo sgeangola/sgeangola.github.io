@@ -10,6 +10,8 @@ import {
 import {
     collection,
     addDoc,
+    deleteDoc,
+    doc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
@@ -23,10 +25,27 @@ import {
 // ELEMENTOS
 // =====================================================
 
-const form = document.getElementById("formEscola");
-const btnCadastrar = document.getElementById("btnCadastrar");
-const mensagem = document.getElementById("mensagem");
-const resultadoCadastro = document.getElementById("resultadoCadastro");
+const form =
+    document.getElementById("formEscola");
+
+const btnCadastrar =
+    document.getElementById("btnCadastrar");
+
+const mensagem =
+    document.getElementById("mensagem");
+
+const resultadoCadastro =
+    document.getElementById("resultadoCadastro");
+
+const btnApagarEscola =
+    document.getElementById("btnApagarEscola");
+
+
+// =====================================================
+// ID DA ESCOLA CRIADA
+// =====================================================
+
+let escolaCriadaId = "";
 
 
 // =====================================================
@@ -113,11 +132,14 @@ function mostrarMensagem(
     tipo
 ) {
 
-    if (!mensagem) return;
+    if (!mensagem)
+        return;
 
-    mensagem.textContent = texto;
+    mensagem.textContent =
+        texto;
 
-    mensagem.className = tipo;
+    mensagem.className =
+        tipo;
 
 }
 
@@ -209,7 +231,8 @@ if (form) {
 
             if (btnCadastrar) {
 
-                btnCadastrar.disabled = true;
+                btnCadastrar.disabled =
+                    true;
 
                 btnCadastrar.textContent =
                     "A cadastrar escola...";
@@ -233,44 +256,44 @@ if (form) {
 
                 const nome =
                     document
-                    .getElementById("nome")
-                    .value
-                    .trim();
+                        .getElementById("nome")
+                        .value
+                        .trim();
 
 
                 const provincia =
                     document
-                    .getElementById("provincia")
-                    .value
-                    .trim();
+                        .getElementById("provincia")
+                        .value
+                        .trim();
 
 
                 const municipio =
                     document
-                    .getElementById("municipio")
-                    .value
-                    .trim();
+                        .getElementById("municipio")
+                        .value
+                        .trim();
 
 
                 const telefone =
                     document
-                    .getElementById("telefone")
-                    .value
-                    .trim();
+                        .getElementById("telefone")
+                        .value
+                        .trim();
 
 
                 const emailEscola =
                     document
-                    .getElementById("emailEscola")
-                    .value
-                    .trim();
+                        .getElementById("emailEscola")
+                        .value
+                        .trim();
 
 
                 const anoLetivo =
                     document
-                    .getElementById("anoLetivo")
-                    .value
-                    .trim();
+                        .getElementById("anoLetivo")
+                        .value
+                        .trim();
 
 
                 // =====================================
@@ -279,8 +302,8 @@ if (form) {
 
                 const tipoEscola =
                     document
-                    .getElementById("tipoEscola")
-                    .value;
+                        .getElementById("tipoEscola")
+                        .value;
 
 
                 // =====================================
@@ -334,28 +357,28 @@ if (form) {
 
                 const nomeGestor =
                     document
-                    .getElementById("nomeGestor")
-                    .value
-                    .trim();
+                        .getElementById("nomeGestor")
+                        .value
+                        .trim();
 
 
                 const emailGestor =
                     document
-                    .getElementById("emailGestor")
-                    .value
-                    .trim();
+                        .getElementById("emailGestor")
+                        .value
+                        .trim();
 
 
                 const senhaGestor =
                     document
-                    .getElementById("senhaGestor")
-                    .value;
+                        .getElementById("senhaGestor")
+                        .value;
 
 
                 const confirmarSenha =
                     document
-                    .getElementById("confirmarSenha")
-                    .value;
+                        .getElementById("confirmarSenha")
+                        .value;
 
 
                 // =====================================
@@ -423,7 +446,7 @@ if (form) {
 
 
                 // =====================================
-                // VALIDAR ESTRUTURA DO PRIMÁRIO
+                // VALIDAR PRIMÁRIO
                 // =====================================
 
                 if (
@@ -441,7 +464,7 @@ if (form) {
 
 
                 // =====================================
-                // VALIDAR ESTRUTURA DO PRIMEIRO CICLO
+                // VALIDAR PRIMEIRO CICLO
                 // =====================================
 
                 if (
@@ -459,7 +482,7 @@ if (form) {
 
 
                 // =====================================
-                // GESTOR
+                // VALIDAR GESTOR
                 // =====================================
 
                 if (!nomeGestor) {
@@ -539,58 +562,68 @@ if (form) {
                 // DADOS DA ESCOLA
                 // =====================================
 
-const dadosEscola = {
+                const dadosEscola = {
 
-    nome: nome,
+                    nome:
+                        nome,
 
-    provincia: provincia,
+                    provincia:
+                        provincia,
 
-    municipio: municipio,
+                    municipio:
+                        municipio,
 
-    telefone: telefone,
+                    telefone:
+                        telefone,
 
-    email: emailEscola,
+                    email:
+                        emailEscola,
 
-    anoLetivoAtual: anoLetivo,
+                    anoLetivoAtual:
+                        anoLetivo,
 
-    tipoEscola: tipoEscola,
+                    tipoEscola:
+                        tipoEscola,
 
-    ensinos:
-        ensinosSelecionados,
+                    ensinos:
+                        ensinosSelecionados,
 
-    estrutura: {
+                    estrutura: {
 
-        ensinoPrimario:
-            estruturaPrimario,
+                        ensinoPrimario:
+                            estruturaPrimario,
 
-        primeiroCiclo:
-            estruturaPrimeiroCiclo
+                        primeiroCiclo:
+                            estruturaPrimeiroCiclo
 
-    },
+                    },
 
-    gestorUid:
-        uidGestor,
+                    gestorUid:
+                        uidGestor,
 
-    nomeGestor:
-        nomeGestor,
+                    nomeGestor:
+                        nomeGestor,
 
-    emailGestor:
-        emailGestor,
+                    emailGestor:
+                        emailGestor,
 
-    logoUrl: "",
+                    logoUrl:
+                        "",
 
-    // =====================================
-    // APROVAÇÃO DA ESCOLA
-    // =====================================
+                    // =================================
+                    // APROVAÇÃO
+                    // =================================
 
-    estado: "pendente",
+                    estado:
+                        "pendente",
 
-    ativo: false,
+                    ativo:
+                        false,
 
-    criadoEm:
-        serverTimestamp()
+                    criadoEm:
+                        serverTimestamp()
 
-};
+                };
 
 
                 // =====================================
@@ -607,9 +640,13 @@ const dadosEscola = {
                     );
 
 
+                escolaCriadaId =
+                    escolaRef.id;
+
+
                 console.log(
                     "ESCOLA CRIADA:",
-                    escolaRef.id
+                    escolaCriadaId
                 );
 
 
@@ -632,6 +669,7 @@ const dadosEscola = {
                         "resultadoEscola"
                     );
 
+
                 if (resultadoEscola) {
 
                     resultadoEscola.textContent =
@@ -644,6 +682,7 @@ const dadosEscola = {
                     document.getElementById(
                         "resultadoNomeGestor"
                     );
+
 
                 if (resultadoNomeGestor) {
 
@@ -658,6 +697,7 @@ const dadosEscola = {
                         "resultadoEmail"
                     );
 
+
                 if (resultadoEmail) {
 
                     resultadoEmail.textContent =
@@ -670,6 +710,7 @@ const dadosEscola = {
                     document.getElementById(
                         "resultadoTipo"
                     );
+
 
                 if (resultadoTipo) {
 
@@ -686,14 +727,13 @@ const dadosEscola = {
                         "resultadoEnsinos"
                     );
 
+
                 if (resultadoEnsinos) {
 
                     resultadoEnsinos.textContent =
                         ensinosSelecionados
-                        .map(
-                            nomeEnsino
-                        )
-                        .join(" + ");
+                            .map(nomeEnsino)
+                            .join(" + ");
 
                 }
 
@@ -707,6 +747,24 @@ const dadosEscola = {
 
 
                 // =====================================
+                // MOSTRAR BOTÃO APAGAR
+                // =====================================
+
+                if (btnApagarEscola) {
+
+                    btnApagarEscola.style.display =
+                        "inline-block";
+
+                    btnApagarEscola.disabled =
+                        false;
+
+                    btnApagarEscola.textContent =
+                        "🗑️ Apagar escola";
+
+                }
+
+
+                // =====================================
                 // GUARDAR ESCOLA ATUAL
                 // =====================================
 
@@ -715,20 +773,24 @@ const dadosEscola = {
                     escolaRef.id
                 );
 
+
                 localStorage.setItem(
-    "escolaId",
-    escolaRef.id
-);
-                
+                    "escolaId",
+                    escolaRef.id
+                );
+
+
                 sessionStorage.setItem(
                     "nomeEscola",
                     nome
                 );
 
+
                 sessionStorage.setItem(
                     "tipoEscola",
                     tipoEscola
                 );
+
 
                 sessionStorage.setItem(
                     "ensinos",
@@ -756,12 +818,13 @@ const dadosEscola = {
                 // LIMPAR FORMULÁRIO
                 // =====================================
 
-                form.reset();
+              form.reset();
 
                 atualizarEstruturaEnsino();
 
-
             }
+
+
             catch (erro) {
 
                 console.error(
@@ -849,4 +912,183 @@ const dadosEscola = {
         }
     );
 
-    }
+}
+
+
+// =====================================================
+// APAGAR ESCOLA
+// =====================================================
+
+if (btnApagarEscola) {
+
+    btnApagarEscola.addEventListener(
+        "click",
+        async function () {
+
+            // -----------------------------------------
+            // VERIFICAR ID
+            // -----------------------------------------
+
+            if (!escolaCriadaId) {
+
+                mostrarMensagem(
+                    "❌ Nenhuma escola criada nesta sessão.",
+                    "erro"
+                );
+
+                return;
+
+            }
+
+
+            // -----------------------------------------
+            // CONFIRMAÇÃO
+            // -----------------------------------------
+
+            const confirmar =
+                confirm(
+                    "⚠️ ATENÇÃO!\n\n" +
+                    "Tem certeza que deseja apagar esta escola?\n\n" +
+                    "O cadastro da escola será removido do Firestore."
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            try {
+
+                btnApagarEscola.disabled =
+                    true;
+
+                btnApagarEscola.textContent =
+                    "A apagar escola...";
+
+
+                // -------------------------------------
+                // APAGAR DOCUMENTO DA ESCOLA
+                // -------------------------------------
+
+                await deleteDoc(
+                    doc(
+                        db,
+                        "escolas",
+                        escolaCriadaId
+                    )
+                );
+
+
+                console.log(
+                    "ESCOLA APAGADA:",
+                    escolaCriadaId
+                );
+
+
+                // -------------------------------------
+                // LIMPAR SESSÃO
+                // -------------------------------------
+
+                sessionStorage.removeItem(
+                    "escolaId"
+                );
+
+                localStorage.removeItem(
+                    "escolaId"
+                );
+
+                sessionStorage.removeItem(
+                    "nomeEscola"
+                );
+
+                sessionStorage.removeItem(
+                    "tipoEscola"
+                );
+
+                sessionStorage.removeItem(
+                    "ensinos"
+                );
+
+                sessionStorage.removeItem(
+                    "estruturaEscola"
+                );
+
+
+                // -------------------------------------
+                // LIMPAR ID
+                // -------------------------------------
+
+                escolaCriadaId =
+                    "";
+
+
+                // -------------------------------------
+                // ESCONDER BOTÃO
+                // -------------------------------------
+
+                btnApagarEscola.style.display =
+                    "none";
+
+
+                // -------------------------------------
+                // MENSAGEM
+                // -------------------------------------
+
+                mostrarMensagem(
+                    "✅ Escola apagada com sucesso.",
+                    "sucesso"
+                );
+
+
+                if (resultadoCadastro) {
+
+                    resultadoCadastro.style.display =
+                        "none";
+
+                }
+
+            }
+
+
+            catch (erro) {
+
+                console.error(
+                    "❌ ERRO AO APAGAR ESCOLA:",
+                    erro
+                );
+
+
+                mostrarMensagem(
+                    "❌ Não foi possível apagar a escola.\n\n" +
+                    erro.message,
+                    "erro"
+                );
+
+
+                btnApagarEscola.disabled =
+                    false;
+
+                btnApagarEscola.textContent =
+                    "🗑️ Apagar escola";
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// INICIALIZAÇÃO
+// =====================================================
+
+atualizarEstruturaEnsino();
+
+
+// =====================================================
+// FIM
+// =====================================================
