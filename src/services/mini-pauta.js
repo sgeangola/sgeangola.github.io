@@ -19,7 +19,7 @@ import {
 
 
 // =====================================================
-// ESCOLA
+// ESCOLA ATUAL
 // =====================================================
 
 let escolaId =
@@ -27,21 +27,13 @@ let escolaId =
     localStorage.getItem("escolaId") ||
     "";
 
-escolaId =
-    String(escolaId).trim();
+escolaId = String(escolaId).trim();
 
-
-console.log(
-    "🏫 escolaId:",
-    escolaId
-);
-
+console.log("🏫 ESCOLA ATUAL:", escolaId);
 
 if (!escolaId) {
 
-    alert(
-        "❌ Escola não identificada."
-    );
+    alert("❌ Escola não identificada.");
 
     throw new Error(
         "escolaId não encontrado."
@@ -55,16 +47,16 @@ if (!escolaId) {
 // =====================================================
 
 const turmaId =
-    localStorage.getItem("turmaId");
+    localStorage.getItem("turmaId") || "";
 
 const turmaNome =
     localStorage.getItem("turmaNome") || "";
 
 const disciplina =
-    localStorage.getItem("disciplina");
+    localStorage.getItem("disciplina") || "";
 
 const trimestre =
-    localStorage.getItem("trimestre");
+    localStorage.getItem("trimestre") || "";
 
 
 if (
@@ -85,7 +77,7 @@ if (
 
 
 // =====================================================
-// ELEMENTOS
+// ELEMENTOS HTML
 // =====================================================
 
 const info =
@@ -102,7 +94,7 @@ const guardarNotas =
 
 
 // =====================================================
-// ESTADO
+// ESTADO DO SISTEMA
 // =====================================================
 
 let ensino =
@@ -130,12 +122,16 @@ let alunos =
 
 const trimestreNormalizado =
     String(trimestre || "")
-        .replace("º", "")
-        .replace("°", "")
-        .replace("ª", "")
-        .replace(" ", "")
-        .replace("Trimestre", "")
+        .replace(/[º°ª]/g, "")
+        .replace(/\s+/g, "")
+        .replace(/Trimestre/gi, "")
         .trim();
+
+
+console.log(
+    "📅 TRIMESTRE:",
+    trimestreNormalizado
+);
 
 
 // =====================================================
@@ -144,14 +140,19 @@ const trimestreNormalizado =
 
 const disciplinaNormalizada =
     String(disciplina || "")
-        .replace(/\//g, "-")
-        .replace(/\s+/g, "_")
-        .trim();
+        .trim()
+        .replace(/[\/\\]/g, "-")
+        .replace(/\s+/g, "_");
+
+
+console.log(
+    "📚 DISCIPLINA NORMALIZADA:",
+    disciplinaNormalizada
+);
 
 
 // =====================================================
-// ID ÚNICO
-// MESMO PADRÃO DO NOTAS.JS
+// ID ÚNICO DA PAUTA
 // =====================================================
 
 const idLancamento =
@@ -251,7 +252,7 @@ function obterProfessorLogado() {
 
 
 // =====================================================
-// INFORMAÇÕES
+// INFORMAÇÕES DA MINI-PAUTA
 // =====================================================
 
 if (info) {
@@ -270,7 +271,7 @@ if (info) {
 
 
 // =====================================================
-// CARREGAR ENSINO
+// CARREGAR ENSINO DA TURMA
 // =====================================================
 
 async function carregarEnsino() {
@@ -289,22 +290,108 @@ async function carregarEnsino() {
         );
 
 
-    if (turmaSnap.exists()) {
+    if (!turmaSnap.exists()) {
 
-        const dados =
-            turmaSnap.data();
+        throw new Error(
+            "A turma não foi encontrada."
+        );
+
+    }
 
 
-        ensino =
-            dados.ensino ||
-            "ensinoPrimario";
+    const dados =
+        turmaSnap.data();
+
+
+    ensino =
+        dados.ensino ||
+        "ensinoPrimario";
+
+
+    console.log(
+        "📚 ENSINO:",
+        ensino
+    );
+
+}
+
+
+// =====================================================
+// VERIFICAR SE A TURMA PERTENCE À ESCOLA
+// =====================================================
+
+async function verificarTurmaEscola() {
+
+    const turmaRef =
+        doc(
+            db,
+            "turmas",
+            turmaId
+        );
+
+
+    const turmaSnap =
+        await getDoc(
+            turmaRef
+        );
+
+
+    if (!turmaSnap.exists()) {
+
+        throw new Error(
+            "A turma não existe no sistema."
+        );
+
+    }
+
+
+    const dados =
+        turmaSnap.data();
+
+
+    const escolaDaTurma =
+        String(
+            dados.escolaId || ""
+        ).trim();
+
+
+    console.log(
+        "🏫 ESCOLA DA TURMA:",
+        escolaDaTurma
+    );
+
+
+    console.log(
+        "🏫 ESCOLA ATUAL:",
+        escolaId
+    );
+
+
+    if (
+        !escolaDaTurma
+    ) {
+
+        throw new Error(
+            "A turma não possui escolaId."
+        );
+
+    }
+
+
+    if (
+        escolaDaTurma !==
+        escolaId
+    ) {
+
+        throw new Error(
+            "Esta turma pertence a outra escola."
+        );
 
     }
 
 
     console.log(
-        "📚 Ensino:",
-        ensino
+        "✅ TURMA PERTENCE À ESCOLA CORRETA."
     );
 
 }
@@ -338,6 +425,10 @@ async function carregarNotas() {
 
     if (!snapshot.exists()) {
 
+        console.log(
+            "ℹ️ Ainda não existem notas."
+        );
+
         return;
 
     }
@@ -347,19 +438,36 @@ async function carregarNotas() {
         snapshot.data();
 
 
-    // ---------------------------------------------
-    // SEGURANÇA DA ESCOLA
-    // ---------------------------------------------
+    // =================================================
+    // SEGURANÇA
+    // =================================================
 
     if (
         dados.escolaId &&
-        String(dados.escolaId).trim() !==
-        String(escolaId).trim()
+        String(
+            dados.escolaId
+        ).trim() !==
+        String(
+            escolaId
+        ).trim()
     ) {
 
-        throw new Error(
-            "Esta Mini-Pauta pertence a outra escola."
+        console.warn(
+            "⚠️ A pauta encontrada possui outro escolaId."
         );
+
+        console.warn(
+            "A pauta antiga NÃO será utilizada."
+        );
+
+        // NÃO interromper o carregamento dos alunos.
+        // Apenas ignorar as notas antigas.
+
+        notasGuardadas = {};
+
+        pautaExiste = false;
+
+        return;
 
     }
 
@@ -367,9 +475,9 @@ async function carregarNotas() {
     pautaExiste = true;
 
 
-    // ---------------------------------------------
-    // NOTAS
-    // ---------------------------------------------
+    // =================================================
+    // NOTAS DOS ALUNOS
+    // =================================================
 
     if (
         Array.isArray(
@@ -380,22 +488,35 @@ async function carregarNotas() {
         dados.alunos.forEach(
             aluno => {
 
-                notasGuardadas[
-                    aluno.numero
-                ] = aluno;
+                if (
+                    aluno.numero !== undefined &&
+                    aluno.numero !== null
+                ) {
+
+                    notasGuardadas[
+                        aluno.numero
+                    ] = aluno;
+
+                }
 
             }
         );
 
     }
 
+
+    console.log(
+        "📝 NOTAS CARREGADAS:",
+        Object.keys(
+            notasGuardadas
+        ).length
+    );
+
 }
 
 
 // =====================================================
-// CARREGAR CONTROLE
-// LÊ O MESMO DOCUMENTO "notas"
-// USADO PELO ADMINISTRADOR
+// CARREGAR CONTROLE DA PAUTA
 // =====================================================
 
 async function carregarControle() {
@@ -407,41 +528,15 @@ async function carregarControle() {
 
     try {
 
-        console.log(
-            "🔎 Procurando controle:"
-        );
-
-        console.log(
-            "ID:",
-            idLancamento
-        );
-
-
-        const referencia =
-            doc(
-                db,
-                "notas",
-                idLancamento
-            );
-
-
         const snapshot =
             await getDoc(
-                referencia
+                notaRef
             );
 
 
-        console.log(
-            "📋 Documento existe:",
-            snapshot.exists()
-        );
-
-
-        // ---------------------------------------------
-        // NÃO EXISTE
-        // ---------------------------------------------
-
-        if (!snapshot.exists()) {
+        if (
+            !snapshot.exists()
+        ) {
 
             atualizarEstadoVisual();
 
@@ -454,26 +549,23 @@ async function carregarControle() {
             snapshot.data();
 
 
-        console.log(
-            "📦 Dados encontrados:",
-            dados
-        );
-
-
-        // ---------------------------------------------
-        // SEGURANÇA DA ESCOLA
-        // ---------------------------------------------
+        // =================================================
+        // SEGURANÇA
+        // =================================================
 
         if (
             dados.escolaId &&
-            String(dados.escolaId).trim() !==
-            String(escolaId).trim()
+            String(
+                dados.escolaId
+            ).trim() !==
+            String(
+                escolaId
+            ).trim()
         ) {
 
-            console.error(
-                "❌ Documento pertence a outra escola."
+            console.warn(
+                "⚠️ Controle pertence a outra escola."
             );
-
 
             atualizarEstadoVisual();
 
@@ -482,31 +574,31 @@ async function carregarControle() {
         }
 
 
-        // ---------------------------------------------
+        // =================================================
         // ABERTURA GERAL
-        // ---------------------------------------------
+        // =================================================
 
         sistemaAberto =
             dados.abertoGeral === true;
 
 
-        // ---------------------------------------------
+        // =================================================
         // ABERTURA INDIVIDUAL
-        // ---------------------------------------------
+        // =================================================
 
         controleAlunos =
             dados.alunosAbertos ||
-            dados.alunos ||
             {};
 
 
         console.log(
-            "🔐 CONTROLE RECEBIDO:",
+            "🔐 CONTROLE:",
             {
-                id: idLancamento,
-                abertoGeral: dados.abertoGeral,
-                sistemaAberto,
-                alunosAbertos: controleAlunos
+                abertoGeral:
+                    dados.abertoGeral,
+
+                alunosAbertos:
+                    controleAlunos
             }
         );
 
@@ -522,11 +614,9 @@ async function carregarControle() {
             erro
         );
 
-
         sistemaAberto = false;
 
         controleAlunos = {};
-
 
         atualizarEstadoVisual();
 
@@ -544,9 +634,9 @@ function alunoPodeEditar(
     numeroAluno
 ) {
 
-    // ---------------------------------------------
+    // =================================================
     // SISTEMA GERAL ABERTO
-    // ---------------------------------------------
+    // =================================================
 
     if (
         sistemaAberto === true
@@ -557,9 +647,9 @@ function alunoPodeEditar(
     }
 
 
-    // ---------------------------------------------
-    // CONTROLE PELO ID
-    // ---------------------------------------------
+    // =================================================
+    // PELO ID
+    // =================================================
 
     const controleId =
         controleAlunos?.[
@@ -576,9 +666,9 @@ function alunoPodeEditar(
     }
 
 
-    // ---------------------------------------------
-    // CONTROLE PELO NÚMERO
-    // ---------------------------------------------
+    // =================================================
+    // PELO NÚMERO
+    // =================================================
 
     const controleNumero =
         controleAlunos?.[
@@ -720,6 +810,10 @@ function classificarNota(
         Number(nota);
 
 
+    // =================================================
+    // ENSINO PRIMÁRIO
+    // =================================================
+
     if (
         ensino ===
         "ensinoPrimario"
@@ -742,9 +836,9 @@ function classificarNota(
     }
 
 
-    // ---------------------------------------------
+    // =================================================
     // PRIMEIRO CICLO
-    // ---------------------------------------------
+    // =================================================
 
     if (nota <= 4)
         return "Mau";
@@ -782,13 +876,19 @@ function(input) {
 
 
     const macInput =
-        linha.querySelector(".mac");
+        linha.querySelector(
+            ".mac"
+        );
 
     const nptInput =
-        linha.querySelector(".npt");
+        linha.querySelector(
+            ".npt"
+        );
 
     const mfInput =
-        linha.querySelector(".mf");
+        linha.querySelector(
+            ".mf"
+        );
 
     const classificacao =
         linha.querySelector(
@@ -888,37 +988,30 @@ async function carregarAlunos() {
     try {
 
         console.log(
-            "🚀 INICIANDO CARREGAMENTO DA MINI-PAUTA..."
+            "🚀 INICIANDO CARREGAMENTO..."
         );
 
 
-        // ---------------------------------------------
-        // ENSINO
-        // ---------------------------------------------
+        // =================================================
+        // 1 — VERIFICAR TURMA
+        // =================================================
+
+        await verificarTurmaEscola();
+
+
+        // =================================================
+        // 2 — ENSINO
+        // =================================================
 
         await carregarEnsino();
 
 
-        // ---------------------------------------------
-        // NOTAS
-        // ---------------------------------------------
-
-        await carregarNotas();
-
-
-        // ---------------------------------------------
-        // CONTROLE
-        // ---------------------------------------------
-
-        await carregarControle();
-
-
-        // ---------------------------------------------
-        // BUSCAR ALUNOS
-        // ---------------------------------------------
+        // =================================================
+        // 3 — BUSCAR ALUNOS
+        // =================================================
 
         console.log(
-            "👨‍🎓 Procurando alunos da turma:",
+            "👨‍🎓 PROCURANDO ALUNOS:",
             turmaId
         );
 
@@ -963,35 +1056,38 @@ async function carregarAlunos() {
         );
 
 
-        // ---------------------------------------------
-        // DEBUG
-        // ---------------------------------------------
-
-        alert(
-            "DEBUG ALUNOS DA TURMA\n\n" +
-
-            "Turma ID:\n" +
-            turmaId +
-
-            "\n\nQuantidade de alunos encontrados:\n" +
-            alunos.length
-        );
-
-
-        // ---------------------------------------------
-        // ORDENAR
-        // ---------------------------------------------
+        // =================================================
+        // 4 — ORDENAR
+        // =================================================
 
         alunos.sort(
             (a, b) =>
-                Number(a.numero || 0) -
-                Number(b.numero || 0)
+                Number(
+                    a.numero || 0
+                ) -
+                Number(
+                    b.numero || 0
+                )
         );
 
 
-        // ---------------------------------------------
-        // LIMPAR TABELA
-        // ---------------------------------------------
+        // =================================================
+        // 5 — CARREGAR NOTAS
+        // =================================================
+
+        await carregarNotas();
+
+
+        // =================================================
+        // 6 — CARREGAR CONTROLE
+        // =================================================
+
+        await carregarControle();
+
+
+        // =================================================
+        // 7 — LIMPAR TABELA
+        // =================================================
 
         if (lista) {
 
@@ -1000,9 +1096,9 @@ async function carregarAlunos() {
         }
 
 
-        // ---------------------------------------------
-        // SEM ALUNOS
-        // ---------------------------------------------
+        // =================================================
+        // 8 — NENHUM ALUNO
+        // =================================================
 
         if (
             alunos.length === 0
@@ -1035,11 +1131,11 @@ async function carregarAlunos() {
         }
 
 
-// ---------------------------------------------
-        // CRIAR LINHAS
-        // ---------------------------------------------
+        // =================================================
+        // 9 — CRIAR LINHAS
+        // =================================================
 
-        alunos.forEach(
+      alunos.forEach(
             aluno => {
 
                 const nota =
@@ -1076,19 +1172,25 @@ async function carregarAlunos() {
                     >
 
                         <td>
+
                             ${aluno.numero || ""}
+
                         </td>
 
 
                         <td
                             style="text-align:left"
                         >
+
                             ${aluno.nome || ""}
+
                         </td>
 
 
                         <td>
+
                             ${aluno.sexo || ""}
+
                         </td>
 
 
@@ -1138,7 +1240,9 @@ async function carregarAlunos() {
                         <td
                             class="classificacao"
                         >
+
                             ${nota.classificacao || ""}
+
                         </td>
 
 
@@ -1155,11 +1259,13 @@ async function carregarAlunos() {
                                     };
                                 "
                             >
+
                                 ${
                                     podeEditar
                                         ? "🔓 Aberto"
                                         : "🔒 Fechado"
                                 }
+
                             </span>
 
                         </td>
@@ -1169,9 +1275,9 @@ async function carregarAlunos() {
                 `;
 
 
-                // -----------------------------------------
-                // CALCULAR MF SE JÁ EXISTIREM NOTAS
-                // -----------------------------------------
+                // =================================================
+                // CALCULAR MF EXISTENTE
+                // =================================================
 
                 const linha =
                     lista.lastElementChild;
@@ -1188,6 +1294,7 @@ async function carregarAlunos() {
                         linha.querySelector(
                             ".mac"
                         );
+
 
                     if (mac) {
 
@@ -1207,8 +1314,22 @@ async function carregarAlunos() {
 
 
         console.log(
-            "✅ MINI-PAUTA CARREGADA COM SUCESSO."
+            "======================================"
         );
+
+        console.log(
+            "✅ MINI-PAUTA CARREGADA"
+        );
+
+        console.log(
+            "👨‍🎓 TOTAL:",
+            alunos.length
+        );
+
+        console.log(
+            "======================================"
+        );
+
 
     }
 
@@ -1226,8 +1347,10 @@ async function carregarAlunos() {
 
                 <tr>
 
-                    <td colspan="8"
-                        style="color:red">
+                    <td
+                        colspan="8"
+                        style="color:red"
+                    >
 
                         ❌ Erro ao carregar
                         Mini-Pauta.
@@ -1272,9 +1395,9 @@ if (guardarNotas) {
 
             try {
 
-                // -----------------------------------------
+                // =================================================
                 // PROFESSOR
-                // -----------------------------------------
+                // =================================================
 
                 const professor =
                     obterProfessorLogado();
@@ -1291,9 +1414,9 @@ if (guardarNotas) {
                 }
 
 
-                // -----------------------------------------
-                // VERIFICAR AUTORIZAÇÃO
-                // -----------------------------------------
+                // =================================================
+                // VERIFICAR DOCUMENTO ATUAL
+                // =================================================
 
                 const controleSnapshot =
                     await getDoc(
@@ -1301,12 +1424,35 @@ if (guardarNotas) {
                     );
 
 
+                let controle = {};
+
+
                 if (
-                    !controleSnapshot.exists()
+                    controleSnapshot.exists()
+                ) {
+
+                    controle =
+                        controleSnapshot.data();
+
+                }
+
+
+                // =================================================
+                // SEGURANÇA DA ESCOLA
+                // =================================================
+
+                if (
+                    controle.escolaId &&
+                    String(
+                        controle.escolaId
+                    ).trim() !==
+                    String(
+                        escolaId
+                    ).trim()
                 ) {
 
                     alert(
-                        "🔒 O lançamento ainda não foi aberto pelo administrador."
+                        "❌ Esta pauta pertence a outra escola."
                     );
 
                     return;
@@ -1314,9 +1460,9 @@ if (guardarNotas) {
                 }
 
 
-                const controle =
-                    controleSnapshot.data();
-
+                // =================================================
+                // VERIFICAR ABERTURA
+                // =================================================
 
                 const sistemaAtualAberto =
                     controle.abertoGeral === true;
@@ -1326,10 +1472,6 @@ if (guardarNotas) {
                     controle.alunosAbertos ||
                     {};
 
-
-                // -----------------------------------------
-                // VERIFICAR NOVAMENTE
-                // -----------------------------------------
 
                 let autorizado =
                     sistemaAtualAberto;
@@ -1351,10 +1493,8 @@ if (guardarNotas) {
                 if (!autorizado) {
 
                     alert(
-                        "🔒 O sistema foi fechado. " +
-                        "As alterações não foram guardadas."
+                        "🔒 O lançamento ainda está fechado pelo administrador."
                     );
-
 
                     await carregarAlunos();
 
@@ -1363,9 +1503,9 @@ if (guardarNotas) {
                 }
 
 
-                // -----------------------------------------
+                // =================================================
                 // CONSTRUIR NOTAS
-                // -----------------------------------------
+                // =================================================
 
                 const notasFinais = [];
 
@@ -1452,7 +1592,7 @@ if (guardarNotas) {
                                     ),
 
                             classificacao:
-                                classificacao?.textContent ||
+                                classificacao?.textContent?.trim() ||
                                 notaAntiga.classificacao ||
                                 ""
 
@@ -1462,9 +1602,9 @@ if (guardarNotas) {
                 );
 
 
-                // -----------------------------------------
+                // =================================================
                 // GUARDAR
-                // -----------------------------------------
+                // =================================================
 
                 await setDoc(
 
@@ -1473,47 +1613,34 @@ if (guardarNotas) {
                     {
 
                         escolaId:
-
                             escolaId,
 
                         turmaId:
-
                             turmaId,
 
                         turmaNome:
-
                             turmaNome,
 
                         disciplina:
-
                             disciplina,
 
                         trimestre:
-
                             trimestreNormalizado,
 
                         professorId:
-
                             professor.id || "",
 
                         professorNome:
-
                             professor.nome || "",
 
                         alunos:
-
                             notasFinais,
 
                         atualizadoEm:
-
                             serverTimestamp(),
 
-                        ...(pautaExiste
-                            ? {}
-                            : {
-                                criadoEm:
-                                    serverTimestamp()
-                            })
+                        criadoEm:
+                            serverTimestamp()
 
                     },
 
@@ -1525,12 +1652,9 @@ if (guardarNotas) {
                 );
 
 
-                pautaExiste = true;
-
-
-                // -----------------------------------------
+                // =================================================
                 // ATUALIZAR CACHE
-                // -----------------------------------------
+                // =================================================
 
                 notasGuardadas = {};
 
@@ -1546,14 +1670,13 @@ if (guardarNotas) {
                 );
 
 
+                pautaExiste = true;
+
+
                 alert(
                     "✅ Notas guardadas com sucesso!"
                 );
 
-
-                // -----------------------------------------
-                // RECARREGAR
-                // -----------------------------------------
 
                 await carregarAlunos();
 
