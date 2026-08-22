@@ -1,17 +1,18 @@
 // =====================================================
 // LOGIN DO ALUNO - SGE
-// Procura primeiro em "alunos"
-// Depois procura dentro de "turmas/{turmaId}/alunos"
+// NOVA VERSÃO
+// Usa a coleção:
+// acessosAlunos
 // =====================================================
 
-alert("STUDENT-LOGIN.JS CARREGOU ✅");
+alert("STUDENT-LOGIN.JS CARREGADO ✅");
 
 
 import { db } from "./firebase.js";
 
 import {
-    collection,
-    getDocs
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
@@ -20,7 +21,9 @@ import {
 // =====================================================
 
 const form =
-    document.getElementById("loginAluno");
+    document.getElementById(
+        "loginAluno"
+    );
 
 
 if (!form) {
@@ -37,7 +40,7 @@ if (!form) {
 
 
 // =====================================================
-// SUBMIT
+// LOGIN
 // =====================================================
 
 form.addEventListener(
@@ -47,21 +50,44 @@ form.addEventListener(
         event.preventDefault();
 
 
+        const campoCodigo =
+            document.getElementById(
+                "codigoAluno"
+            );
+
+
+        const campoSenha =
+            document.getElementById(
+                "senhaAluno"
+            );
+
+
+        if (
+            !campoCodigo ||
+            !campoSenha
+        ) {
+
+            alert(
+                "Campos de login não encontrados."
+            );
+
+            return;
+
+        }
+
+
         const codigoAluno =
-            document
-                .getElementById("codigoAluno")
-                .value
-                .trim();
+            campoCodigo.value.trim();
 
 
         const senha =
-            document
-                .getElementById("senhaAluno")
-                .value
-                .trim();
+            campoSenha.value.trim();
 
 
-        if (!codigoAluno || !senha) {
+        if (
+            !codigoAluno ||
+            !senha
+        ) {
 
             alert(
                 "Preencha o código e a senha."
@@ -74,286 +100,124 @@ form.addEventListener(
 
         try {
 
-            alert("Procurando aluno...");
+            console.log(
+                "================================="
+            );
 
+            console.log(
+                "🎓 INICIANDO LOGIN DO ALUNO"
+            );
 
-            let alunoEncontrado = null;
+            console.log(
+                "Código:",
+                codigoAluno
+            );
 
 
             // =================================================
-            // 1. PROCURAR NA COLEÇÃO PRINCIPAL "alunos"
+            // NORMALIZAR CÓDIGO
             // =================================================
 
-            const alunosSnapshot =
-                await getDocs(
-                    collection(
-                        db,
-                        "alunos"
-                    )
+            const codigoId =
+                codigoAluno
+                    .replace(/\s+/g, "")
+                    .replace(/\//g, "-");
+
+
+            console.log(
+                "🔎 ID DE ACESSO:",
+                codigoId
+            );
+
+
+            // =================================================
+            // PROCURAR ACESSO
+            // =================================================
+
+            const acessoRef =
+                doc(
+                    db,
+                    "acessosAlunos",
+                    codigoId
                 );
 
 
-            for (
-                const alunoDoc
-                of alunosSnapshot.docs
+            const acessoSnap =
+                await getDoc(
+                    acessoRef
+                );
+
+
+            // =================================================
+            // NÃO EXISTE
+            // =================================================
+
+            if (
+                !acessoSnap.exists()
             ) {
 
-                const dados =
-                    alunoDoc.data();
+                console.warn(
+                    "❌ Acesso não encontrado."
+                );
+
+                alert(
+                    "Código ou senha incorretos."
+                );
+
+                return;
+
+            }
 
 
-                const codigo =
-                    String(
-                        dados.codigoAluno || ""
-                    ).trim();
+            const acesso =
+                acessoSnap.data();
 
 
-                const senhaFirebase =
-                    String(
-                        dados.senha || ""
-                    ).trim();
+            console.log(
+                "📦 ACESSO ENCONTRADO:",
+                acesso
+            );
 
 
-                if (
-                    codigo === codigoAluno &&
-                    senhaFirebase === senha
-                ) {
+            // =================================================
+            // VERIFICAR ESTADO
+            // =================================================
 
-                    alunoEncontrado = {
+            if (
+                String(
+                    acesso.estado ||
+                    "ativo"
+                ).toLowerCase() !==
+                "ativo"
+            ) {
 
-                        id:
-                            alunoDoc.id,
+                alert(
+                    "❌ Este acesso está inativo."
+                );
 
-                        // 🔥 ESCOLA
-                        escolaId:
-                            dados.escolaId || "",
-
-                        nome:
-                            dados.nome || "",
-
-                        codigoAluno:
-                            codigo,
-
-                        numero:
-                            dados.numero || "",
-
-                        sexo:
-                            dados.sexo || "",
-
-                        estado:
-                            String(
-                                dados.estado ||
-                                "ativo"
-                            ).trim(),
-
-                        classe:
-                            dados.classe || "",
-
-                        ensino:
-                            dados.ensino || "",
-
-                        anoLetivo:
-                            dados.anoLetivo || "",
-
-                        turmaId:
-                            dados.turmaId || "",
-
-                        turmaNome:
-                            dados.turmaNome || "",
-
-                        origem:
-                            "alunos"
-
-                    };
-
-
-                    break;
-
-                }
+                return;
 
             }
 
 
             // =================================================
-            // 2. PROCURAR NAS TURMAS
+            // VERIFICAR SENHA
             // =================================================
 
-            if (!alunoEncontrado) {
+            const senhaFirebase =
+                String(
+                    acesso.senhaAcesso ||
+                    ""
+                ).trim();
 
-                console.log(
-                    "Aluno não encontrado em alunos."
+
+            if (
+                senhaFirebase !== senha
+            ) {
+
+                console.warn(
+                    "❌ Senha incorreta."
                 );
-
-                console.log(
-                    "Procurando nas turmas..."
-                );
-
-
-                const turmasSnapshot =
-                    await getDocs(
-                        collection(
-                            db,
-                            "turmas"
-                        )
-                    );
-
-
-                for (
-                    const turmaDoc
-                    of turmasSnapshot.docs
-                ) {
-
-                    const turmaDados =
-                        turmaDoc.data();
-
-
-                    console.log(
-                        "🏫 Verificando turma:",
-                        turmaDoc.id,
-                        turmaDados
-                    );
-
-
-                    const alunosTurmaSnapshot =
-                        await getDocs(
-
-                            collection(
-                                db,
-                                "turmas",
-                                turmaDoc.id,
-                                "alunos"
-                            )
-
-                        );
-
-
-                    for (
-                        const alunoDoc
-                        of alunosTurmaSnapshot.docs
-                    ) {
-
-                        const dados =
-                            alunoDoc.data();
-
-
-                        const codigo =
-                            String(
-                                dados.codigoAluno || ""
-                            ).trim();
-
-
-                        const senhaFirebase =
-                            String(
-                                dados.senhaAcesso ||
-                                dados.senha ||
-                                ""
-                            ).trim();
-
-
-                        if (
-                            codigo === codigoAluno &&
-                            senhaFirebase === senha
-                        ) {
-
-                            alunoEncontrado = {
-
-                                id:
-                                    alunoDoc.id,
-
-                                // =================================
-                                // 🔥 ESCOLA ID
-                                // =================================
-
-                                escolaId:
-                                    dados.escolaId ||
-                                    turmaDados.escolaId ||
-                                    "",
-
-
-                                turmaId:
-                                    turmaDoc.id,
-
-
-                                nome:
-                                    dados.nome || "",
-
-
-                                codigoAluno:
-                                    codigo,
-
-
-                                numero:
-                                    dados.numero || "",
-
-
-                                senhaAcesso:
-                                    senhaFirebase,
-
-
-                                sexo:
-                                    dados.sexo || "",
-
-
-                                estado:
-                                    String(
-                                        dados.estado ||
-                                        "ativo"
-                                    ).trim(),
-
-
-                                classe:
-                                    dados.classe ||
-                                    turmaDados.classe ||
-                                    "",
-
-
-                                ensino:
-                                    dados.ensino ||
-                                    turmaDados.ensino ||
-                                    "",
-
-
-                                anoLetivo:
-                                    dados.anoLetivo ||
-                                    turmaDados.anoLetivo ||
-                                    "",
-
-
-                                turmaNome:
-                                    dados.turmaNome ||
-                                    turmaDados.nome ||
-                                    "",
-
-
-                                origem:
-                                    "turma"
-
-                            };
-
-
-                            break;
-
-                        }
-
-                    }
-
-
-                    if (alunoEncontrado) {
-
-                        break;
-
-                    }
-
-                }
-
-            }
-
-
-            // =================================================
-            // 3. NÃO ENCONTROU
-            // =================================================
-
-            if (!alunoEncontrado) {
 
                 alert(
                     "Código ou senha incorretos."
@@ -365,56 +229,91 @@ form.addEventListener(
 
 
             // =================================================
-            // 4. VERIFICAR ESCOLA
+            // CRIAR SESSÃO
             // =================================================
 
-            console.log(
-                "🏫 ESCOLA DO ALUNO:",
-                alunoEncontrado.escolaId
-            );
+            const alunoLogado = {
 
+                id:
+                    acesso.alunoId || "",
+
+                alunoId:
+                    acesso.alunoId || "",
+
+                codigoAluno:
+                    acesso.codigoAluno ||
+                    codigoAluno,
+
+                nome:
+                    acesso.nome || "",
+
+                turmaId:
+                    acesso.turmaId || "",
+
+                turmaNome:
+                    acesso.turmaNome || "",
+
+                escolaId:
+                    acesso.escolaId || "",
+
+                estado:
+                    acesso.estado ||
+                    "ativo"
+
+            };
+
+
+            // =================================================
+            // GUARDAR ESCOLA
+            // =================================================
 
             if (
-                !alunoEncontrado.escolaId
-            ) {
-
-                console.warn(
-                    "⚠️ O aluno foi encontrado, mas a escola não está associada."
-                );
-
-                alert(
-                    "⚠️ Aluno encontrado, mas a escola não está identificada."
-                );
-
-                // Não bloqueamos o login.
-                // Apenas avisamos.
-            }
-
-
-            // =================================================
-            // 5. GUARDAR ESCOLA TAMBÉM NA SESSÃO
-            // =================================================
-
-            if (
-                alunoEncontrado.escolaId
+                alunoLogado.escolaId
             ) {
 
                 sessionStorage.setItem(
                     "escolaId",
-                    alunoEncontrado.escolaId
+                    alunoLogado.escolaId
+                );
+
+                localStorage.setItem(
+                    "escolaId",
+                    alunoLogado.escolaId
                 );
 
             }
 
 
             // =================================================
-            // 6. GUARDAR SESSÃO DO ALUNO
+            // GUARDAR TURMA
+            // =================================================
+
+            if (
+                alunoLogado.turmaId
+            ) {
+
+                localStorage.setItem(
+                    "turmaId",
+                    alunoLogado.turmaId
+                );
+
+            }
+
+
+            localStorage.setItem(
+                "turmaNome",
+                alunoLogado.turmaNome
+            );
+
+
+            // =================================================
+            // GUARDAR ALUNO LOGADO
             // =================================================
 
             localStorage.setItem(
                 "alunoLogado",
                 JSON.stringify(
-                    alunoEncontrado
+                    alunoLogado
                 )
             );
 
@@ -424,26 +323,11 @@ form.addEventListener(
             );
 
             console.log(
-                "🎓 ALUNO ENCONTRADO"
+                "✅ LOGIN DO ALUNO REALIZADO"
             );
 
             console.log(
-                alunoEncontrado
-            );
-
-            console.log(
-                "🏫 escolaId:",
-                alunoEncontrado.escolaId
-            );
-
-            console.log(
-                "🏫 turmaId:",
-                alunoEncontrado.turmaId
-            );
-
-            console.log(
-                "👨‍🎓 alunoId:",
-                alunoEncontrado.id
+                alunoLogado
             );
 
             console.log(
@@ -452,42 +336,7 @@ form.addEventListener(
 
 
             // =================================================
-            // 7. CONFIRMAÇÃO
-            // =================================================
-
-            alert(
-
-                "LOGIN REALIZADO COM SUCESSO ✅\n\n" +
-
-                "Nome: " +
-                alunoEncontrado.nome +
-
-                "\nCódigo: " +
-                alunoEncontrado.codigoAluno +
-
-                "\nNúmero: " +
-                (
-                    alunoEncontrado.numero ||
-                    "não informado"
-                ) +
-
-                "\nTurma: " +
-                (
-                    alunoEncontrado.turmaNome ||
-                    "não informada"
-                ) +
-
-                "\nEscola ID: " +
-                (
-                    alunoEncontrado.escolaId ||
-                    "não identificada"
-                )
-
-            );
-
-
-            // =================================================
-            // 8. ÁREA DO ALUNO
+            // REDIRECIONAR
             // =================================================
 
             window.location.href =
@@ -495,21 +344,20 @@ form.addEventListener(
 
         }
 
-        catch (error) {
+        catch (erro) {
 
             console.error(
-                "ERRO NO LOGIN:",
-                error
+                "❌ ERRO NO LOGIN DO ALUNO:",
+                erro
             );
 
 
             alert(
                 "Erro no login:\n\n" +
-                error.message
+                erro.message
             );
 
         }
 
     }
-
 );
