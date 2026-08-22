@@ -1,7 +1,7 @@
 // =====================================================
 // MINI-PAUTA.JS
 // SGE ANGOLA
-// BLOCO 1 — IDENTIFICAÇÃO
+// VERSÃO ÚNICA — NOTAS + CONTROLO ABERTO/FECHADO
 // =====================================================
 
 import { db } from "./firebase.js";
@@ -17,7 +17,7 @@ import {
 
 
 // =====================================================
-// ESCOLA ATUAL
+// 1. IDENTIFICAÇÃO
 // =====================================================
 
 const escolaId =
@@ -27,44 +27,36 @@ const escolaId =
         ""
     ).trim();
 
+const turmaId =
+    String(
+        localStorage.getItem("turmaId") ||
+        ""
+    ).trim();
+
+const turmaNome =
+    localStorage.getItem("turmaNome") ||
+    "";
+
+const disciplina =
+    localStorage.getItem("disciplina") ||
+    "";
+
+const trimestre =
+    localStorage.getItem("trimestre") ||
+    "";
+
 
 if (!escolaId) {
 
-    alert("❌ Escola não identificada.");
+    alert(
+        "❌ Escola não identificada."
+    );
 
     throw new Error(
         "escolaId não encontrado."
     );
 
 }
-
-
-console.log(
-    "🏫 ESCOLA ATUAL:",
-    escolaId
-);
-
-
-// =====================================================
-// TURMA
-// =====================================================
-
-const turmaId =
-    String(
-        localStorage.getItem("turmaId") || ""
-    ).trim();
-
-
-const turmaNome =
-    localStorage.getItem("turmaNome") || "";
-
-
-const disciplina =
-    localStorage.getItem("disciplina") || "";
-
-
-const trimestre =
-    localStorage.getItem("trimestre") || "";
 
 
 if (!turmaId) {
@@ -107,37 +99,126 @@ if (!trimestre) {
 
 
 console.log(
-    "🏫 escolaId:",
+    "🏫 ESCOLA:",
     escolaId
 );
 
 console.log(
-    "🏫 turmaId:",
+    "🏫 TURMA:",
     turmaId
 );
 
 console.log(
-    "🏫 turmaNome:",
+    "🏫 TURMA NOME:",
     turmaNome
 );
 
 console.log(
-    "📚 disciplina:",
+    "📚 DISCIPLINA:",
     disciplina
 );
 
 console.log(
-    "📅 trimestre:",
+    "📅 TRIMESTRE:",
     trimestre
 );
 
-    // =====================================================
-// BLOCO 2 — CARREGAR TURMA
+
+// =====================================================
+// 2. ID ÚNICO DO LANÇAMENTO
+// =====================================================
+
+const disciplinaNormalizada =
+    String(disciplina)
+        .replace(/\//g, "-")
+        .replace(/\s+/g, "_")
+        .trim();
+
+const trimestreNormalizado =
+    String(trimestre)
+        .replace("º", "")
+        .replace("°", "")
+        .replace("ª", "")
+        .replace(/\s+/g, "")
+        .replace("Trimestre", "")
+        .trim();
+
+
+const idLancamento =
+    `${turmaId}_${disciplinaNormalizada}_${trimestreNormalizado}`;
+
+
+console.log(
+    "🔑 ID LANÇAMENTO:",
+    idLancamento
+);
+
+
+// =====================================================
+// 3. ESTADO
 // =====================================================
 
 let turmaDados = null;
-let ensino = "ensinoPrimario";
 
+let ensino =
+    "ensinoPrimario";
+
+let alunos = [];
+
+let sistemaAberto =
+    false;
+
+let alunosAbertos =
+    {};
+
+
+// =====================================================
+// 4. ELEMENTOS
+// =====================================================
+
+const lista =
+    document.getElementById(
+        "listaAlunos"
+    );
+
+const botaoGuardar =
+    document.getElementById(
+        "guardarNotas"
+    );
+
+const estadoPauta =
+    document.getElementById(
+        "estadoPauta"
+    );
+
+const info =
+    document.getElementById(
+        "info"
+    );
+
+
+// =====================================================
+// 5. INFORMAÇÕES DA MINI-PAUTA
+// =====================================================
+
+if (info) {
+
+    info.innerHTML = `
+
+        Turma: ${turmaNome}<br>
+
+        Disciplina: ${disciplina}<br>
+
+        Trimestre: ${trimestreNormalizado}º
+
+    `;
+
+}
+
+
+// =====================================================
+// 6. CARREGAR TURMA
+// =====================================================
 
 async function carregarTurma() {
 
@@ -164,7 +245,9 @@ async function carregarTurma() {
     if (!turmaSnap.exists()) {
 
         throw new Error(
-            "A turma não existe no Firestore."
+            "A turma não existe no Firestore.\n\n" +
+            "ID procurado:\n" +
+            turmaId
         );
 
     }
@@ -181,7 +264,7 @@ async function carregarTurma() {
 
 
     // =================================================
-    // CONFIRMAR ESCOLA
+    // ESCOLA
     // =================================================
 
     const escolaDaTurma =
@@ -190,29 +273,13 @@ async function carregarTurma() {
         ).trim();
 
 
-    console.log(
-        "🏫 escola da sessão:",
-        escolaId
-    );
-
-    console.log(
-        "🏫 escola da turma:",
-        escolaDaTurma
-    );
-
-
     if (
         escolaDaTurma &&
         escolaDaTurma !== escolaId
     ) {
 
         throw new Error(
-            "A turma pertence a outra escola.\n\n" +
-            "Escola da sessão: " +
-            escolaId +
-            "\n" +
-            "Escola da turma: " +
-            escolaDaTurma
+            "A turma pertence a outra escola."
         );
 
     }
@@ -228,20 +295,18 @@ async function carregarTurma() {
 
 
     console.log(
-        "📚 Ensino:",
+        "📚 ENSINO:",
         ensino
     );
 
 }
 
-    // =====================================================
-// BLOCO 3 — CARREGAR ALUNOS DA TURMA
+
+// =====================================================
+// 7. CARREGAR ALUNOS
 // =====================================================
 
-let alunos = [];
-
-
-async function carregarAlunosDaTurma() {
+async function carregarAlunos() {
 
     console.log(
         "👨‍🎓 A carregar alunos..."
@@ -269,16 +334,12 @@ async function carregarAlunosDaTurma() {
     snapshot.forEach(
         documento => {
 
-            const dados =
-                documento.data();
-
-
             alunos.push({
 
                 id:
                     documento.id,
 
-                ...dados
+                ...documento.data()
 
             });
 
@@ -286,30 +347,16 @@ async function carregarAlunosDaTurma() {
     );
 
 
-    // =================================================
-    // ORDENAR PELO NÚMERO
-    // =================================================
-
     alunos.sort(
-        (a, b) => {
-
-            return (
-                Number(a.numero || 0) -
-                Number(b.numero || 0)
-            );
-
-        }
+        (a, b) =>
+            Number(a.numero || 0) -
+            Number(b.numero || 0)
     );
 
 
     console.log(
-        "✅ ALUNOS ENCONTRADOS:",
+        "✅ ALUNOS:",
         alunos.length
-    );
-
-
-    console.table(
-        alunos
     );
 
 
@@ -323,199 +370,244 @@ async function carregarAlunosDaTurma() {
 
     }
 
-
-    return alunos;
-
 }
 
+
 // =====================================================
-// BLOCO 4 — INICIALIZAÇÃO
+// 8. VERIFICAR SE ALUNO PODE EDITAR
 // =====================================================
 
-async function iniciarMiniPauta() {
+function alunoPodeEditar(
+    aluno
+) {
 
-    try {
+    // ================================================
+    // SISTEMA GERAL ABERTO
+    // ================================================
 
-        console.log(
-            "===================================="
-        );
+    if (
+        sistemaAberto === true
+    ) {
 
-        console.log(
-            "📋 INICIANDO MINI-PAUTA"
-        );
-
-        console.log(
-            "===================================="
-        );
-
-
-        await carregarTurma();
-
-        await carregarAlunosDaTurma();
-
-
-        console.log(
-            "👨‍🎓 Alunos:",
-            alunos.length
-        );
-
-
-        // Criar tabela
-        renderizarAlunos();
-
-
-        // Carregar notas já existentes
-        await carregarNotasNaTabela();
-
-
-        console.log(
-            "===================================="
-        );
-
-        console.log(
-            "✅ MINI-PAUTA PRONTA"
-        );
-
-        console.log(
-            "===================================="
-        );
+        return true;
 
     }
 
-    catch (erro) {
 
-        console.error(
-            "❌ ERRO NA MINI-PAUTA:",
-            erro
-        );
+    // ================================================
+    // SISTEMA FECHADO
+    // VERIFICAR ABERTURA INDIVIDUAL
+    // ================================================
+
+    const controle =
+        alunosAbertos?.[
+            aluno.id
+        ];
 
 
-        alert(
-            "❌ Erro ao carregar Mini-Pauta:\n\n" +
-            erro.message
-        );
+    if (
+        controle &&
+        controle.edicaoAberta === true
+    ) {
+
+        return true;
 
     }
+
+
+    // ================================================
+    // TAMBÉM ACEITAR PELO NÚMERO
+    // ================================================
+
+    const controleNumero =
+        alunosAbertos?.[
+            String(aluno.numero)
+        ];
+
+
+    if (
+        controleNumero &&
+        controleNumero.edicaoAberta === true
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
 
 }
 
 
-iniciarMiniPauta();
-
 // =====================================================
-// BLOCO 5 — RENDERIZAR ALUNOS
+// 9. ATUALIZAR ESTADO VISUAL
 // =====================================================
 
-function renderizarAlunos() {
+function atualizarEstadoVisual() {
 
-    const lista =
-        document.getElementById(
-            "listaAlunos"
-        );
-
-
-    if (!lista) {
-
-        console.error(
-            "❌ Elemento #listaAlunos não encontrado."
-        );
-
+    if (!estadoPauta)
         return;
 
+
+    if (
+        sistemaAberto === true
+    ) {
+
+        estadoPauta.textContent =
+            "🟢 Sistema aberto — todos os alunos podem receber notas.";
+
+        estadoPauta.style.color =
+            "green";
+
+    }
+
+    else {
+
+        const existeIndividual =
+            alunos.some(
+                aluno =>
+                    alunoPodeEditar(aluno)
+            );
+
+
+        if (
+            existeIndividual
+        ) {
+
+            estadoPauta.textContent =
+                "🟡 Sistema fechado — apenas alunos autorizados podem ser editados.";
+
+            estadoPauta.style.color =
+                "#d97706";
+
+        }
+
+        else {
+
+            estadoPauta.textContent =
+                "🔴 Sistema fechado — lançamento bloqueado.";
+
+            estadoPauta.style.color =
+                "red";
+
+        }
+
     }
 
 
-    lista.innerHTML = "";
+    atualizarBloqueios();
 
+}
+
+
+// =====================================================
+// 10. ATUALIZAR CAMPOS BLOQUEADOS
+// =====================================================
+
+function atualizarBloqueios() {
 
     alunos.forEach(
         aluno => {
 
-            const linha =
-                document.createElement("tr");
+            const podeEditar =
+                alunoPodeEditar(
+                    aluno
+                );
 
 
-            linha.innerHTML = `
-
-                <td>
-                    ${aluno.numero || ""}
-                </td>
-
-                <td>
-                    ${aluno.nome || ""}
-                </td>
-
-                <td>
-                    ${aluno.sexo || ""}
-                </td>
-
-                <td>
-                    <input
-                        type="number"
-                        class="mac"
-                        min="0"
-                        max="20"
-                        step="0.1"
-                        data-id="${aluno.id}"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="number"
-                        class="npt"
-                        min="0"
-                        max="20"
-                        step="0.1"
-                        data-id="${aluno.id}"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="text"
-                        class="mf"
-                        readonly
-                    >
-                </td>
-
-                <td>
-                    <span class="classificacao"></span>
-                </td>
-
-            `;
+            const mac =
+                document.querySelector(
+                    `.mac[data-id="${aluno.id}"]`
+                );
 
 
-            lista.appendChild(
-                linha
-            );
+            const npt =
+                document.querySelector(
+                    `.npt[data-id="${aluno.id}"]`
+                );
+
+
+            if (mac) {
+
+                mac.disabled =
+                    !podeEditar;
+
+            }
+
+
+            if (npt) {
+
+                npt.disabled =
+                    !podeEditar;
+
+            }
 
         }
     );
 
 
-    console.log(
-        "✅ Tabela criada com",
-        alunos.length,
-        "alunos."
-    );
+    atualizarBotaoGuardar();
 
 }
 
+
 // =====================================================
-// BLOCO 6 — CÁLCULO DA MF
+// 11. BOTÃO GUARDAR
 // =====================================================
 
-function classificarNota(nota) {
+function atualizarBotaoGuardar() {
 
-    nota = Number(nota);
+    if (!botaoGuardar)
+        return;
 
 
-    // ================================================
-    // ENSINO PRIMÁRIO
-    // ================================================
+    const podeGuardar =
+        alunos.some(
+            aluno =>
+                alunoPodeEditar(aluno)
+        );
 
-    if (ensino === "ensinoPrimario") {
+
+    botaoGuardar.disabled =
+        !podeGuardar;
+
+
+    if (
+        podeGuardar
+    ) {
+
+        botaoGuardar.title =
+            "Guardar notas";
+
+    }
+
+    else {
+
+        botaoGuardar.title =
+            "Sistema fechado";
+
+    }
+
+}
+
+
+// =====================================================
+// 12. CLASSIFICAÇÃO
+// =====================================================
+
+function classificarNota(
+    nota
+) {
+
+    nota =
+        Number(nota);
+
+
+    if (
+        ensino ===
+        "ensinoPrimario"
+    ) {
 
         if (nota <= 2)
             return "Mau";
@@ -530,12 +622,9 @@ function classificarNota(nota) {
             return "Bom";
 
         return "Muito Bom";
+
     }
 
-
-    // ================================================
-    // PRIMEIRO CICLO
-    // ================================================
 
     if (nota <= 4)
         return "Mau";
@@ -550,35 +639,45 @@ function classificarNota(nota) {
         return "Bom";
 
     return "Muito Bom";
+
 }
 
 
 // =====================================================
-// CALCULAR MF DE UMA LINHA
+// 13. CALCULAR MF
 // =====================================================
 
-function calcularMF(input) {
+function calcularMF(
+    input
+) {
 
     const linha =
         input.closest("tr");
 
 
-    if (!linha) {
+    if (!linha)
         return;
-    }
 
 
     const mac =
-        linha.querySelector(".mac");
+        linha.querySelector(
+            ".mac"
+        );
 
     const npt =
-        linha.querySelector(".npt");
+        linha.querySelector(
+            ".npt"
+        );
 
     const mf =
-        linha.querySelector(".mf");
+        linha.querySelector(
+            ".mf"
+        );
 
     const classificacao =
-        linha.querySelector(".classificacao");
+        linha.querySelector(
+            ".classificacao"
+        );
 
 
     if (
@@ -593,10 +692,6 @@ function calcularMF(input) {
     }
 
 
-    // ================================================
-    // SE UM DOS CAMPOS ESTIVER VAZIO
-    // ================================================
-
     if (
         mac.value === "" ||
         npt.value === ""
@@ -604,9 +699,11 @@ function calcularMF(input) {
 
         mf.value = "";
 
-        classificacao.textContent = "";
+        classificacao.textContent =
+            "";
 
         return;
+
     }
 
 
@@ -616,10 +713,6 @@ function calcularMF(input) {
     const valorNPT =
         Number(npt.value);
 
-
-    // ================================================
-    // VALIDAR NOTAS
-    // ================================================
 
     if (
         valorMAC < 0 ||
@@ -637,16 +730,14 @@ function calcularMF(input) {
             "red";
 
         return;
+
     }
 
 
-    // ================================================
-    // CALCULAR MF
-    // ================================================
-
     const media =
         (
-            (valorMAC + valorNPT) / 2
+            (valorMAC + valorNPT) /
+            2
         ).toFixed(1);
 
 
@@ -654,78 +745,54 @@ function calcularMF(input) {
         media;
 
 
-    // ================================================
-    // CLASSIFICAÇÃO
-    // ================================================
-
     classificacao.textContent =
         classificarNota(media);
 
 
-    // ================================================
-    // COR DA CLASSIFICAÇÃO
-    // ================================================
-
     const limite =
-        ensino === "ensinoPrimario"
+        ensino ===
+        "ensinoPrimario"
             ? 5
             : 10;
 
 
-    if (
-        Number(media) < limite
-    ) {
-
-        mf.style.color = "red";
-
-        classificacao.style.color =
-            "red";
-
-    }
-
-    else {
-
-        mf.style.color = "green";
-
-        classificacao.style.color =
-            "green";
-
-    }
+    const reprovado =
+        Number(media) < limite;
 
 
-    console.log(
-        "📊 Nota calculada:",
-        {
-            mac: valorMAC,
-            npt: valorNPT,
-            mf: media,
-            classificacao:
-                classificacao.textContent
-        }
-    );
+    mf.style.color =
+        reprovado
+            ? "red"
+            : "green";
+
+
+    classificacao.style.color =
+        reprovado
+            ? "red"
+            : "green";
 
 }
 
-
-// =====================================================
-// DISPONIBILIZAR PARA O HTML
-// =====================================================
 
 window.calcularMF =
     calcularMF;
 
 
 // =====================================================
-// DETECTAR ALTERAÇÃO NOS CAMPOS
+// 14. INPUT
 // =====================================================
 
 document.addEventListener(
     "input",
-    function(event) {
+    event => {
 
         if (
-            event.target.classList.contains("mac") ||
-            event.target.classList.contains("npt")
+            event.target.classList.contains(
+                "mac"
+            ) ||
+            event.target.classList.contains(
+                "npt"
+            )
         ) {
 
             calcularMF(
@@ -737,8 +804,380 @@ document.addEventListener(
     }
 );
 
-/// =====================================================
-// BLOCO 7 — GUARDAR NOTAS
+
+// =====================================================
+// 15. RENDERIZAR ALUNOS
+// =====================================================
+
+function renderizarAlunos() {
+
+    if (!lista) {
+
+        throw new Error(
+            "Elemento #listaAlunos não encontrado."
+        );
+
+    }
+
+
+    lista.innerHTML =
+        "";
+
+
+    alunos.forEach(
+        aluno => {
+
+            const linha =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const podeEditar =
+                alunoPodeEditar(
+                    aluno
+                );
+
+
+            linha.innerHTML = `
+
+                <td>
+                    ${aluno.numero || ""}
+                </td>
+
+                <td>
+                    ${aluno.nome || ""}
+                </td>
+
+                <td>
+                    ${aluno.sexo || ""}
+                </td>
+
+                <td>
+
+                    <input
+                        type="number"
+                        class="mac"
+                        min="0"
+                        max="20"
+                        step="0.1"
+                        data-id="${aluno.id}"
+                        ${!podeEditar ? "disabled" : ""}
+                    >
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="number"
+                        class="npt"
+                        min="0"
+                        max="20"
+                        step="0.1"
+                        data-id="${aluno.id}"
+                        ${!podeEditar ? "disabled" : ""}
+                    >
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="text"
+                        class="mf"
+                        readonly
+                    >
+
+                </td>
+
+                <td>
+
+                    <span
+                        class="classificacao"
+                    ></span>
+
+                </td>
+
+            `;
+
+
+            lista.appendChild(
+                linha
+            );
+
+        }
+    );
+
+
+    atualizarBotaoGuardar();
+
+}
+
+
+// =====================================================
+// 16. CARREGAR NOTAS + CONTROLO
+// =====================================================
+
+async function carregarNotas() {
+
+    console.log(
+        "📥 A carregar documento:",
+        idLancamento
+    );
+
+
+    const notaRef =
+        doc(
+            db,
+            "notas",
+            idLancamento
+        );
+
+
+    const snapshot =
+        await getDoc(
+            notaRef
+        );
+
+
+    // =================================================
+    // DOCUMENTO NÃO EXISTE
+    // =================================================
+
+    if (
+        !snapshot.exists()
+    ) {
+
+        console.log(
+            "ℹ️ Documento de notas ainda não existe."
+        );
+
+
+        sistemaAberto =
+            false;
+
+        alunosAbertos =
+            {};
+
+
+        atualizarEstadoVisual();
+
+        return;
+
+    }
+
+
+    const dados =
+        snapshot.data();
+
+
+    console.log(
+        "📒 DADOS DAS NOTAS:",
+        dados
+    );
+
+
+    // =================================================
+    // SEGURANÇA
+    // =================================================
+
+    if (
+        dados.escolaId &&
+        String(
+            dados.escolaId
+        ).trim() !==
+        String(
+            escolaId
+        ).trim()
+    ) {
+
+        throw new Error(
+            "Esta Mini-Pauta pertence a outra escola."
+        );
+
+    }
+
+
+    // =================================================
+    // CONTROLO ABERTO / FECHADO
+    // =================================================
+
+    sistemaAberto =
+        dados.abertoGeral === true;
+
+
+    alunosAbertos =
+        dados.alunosAbertos ||
+        {};
+
+
+    console.log(
+        "🔐 CONTROLO:",
+        {
+            abertoGeral:
+                sistemaAberto,
+
+            alunosAbertos:
+                alunosAbertos
+        }
+    );
+
+
+    // =================================================
+    // CARREGAR NOTAS
+    // =================================================
+
+    if (
+        Array.isArray(
+            dados.alunos
+        )
+    ) {
+
+        dados.alunos.forEach(
+            notaAluno => {
+
+                const alunoId =
+                    String(
+                        notaAluno.id ||
+                        ""
+                    );
+
+
+                if (!alunoId)
+                    return;
+
+
+                const mac =
+                    document.querySelector(
+                        `.mac[data-id="${alunoId}"]`
+                    );
+
+
+                if (!mac)
+                    return;
+
+
+                const linha =
+                    mac.closest("tr");
+
+
+                const npt =
+                    linha.querySelector(
+                        ".npt"
+                    );
+
+                const mf =
+                    linha.querySelector(
+                        ".mf"
+                    );
+
+                const classificacao =
+                    linha.querySelector(
+                        ".classificacao"
+                    );
+
+
+                if (
+                    notaAluno.mac !==
+                    undefined
+                ) {
+
+                    mac.value =
+                        notaAluno.mac;
+
+                }
+
+
+                if (
+                    npt &&
+                    notaAluno.npt !==
+                    undefined
+                ) {
+
+                    npt.value =
+                        notaAluno.npt;
+
+                }
+
+
+                if (
+                    mf &&
+                    notaAluno.mf !==
+                    undefined
+                ) {
+
+                    mf.value =
+                        notaAluno.mf;
+
+                }
+
+
+                if (
+                    classificacao &&
+                    notaAluno.classificacao
+                ) {
+
+                    classificacao.textContent =
+                        notaAluno.classificacao;
+
+                }
+
+
+                if (
+                    mf &&
+                    notaAluno.mf !== ""
+                ) {
+
+                    const valor =
+                        Number(
+                            notaAluno.mf
+                        );
+
+
+                    const limite =
+                        ensino ===
+                        "ensinoPrimario"
+                            ? 5
+                            : 10;
+
+
+                    const reprovado =
+                        valor < limite;
+
+
+                    mf.style.color =
+                        reprovado
+                            ? "red"
+                            : "green";
+
+
+                    if (
+                        classificacao
+                    ) {
+
+                        classificacao.style.color =
+                            reprovado
+                                ? "red"
+                                : "green";
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    atualizarEstadoVisual();
+
+}
+
+
+// =====================================================
+// 17. GUARDAR NOTAS
 // =====================================================
 
 async function guardarNotasFirestore() {
@@ -746,18 +1185,27 @@ async function guardarNotasFirestore() {
     try {
 
         console.log(
-            "💾 A preparar gravação das notas..."
+            "💾 A guardar notas..."
         );
 
 
-        // ================================================
-        // VERIFICAR SE HÁ ALUNOS
-        // ================================================
+        // =================================================
+        // VERIFICAR PERMISSÃO
+        // =================================================
 
-        if (!alunos || alunos.length === 0) {
+        const podeGuardar =
+            alunos.some(
+                aluno =>
+                    alunoPodeEditar(
+                        aluno
+                    )
+            );
+
+
+        if (!podeGuardar) {
 
             alert(
-                "❌ Não existem alunos para guardar."
+                "🔴 O sistema está fechado para lançamento."
             );
 
             return;
@@ -765,30 +1213,33 @@ async function guardarNotasFirestore() {
         }
 
 
-        // ================================================
-        // RECOLHER NOTAS DA TABELA
-        // ================================================
-
         const linhas =
             document.querySelectorAll(
                 "#listaAlunos tr"
             );
 
 
-        const alunosNotas = [];
+        const alunosNotas =
+            [];
 
 
         linhas.forEach(
             linha => {
 
                 const macInput =
-                    linha.querySelector(".mac");
+                    linha.querySelector(
+                        ".mac"
+                    );
 
                 const nptInput =
-                    linha.querySelector(".npt");
+                    linha.querySelector(
+                        ".npt"
+                    );
 
                 const mfInput =
-                    linha.querySelector(".mf");
+                    linha.querySelector(
+                        ".mf"
+                    );
 
                 const classificacao =
                     linha.querySelector(
@@ -813,37 +1264,18 @@ async function guardarNotasFirestore() {
                 const aluno =
                     alunos.find(
                         item =>
-                            String(item.id) ===
-                            String(alunoId)
+                            String(
+                                item.id
+                            ) ===
+                            String(
+                                alunoId
+                            )
                     );
 
 
-                if (!aluno) {
-
+                if (!aluno)
                     return;
 
-                }
-
-
-                const mac =
-                    macInput.value.trim();
-
-
-                const npt =
-                    nptInput.value.trim();
-
-
-                const mf =
-                    mfInput?.value?.trim() || "";
-
-
-                const classe =
-                    classificacao?.textContent?.trim() || "";
-
-
-                // =========================================
-                // GUARDAR DADOS DO ALUNO
-                // =========================================
 
                 alunosNotas.push({
 
@@ -851,28 +1283,34 @@ async function guardarNotasFirestore() {
                         aluno.id,
 
                     numero:
-                        aluno.numero || "",
+                        aluno.numero ||
+                        "",
 
                     nome:
-                        aluno.nome || "",
+                        aluno.nome ||
+                        "",
 
                     sexo:
-                        aluno.sexo || "",
+                        aluno.sexo ||
+                        "",
 
                     matricula:
-                        aluno.matricula || "",
+                        aluno.matricula ||
+                        "",
 
                     mac:
-                        mac,
+                        macInput.value.trim(),
 
                     npt:
-                        npt,
+                        nptInput.value.trim(),
 
                     mf:
-                        mf,
+                        mfInput?.value?.trim() ||
+                        "",
 
                     classificacao:
-                        classe
+                        classificacao?.textContent?.trim() ||
+                        ""
 
                 });
 
@@ -880,9 +1318,9 @@ async function guardarNotasFirestore() {
         );
 
 
-        // ================================================
-        // REFERÊNCIA DO DOCUMENTO
-        // ================================================
+        // =================================================
+        // REFERÊNCIA
+        // =================================================
 
         const notaRef =
             doc(
@@ -892,17 +1330,14 @@ async function guardarNotasFirestore() {
             );
 
 
-        // ================================================
-        // VERIFICAR DOCUMENTO EXISTENTE
-        // ================================================
-
         const notaSnap =
             await getDoc(
                 notaRef
             );
 
 
-        let dadosAtuais = {};
+        let dadosAtuais =
+            {};
 
 
         if (
@@ -913,9 +1348,9 @@ async function guardarNotasFirestore() {
                 notaSnap.data();
 
 
-            // ============================================
-            // SEGURANÇA DA ESCOLA
-            // ============================================
+            // =================================================
+            // SEGURANÇA
+            // =================================================
 
             if (
                 dadosAtuais.escolaId &&
@@ -928,8 +1363,7 @@ async function guardarNotasFirestore() {
             ) {
 
                 alert(
-                    "❌ Não é possível guardar.\n\n" +
-                    "Este lançamento pertence a outra escola."
+                    "❌ Este lançamento pertence a outra escola."
                 );
 
                 return;
@@ -939,67 +1373,67 @@ async function guardarNotasFirestore() {
         }
 
 
-        // ================================================
-        // DADOS DO DOCUMENTO
-        // ================================================
+        // =================================================
+        // DADOS
+        // =================================================
 
-        const dadosParaGuardar = {
+        const dados =
+            {
 
-            escolaId:
-                escolaId,
+                escolaId:
+                    escolaId,
 
-            turmaId:
-                turmaId,
+                turmaId:
+                    turmaId,
 
-            turmaNome:
-                turmaNome,
+                turmaNome:
+                    turmaNome,
 
-            disciplina:
-                disciplina,
+                disciplina:
+                    disciplina,
 
-            trimestre:
-                trimestre,
+                trimestre:
+                    trimestre,
 
-            ensino:
-                ensino,
+                ensino:
+                    ensino,
 
-            alunos:
-                alunosNotas,
+                alunos:
+                    alunosNotas,
 
-            // manter controle existente
-            abertoGeral:
-                dadosAtuais.abertoGeral === true,
+                // IMPORTANTE:
+                // NÃO APAGAR O CONTROLO DO ADMIN
 
-            alunosAbertos:
-                dadosAtuais.alunosAbertos || {},
+                abertoGeral:
+                    dadosAtuais.abertoGeral === true,
 
-            atualizadoEm:
-                serverTimestamp()
+                alunosAbertos:
+                    dadosAtuais.alunosAbertos ||
+                    {},
 
-        };
+                atualizadoEm:
+                    serverTimestamp()
 
+            };
 
-        // ================================================
-        // CRIAR DOCUMENTO
-        // ================================================
 
         if (
             !notaSnap.exists()
         ) {
 
-            dadosParaGuardar.criadoEm =
+            dados.criadoEm =
                 serverTimestamp();
 
         }
 
 
-        // ================================================
+        // =================================================
         // GRAVAR
-        // ================================================
+        // =================================================
 
         await setDoc(
             notaRef,
-            dadosParaGuardar,
+            dados,
             {
                 merge: true
             }
@@ -1008,7 +1442,7 @@ async function guardarNotasFirestore() {
 
         console.log(
             "✅ NOTAS GUARDADAS:",
-            dadosParaGuardar
+            dados
         );
 
 
@@ -1021,7 +1455,7 @@ async function guardarNotasFirestore() {
     catch (erro) {
 
         console.error(
-            "❌ ERRO AO GUARDAR NOTAS:",
+            "❌ ERRO AO GUARDAR:",
             erro
         );
 
@@ -1037,16 +1471,12 @@ async function guardarNotasFirestore() {
 
 
 // =====================================================
-// LIGAR AO BOTÃO
+// 18. BOTÃO GUARDAR
 // =====================================================
 
-const botaoGuardar =
-    document.getElementById(
-        "guardarNotas"
-    );
-
-
-if (botaoGuardar) {
+if (
+    botaoGuardar
+) {
 
     botaoGuardar.addEventListener(
         "click",
@@ -1055,296 +1485,59 @@ if (botaoGuardar) {
 
 }
 
+
 // =====================================================
-// BLOCO 8 — CARREGAR NOTAS EXISTENTES NA TABELA
+// 19. INICIALIZAÇÃO
 // =====================================================
 
-async function carregarNotasNaTabela() {
+async function iniciarMiniPauta() {
 
     try {
 
         console.log(
-            "📥 A carregar notas existentes..."
+            "======================================"
+        );
+
+        console.log(
+            "🚀 A INICIAR MINI-PAUTA..."
+        );
+
+        console.log(
+            "======================================"
         );
 
 
-        const notaRef =
-            doc(
-                db,
-                "notas",
-                idLancamento
-            );
+        await carregarTurma();
 
 
-        const snapshot =
-            await getDoc(
-                notaRef
-            );
+        await carregarAlunos();
 
 
-        // ================================================
-        // NÃO EXISTE DOCUMENTO DE NOTAS
-        // ================================================
+        /*
+         * Primeiro cria a tabela.
+         * Depois carrega as notas e o
+         * estado aberto/fechado.
+         */
 
-        if (!snapshot.exists()) {
-
-            console.log(
-                "ℹ️ Ainda não existem notas guardadas."
-            );
-
-            return;
-
-        }
+        renderizarAlunos();
 
 
-        const dados =
-            snapshot.data();
+        await carregarNotas();
+
+
+        atualizarEstadoVisual();
 
 
         console.log(
-            "📒 NOTAS ENCONTRADAS:",
-            dados
+            "======================================"
         );
-
-
-        // ================================================
-        // SEGURANÇA DA ESCOLA
-        // ================================================
-
-        if (
-            dados.escolaId &&
-            String(
-                dados.escolaId
-            ).trim() !==
-            String(
-                escolaId
-            ).trim()
-        ) {
-
-            console.error(
-                "❌ As notas pertencem a outra escola."
-            );
-
-            return;
-
-        }
-
-
-        // ================================================
-        // VERIFICAR LISTA DE ALUNOS
-        // ================================================
-
-        if (
-            !Array.isArray(
-                dados.alunos
-            )
-        ) {
-
-            console.log(
-                "ℹ️ O documento não possui alunos."
-            );
-
-            return;
-
-        }
-
-
-        // ================================================
-        // PERCORRER NOTAS
-        // ================================================
-
-        dados.alunos.forEach(
-            notaAluno => {
-
-                const alunoId =
-                    String(
-                        notaAluno.id || ""
-                    );
-
-
-                if (!alunoId) {
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // PROCURAR LINHA DO ALUNO
-                // =========================================
-
-                const macInput =
-                    document.querySelector(
-                        `.mac[data-id="${alunoId}"]`
-                    );
-
-
-                if (!macInput) {
-
-                    console.warn(
-                        "⚠️ Linha não encontrada:",
-                        alunoId
-                    );
-
-                    return;
-
-                }
-
-
-                const linha =
-                    macInput.closest("tr");
-
-
-                if (!linha) {
-
-                    return;
-
-                }
-
-
-                const nptInput =
-                    linha.querySelector(
-                        ".npt"
-                    );
-
-
-                const mfInput =
-                    linha.querySelector(
-                        ".mf"
-                    );
-
-
-                const classificacao =
-                    linha.querySelector(
-                        ".classificacao"
-                    );
-
-
-                // =========================================
-                // MAC
-                // =========================================
-
-                if (
-                    macInput &&
-                    notaAluno.mac !== undefined &&
-                    notaAluno.mac !== ""
-                ) {
-
-                    macInput.value =
-                        notaAluno.mac;
-
-                }
-
-
-                // =========================================
-                // NPT
-                // =========================================
-
-                if (
-                    nptInput &&
-                    notaAluno.npt !== undefined &&
-                    notaAluno.npt !== ""
-                ) {
-
-                    nptInput.value =
-                        notaAluno.npt;
-
-                }
-
-
-                // =========================================
-                // MF
-                // =========================================
-
-                if (
-                    mfInput &&
-                    notaAluno.mf !== undefined
-                ) {
-
-                    mfInput.value =
-                        notaAluno.mf;
-
-                }
-
-
-                // =========================================
-                // CLASSIFICAÇÃO
-                // =========================================
-
-                if (
-                    classificacao &&
-                    notaAluno.classificacao
-                ) {
-
-                    classificacao.textContent =
-                        notaAluno.classificacao;
-
-                }
-
-
-                // =========================================
-                // ATUALIZAR CORES
-                // =========================================
-
-                if (
-                    mfInput &&
-                    notaAluno.mf !== ""
-                ) {
-
-                    const valorMF =
-                        Number(
-                            notaAluno.mf
-                        );
-
-
-                    const limite =
-                        ensino === "ensinoPrimario"
-                            ? 5
-                            : 10;
-
-
-                    if (
-                        valorMF < limite
-                    ) {
-
-                        mfInput.style.color =
-                            "red";
-
-                        if (
-                            classificacao
-                        ) {
-
-                            classificacao.style.color =
-                                "red";
-
-                        }
-
-                    }
-
-                    else {
-
-                        mfInput.style.color =
-                            "green";
-
-                        if (
-                            classificacao
-                        ) {
-
-                            classificacao.style.color =
-                                "green";
-
-                        }
-
-                    }
-
-                }
-
-            }
-        );
-
 
         console.log(
-            "✅ Notas carregadas na Mini-Pauta."
+            "✅ MINI-PAUTA PRONTA"
+        );
+
+        console.log(
+            "======================================"
         );
 
     }
@@ -1352,11 +1545,39 @@ async function carregarNotasNaTabela() {
     catch (erro) {
 
         console.error(
-            "❌ ERRO AO CARREGAR NOTAS:",
+            "❌ ERRO NA MINI-PAUTA:",
             erro
+        );
+
+
+        if (lista) {
+
+            lista.innerHTML = `
+
+                <tr>
+
+                    <td colspan="7">
+
+                        ❌ Erro ao carregar Mini-Pauta.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        alert(
+            "❌ Erro ao carregar Mini-Pauta:\n\n" +
+            erro.message
         );
 
     }
 
 }
 
+
+iniciarMiniPauta();
+  
