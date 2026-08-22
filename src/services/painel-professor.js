@@ -4,7 +4,7 @@
 // Seleção de Turma → Disciplina → Trimestre
 // =====================================================
 
-alert("PAINEL PROFESSOR CARREGADO ✅");
+alert("PAINEL PROFESSOR 1CARREGADO ✅");
 
 import { db } from "./firebase.js";
 
