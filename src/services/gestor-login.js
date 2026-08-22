@@ -1,6 +1,6 @@
 // =====================================================
 // LOGIN DO GESTOR - SGE ANGOLA
-// Verifica se a escola está aprovada antes de entrar
+// Verifica se a escola está autorizada pelo Super Admin
 // =====================================================
 
 import { login } from "./auth.js";
@@ -18,310 +18,391 @@ import {
 } from "./firebase.js";
 
 
-const form = document.getElementById("loginForm");
+// =====================================================
+// FORMULÁRIO
+// =====================================================
+
+const form =
+    document.getElementById("loginForm");
 
 
-form.addEventListener("submit", async (event) => {
+if (!form) {
 
-    event.preventDefault();
+    console.error(
+        "FORMULÁRIO loginForm NÃO ENCONTRADO."
+    );
 
-
-    // =================================================
-    // CAMPOS
-    // =================================================
-
-    const email =
-        document
-        .getElementById("email")
-        .value
-        .trim();
+} else {
 
 
-    const password =
-        document
-        .getElementById("password")
-        .value;
+    form.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
 
 
-    try {
+            // =================================================
+            // CAMPOS
+            // =================================================
 
-        // =================================================
-        // LOGIN FIREBASE
-        // =================================================
-
-        const result =
-            await login(
-                email,
-                password
-            );
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
 
-        if (!result.success) {
-
-            alert(
-                "Erro no login: " +
-                result.message
-            );
-
-            return;
-
-        }
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
 
 
-        // =================================================
-        // UTILIZADOR AUTENTICADO
-        // =================================================
+            if (!email || !password) {
 
-        const user =
-            auth.currentUser;
+                alert(
+                    "Preencha o e-mail e a palavra-passe."
+                );
 
-
-        if (!user) {
-
-            alert(
-                "Não foi possível identificar o utilizador."
-            );
-
-            return;
-
-        }
-
-
-        console.log(
-            "GESTOR AUTENTICADO:",
-            user.uid
-        );
-
-
-        // =================================================
-        // PROCURAR A ESCOLA DO GESTOR
-        // =================================================
-
-        const escolasRef =
-            collection(
-                db,
-                "escolas"
-            );
-
-
-        const consulta =
-            query(
-                escolasRef,
-                where(
-                    "gestorUid",
-                    "==",
-                    user.uid
-                )
-            );
-
-
-        const resultado =
-            await getDocs(
-                consulta
-            );
-
-
-        // =================================================
-        // ESCOLA NÃO ENCONTRADA
-        // =================================================
-
-        if (resultado.empty) {
-
-            alert(
-                "A sua conta não está associada a nenhuma escola."
-            );
-
-            return;
-
-        }
-
-
-        // =================================================
-        // PEGAR ESCOLA
-        // =================================================
-
-        let escolaId = null;
-
-        let escola = null;
-
-
-        resultado.forEach(
-            (doc) => {
-
-                escolaId =
-                    doc.id;
-
-                escola =
-                    doc.data();
+                return;
 
             }
-        );
 
 
-        console.log(
-            "ESCOLA ENCONTRADA:",
-            escolaId,
-            escola
-        );
+            try {
+
+                // =================================================
+                // LOGIN FIREBASE
+                // =================================================
+
+                const result =
+                    await login(
+                        email,
+                        password
+                    );
 
 
-        // =================================================
-        // VERIFICAR ESTADO
-        // =================================================
+                if (!result.success) {
 
-        const estado =
-            escola.estado || "pendente";
+                    alert(
+                        "Erro no login: " +
+                        result.message
+                    );
 
+                    return;
 
-        const ativo =
-            escola.ativo === true;
-
-
-        // =================================================
-        // ESCOLA PENDENTE
-        // =================================================
-
-        if (
-            estado === "pendente" ||
-            !ativo
-        ) {
-
-            alert(
-                "A sua escola ainda está pendente de aprovação pelo Super Administrador.\n\n" +
-                "Aguarde a aprovação para poder utilizar o sistema."
-            );
+                }
 
 
-            // IMPORTANTE:
-            // Não deixar a sessão continuar aberta.
+                // =================================================
+                // UTILIZADOR AUTENTICADO
+                // =================================================
 
-            await auth.signOut();
+                const user =
+                    auth.currentUser;
 
 
-            return;
+                if (!user) {
+
+                    alert(
+                        "Não foi possível identificar o utilizador."
+                    );
+
+                    return;
+
+                }
+
+
+                console.log(
+                    "===================================="
+                );
+
+                console.log(
+                    "GESTOR AUTENTICADO"
+                );
+
+                console.log(
+                    "E-mail:",
+                    user.email
+                );
+
+                console.log(
+                    "UID:",
+                    user.uid
+                );
+
+
+                // =================================================
+                // PROCURAR ESCOLA DO GESTOR
+                // =================================================
+
+                const escolasRef =
+                    collection(
+                        db,
+                        "escolas"
+                    );
+
+
+                const consulta =
+                    query(
+                        escolasRef,
+                        where(
+                            "gestorUid",
+                            "==",
+                            user.uid
+                        )
+                    );
+
+
+                const resultado =
+                    await getDocs(
+                        consulta
+                    );
+
+
+                // =================================================
+                // ESCOLA NÃO ENCONTRADA
+                // =================================================
+
+                if (resultado.empty) {
+
+                    alert(
+                        "A sua conta não está associada a nenhuma escola."
+                    );
+
+                    await auth.signOut();
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // PEGAR ESCOLA
+                // =================================================
+
+                let escolaId = null;
+
+                let escola = null;
+
+
+                resultado.forEach(
+                    (documento) => {
+
+                        escolaId =
+                            documento.id;
+
+                        escola =
+                            documento.data();
+
+                    }
+                );
+
+
+                console.log(
+                    "ESCOLA ENCONTRADA:",
+                    escolaId
+                );
+
+                console.log(
+                    "DADOS DA ESCOLA:",
+                    escola
+                );
+
+
+                // =================================================
+                // ESTADO DA ESCOLA
+                // =================================================
+
+                const estado =
+                    escola.estado ||
+                    "pendente";
+
+
+                const ativo =
+                    escola.ativo === true;
+
+
+                console.log(
+                    "ESTADO:",
+                    estado
+                );
+
+                console.log(
+                    "ATIVO:",
+                    ativo
+                );
+
+
+                // =================================================
+                // ESCOLA REJEITADA
+                // =================================================
+
+                if (
+                    estado === "rejeitado"
+                ) {
+
+                    alert(
+                        "A candidatura da sua escola foi rejeitada pelo Super Administrador."
+                    );
+
+                    await auth.signOut();
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // ESCOLA PENDENTE
+                // =================================================
+
+                if (
+                    estado === "pendente"
+                ) {
+
+                    alert(
+                        "A sua escola ainda está pendente de aprovação pelo Super Administrador.\n\n" +
+                        "Aguarde a aprovação para poder utilizar o sistema."
+                    );
+
+                    await auth.signOut();
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // ESCOLA APROVADA / ATIVA
+                // =================================================
+                //
+                // O SUPER ADMIN grava:
+                //
+                // estado: "ativo"
+                // ativo: true
+                //
+                // Portanto é isso que verificamos aqui.
+                // =================================================
+
+                if (
+                    estado === "ativo" &&
+                    ativo === true
+                ) {
+
+
+                    console.log(
+                        "ESCOLA AUTORIZADA!"
+                    );
+
+
+                    // =============================================
+                    // GUARDAR ESCOLA ATUAL
+                    // =============================================
+
+                    localStorage.setItem(
+                        "escolaId",
+                        escolaId
+                    );
+
+
+                    sessionStorage.setItem(
+                        "escolaId",
+                        escolaId
+                    );
+
+
+                    sessionStorage.setItem(
+                        "nomeEscola",
+                        escola.nome || ""
+                    );
+
+
+                    sessionStorage.setItem(
+                        "tipoEscola",
+                        escola.tipoEscola || ""
+                    );
+
+
+                    sessionStorage.setItem(
+                        "ensinos",
+                        JSON.stringify(
+                            escola.ensinos || []
+                        )
+                    );
+
+
+                    sessionStorage.setItem(
+                        "estruturaEscola",
+                        JSON.stringify(
+                            escola.estrutura || {}
+                        )
+                    );
+
+
+                    // =============================================
+                    // LOGIN CONCLUÍDO
+                    // =============================================
+
+                    alert(
+                        "Login efetuado com sucesso!"
+                    );
+
+
+                    window.location.href =
+                        "../pages/dashboard-gestor.html";
+
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // ESTADO NÃO RECONHECIDO
+                // =================================================
+
+                console.warn(
+                    "Estado da escola não reconhecido:",
+                    estado,
+                    ativo
+                );
+
+
+                alert(
+                    "A escola ainda não está autorizada a utilizar o sistema."
+                );
+
+
+                await auth.signOut();
+
+            }
+
+
+            catch (erro) {
+
+                console.error(
+                    "===================================="
+                );
+
+                console.error(
+                    "ERRO NO LOGIN DO GESTOR:"
+                );
+
+                console.error(
+                    erro
+                );
+
+
+                alert(
+                    "Ocorreu um erro ao verificar a escola.\n\n" +
+                    erro.message
+                );
+
+            }
 
         }
+    );
 
-
-        // =================================================
-        // ESCOLA REJEITADA
-        // =================================================
-
-        if (
-            estado === "rejeitada"
-        ) {
-
-            alert(
-                "A candidatura da sua escola foi rejeitada pelo Super Administrador."
-            );
-
-
-            await auth.signOut();
-
-
-            return;
-
-        }
-
-
-        // =================================================
-        // ESCOLA APROVADA
-        // =================================================
-
-        if (
-            estado === "aprovada" &&
-            ativo === true
-        ) {
-
-
-            // =============================================
-            // GUARDAR ESCOLA ATUAL
-            // =============================================
-
-            localStorage.setItem(
-                "escolaId",
-                escolaId
-            );
-
-
-            sessionStorage.setItem(
-                "escolaId",
-                escolaId
-            );
-
-
-            sessionStorage.setItem(
-                "nomeEscola",
-                escola.nome || ""
-            );
-
-
-            sessionStorage.setItem(
-                "tipoEscola",
-                escola.tipoEscola || ""
-            );
-
-
-            sessionStorage.setItem(
-                "ensinos",
-                JSON.stringify(
-                    escola.ensinos || []
-                )
-            );
-
-
-            sessionStorage.setItem(
-                "estruturaEscola",
-                JSON.stringify(
-                    escola.estrutura || {}
-                )
-            );
-
-
-            // =============================================
-            // ENTRAR NO DASHBOARD
-            // =============================================
-
-            alert(
-                "Login efetuado com sucesso!"
-            );
-
-
-            window.location.href =
-                "../pages/dashboard-gestor.html";
-
-
-            return;
-
-        }
-
-
-        // =================================================
-        // ESTADO DESCONHECIDO
-        // =================================================
-
-        alert(
-            "A escola ainda não está autorizada a utilizar o sistema."
-        );
-
-
-        await auth.signOut();
-
-
-    }
-    catch (erro) {
-
-        console.error(
-            "ERRO NO LOGIN:",
-            erro
-        );
-
-
-        alert(
-            "Ocorreu um erro ao verificar a escola.\n\n" +
-            erro.message
-        );
-
-    }
-
-});
+}
