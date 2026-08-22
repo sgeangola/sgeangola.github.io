@@ -4,7 +4,7 @@
 // Sistema de lançamento de notas
 // =====================================================
 
-alert("MINI-PAUTA.JS CARREGADO ✅");
+alert("MINI-PAUTA.JS 1CARREGADO ✅");
 
 import { db } from "./firebase.js";
 
