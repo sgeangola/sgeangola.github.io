@@ -1,22 +1,18 @@
 // =====================================================
+// LOGIN EXCLUSIVO DO SUPER ADMIN
 // SGE ANGOLA
-// SUPER ADMIN — GESTÃO DA PLATAFORMA
 // =====================================================
 
 import {
-    onAuthStateChanged,
-    signOut
+    signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
+
 import {
-    collection,
-    getDocs,
     doc,
-    getDoc,
-    updateDoc,
-    deleteDoc,
-    serverTimestamp
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
 
 import {
     auth,
@@ -25,7 +21,7 @@ import {
 
 
 // =====================================================
-// CONFIGURAÇÃO DO SUPER ADMIN
+// UID DO SUPER ADMIN
 // =====================================================
 
 const SUPER_ADMIN_UID =
@@ -33,128 +29,25 @@ const SUPER_ADMIN_UID =
 
 
 // =====================================================
-// ELEMENTOS DO HTML
+// ELEMENTOS
 // =====================================================
 
-const carregando =
-    document.getElementById("carregando");
+const formulario =
+    document.getElementById(
+        "loginSuperAdmin"
+    );
 
-const acessoNegado =
-    document.getElementById("acessoNegado");
-
-const painelAdmin =
-    document.getElementById("painelAdmin");
-
-const nomeAdmin =
-    document.getElementById("nomeAdmin");
-
-const listaEscolas =
-    document.getElementById("listaEscolas");
-
-const totalPendentes =
-    document.getElementById("totalPendentes");
-
-const totalAtivas =
-    document.getElementById("totalAtivas");
-
-const totalRejeitadas =
-    document.getElementById("totalRejeitadas");
-
-const totalEscolas =
-    document.getElementById("totalEscolas");
 
 const mensagem =
-    document.getElementById("mensagem");
+    document.getElementById(
+        "mensagem"
+    );
 
 
-// =====================================================
-// MOSTRAR CARREGAMENTO
-// =====================================================
-
-function mostrarCarregando() {
-
-    if (carregando) {
-
-        carregando.style.display =
-            "flex";
-
-    }
-
-    if (acessoNegado) {
-
-        acessoNegado.style.display =
-            "none";
-
-    }
-
-    if (painelAdmin) {
-
-        painelAdmin.style.display =
-            "none";
-
-    }
-
-}
-
-
-// =====================================================
-// MOSTRAR PAINEL
-// =====================================================
-
-function mostrarPainel() {
-
-    if (carregando) {
-
-        carregando.style.display =
-            "none";
-
-    }
-
-    if (acessoNegado) {
-
-        acessoNegado.style.display =
-            "none";
-
-    }
-
-    if (painelAdmin) {
-
-        painelAdmin.style.display =
-            "block";
-
-    }
-
-}
-
-
-// =====================================================
-// MOSTRAR ACESSO NEGADO
-// =====================================================
-
-function mostrarAcessoNegado() {
-
-    if (carregando) {
-
-        carregando.style.display =
-            "none";
-
-    }
-
-    if (painelAdmin) {
-
-        painelAdmin.style.display =
-            "none";
-
-    }
-
-    if (acessoNegado) {
-
-        acessoNegado.style.display =
-            "flex";
-
-    }
-
-}
+const botao =
+    document.getElementById(
+        "btnEntrar"
+    );
 
 
 // =====================================================
@@ -163,21 +56,17 @@ function mostrarAcessoNegado() {
 
 function mostrarMensagem(
     texto,
-    tipo = "sucesso"
+    erro = false
 ) {
-
-    if (!mensagem) return;
-
 
     mensagem.textContent =
         texto;
-
 
     mensagem.style.display =
         "block";
 
 
-    if (tipo === "erro") {
+    if (erro) {
 
         mensagem.style.background =
             "#fde8e8";
@@ -197,1236 +86,264 @@ function mostrarMensagem(
 
     }
 
-
-    setTimeout(() => {
-
-        mensagem.style.display =
-            "none";
-
-    }, 4000);
-
 }
 
 
 // =====================================================
-// ESCAPAR HTML
+// LOGIN
 // =====================================================
 
-function escaparHTML(texto) {
+formulario.addEventListener(
+    "submit",
+    async (event) => {
 
-    return String(texto || "")
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
+        event.preventDefault();
 
 
-// =====================================================
-// VERIFICAR SUPER ADMIN
-// =====================================================
-
-async function verificarSuperAdmin(
-    usuario
-) {
-
-    console.log(
-        "===================================="
-    );
-
-    console.log(
-        "SUPER ADMIN — VERIFICAÇÃO"
-    );
-
-    console.log(
-        "E-mail:",
-        usuario?.email
-    );
-
-    console.log(
-        "UID:",
-        usuario?.uid
-    );
+        const email =
+            document
+                .getElementById("email")
+                .value
+                .trim();
 
 
-    // -------------------------------------------------
-    // VERIFICAR LOGIN
-    // -------------------------------------------------
-
-    if (!usuario) {
-
-        console.warn(
-            "Nenhum utilizador autenticado."
-        );
-
-        window.location.href =
-            "./login.html";
-
-        return false;
-
-    }
+        const password =
+            document
+                .getElementById("password")
+                .value;
 
 
-    // -------------------------------------------------
-    // VERIFICAR UID
-    // -------------------------------------------------
+        if (!email || !password) {
 
-    if (
-        usuario.uid !==
-        SUPER_ADMIN_UID
-    ) {
+            mostrarMensagem(
+                "Preencha todos os campos.",
+                true
+            );
 
-        console.warn(
-            "UID não pertence ao Super Admin."
-        );
+            return;
 
-        mostrarAcessoNegado();
-
-        return false;
-
-    }
+        }
 
 
-    // -------------------------------------------------
-    // BUSCAR SUPER ADMIN NO FIRESTORE
-    // -------------------------------------------------
+        try {
 
-    try {
+            botao.disabled =
+                true;
 
-        const referencia =
-            doc(
-                db,
-                "superAdmins",
+            botao.textContent =
+                "A entrar...";
+
+
+            // =========================================
+            // AUTENTICAR NO FIREBASE
+            // =========================================
+
+            const resultado =
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+
+            const usuario =
+                resultado.user;
+
+
+            console.log(
+                "Super Admin autenticado:",
+                usuario.email
+            );
+
+
+            console.log(
+                "UID:",
+                usuario.uid
+            );
+
+
+            // =========================================
+            // VERIFICAR UID
+            // =========================================
+
+            if (
+                usuario.uid !==
                 SUPER_ADMIN_UID
-            );
+            ) {
 
+                await auth.signOut();
 
-        const resultado =
-            await getDoc(
-                referencia
-            );
 
+                mostrarMensagem(
+                    "Esta conta não pertence ao Super Administrador.",
+                    true
+                );
 
-        if (!resultado.exists()) {
 
-            console.error(
-                "Documento superAdmins não existe."
-            );
+                botao.disabled =
+                    false;
 
-            mostrarAcessoNegado();
+                botao.textContent =
+                    "Entrar no Super Admin";
 
-            return false;
 
-        }
-
-
-        const dados =
-            resultado.data();
-
-
-        console.log(
-            "Dados do Super Admin:",
-            dados
-        );
-
-
-        // -------------------------------------------------
-        // VERIFICAR ATIVO
-        // -------------------------------------------------
-
-        if (
-            dados.ativo !== true
-        ) {
-
-            console.warn(
-                "Super Admin está desativado."
-            );
-
-            mostrarAcessoNegado();
-
-            return false;
-
-        }
-
-
-        // -------------------------------------------------
-        // MOSTRAR NOME
-        // -------------------------------------------------
-
-        if (nomeAdmin) {
-
-            nomeAdmin.textContent =
-                dados.nome ||
-                usuario.email ||
-                "Super Admin";
-
-        }
-
-
-        console.log(
-            "SUPER ADMIN AUTORIZADO."
-        );
-
-
-        mostrarPainel();
-
-
-        // -------------------------------------------------
-        // CARREGAR ESCOLAS
-        // -------------------------------------------------
-
-        await carregarEscolas();
-
-
-        return true;
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "ERRO AO VERIFICAR SUPER ADMIN:",
-            erro
-        );
-
-
-        if (
-            erro.code ===
-            "unavailable"
-        ) {
-
-            mostrarMensagem(
-                "Não foi possível ligar ao Firebase. Verifique a Internet.",
-                "erro"
-            );
-
-        }
-
-        else {
-
-            mostrarMensagem(
-                "Erro ao verificar o Super Admin: " +
-                erro.message,
-                "erro"
-            );
-
-        }
-
-
-        // Não confundir erro de ligação
-        // com acesso negado.
-
-        if (carregando) {
-
-            carregando.style.display =
-                "none";
-
-        }
-
-        if (painelAdmin) {
-
-            painelAdmin.style.display =
-                "none";
-
-        }
-
-        return false;
-
-    }
-
-}
-
-
-// =====================================================
-// CARREGAR ESCOLAS
-// =====================================================
-
-async function carregarEscolas() {
-
-    try {
-
-        if (listaEscolas) {
-
-            listaEscolas.innerHTML = `
-
-                <tr>
-
-                    <td colspan="6">
-
-                        A carregar escolas...
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-
-
-        const resultado =
-            await getDocs(
-                collection(
-                    db,
-                    "escolas"
-                )
-            );
-
-
-        let pendentes = 0;
-        let ativas = 0;
-        let rejeitadas = 0;
-
-
-        const escolas = [];
-
-
-        resultado.forEach(
-            documento => {
-
-                const escola =
-                    documento.data();
-
-
-                escolas.push({
-
-                    id:
-                        documento.id,
-
-                    ...escola
-
-                });
-
-
-                if (
-                    escola.estado ===
-                    "pendente"
-                ) {
-
-                    pendentes++;
-
-                }
-
-                else if (
-                    escola.estado ===
-                    "ativo"
-                ) {
-
-                    ativas++;
-
-                }
-
-                else if (
-                    escola.estado ===
-                    "rejeitado"
-                ) {
-
-                    rejeitadas++;
-
-                }
+                return;
 
             }
-        );
 
 
-        // -------------------------------------------------
-        // ESTATÍSTICAS
-        // -------------------------------------------------
+            // =========================================
+            // VERIFICAR DOCUMENTO
+            // =========================================
 
-        if (totalPendentes) {
-
-            totalPendentes.textContent =
-                pendentes;
-
-        }
-
-
-        if (totalAtivas) {
-
-            totalAtivas.textContent =
-                ativas;
-
-        }
-
-
-        if (totalRejeitadas) {
-
-            totalRejeitadas.textContent =
-                rejeitadas;
-
-        }
-
-
-        if (totalEscolas) {
-
-            totalEscolas.textContent =
-                escolas.length;
-
-        }
-
-
-        // -------------------------------------------------
-        // TABELA
-        // -------------------------------------------------
-
-        mostrarEscolas(
-            escolas
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao carregar escolas:",
-            erro
-        );
-
-
-        if (listaEscolas) {
-
-            listaEscolas.innerHTML = `
-
-                <tr>
-
-                    <td colspan="6">
-
-                        Erro ao carregar escolas.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-
-
-        mostrarMensagem(
-            "Erro ao carregar escolas: " +
-            erro.message,
-            "erro"
-        );
-
-    }
-
-}
-
-
-// =====================================================
-// MOSTRAR ESCOLAS NA TABELA
-// =====================================================
-
-function mostrarEscolas(
-    escolas
-) {
-
-    if (!listaEscolas) return;
-
-
-    if (!escolas.length) {
-
-        listaEscolas.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="6"
-                    style="text-align:center;"
-                >
-
-                    Nenhuma escola registada.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-
-    listaEscolas.innerHTML = "";
-
-
-    escolas.forEach(
-        escola => {
-
-            const tr =
-                document.createElement(
-                    "tr"
+            const referencia =
+                doc(
+                    db,
+                    "superAdmins",
+                    usuario.uid
                 );
 
 
-            const nome =
-                escaparHTML(
-                    escola.nome ||
-                    "Sem nome"
+            const documento =
+                await getDoc(
+                    referencia
                 );
 
 
-            const gestor =
-                escaparHTML(
-                    escola.nomeGestor ||
-                    escola.gestor ||
-                    "—"
+            if (!documento.exists()) {
+
+                await auth.signOut();
+
+
+                mostrarMensagem(
+                    "Conta de Super Admin não configurada no Firestore.",
+                    true
                 );
 
 
-            const email =
-                escaparHTML(
-                    escola.emailGestor ||
-                    escola.email ||
-                    "—"
+                botao.disabled =
+                    false;
+
+                botao.textContent =
+                    "Entrar no Super Admin";
+
+
+                return;
+
+            }
+
+
+            const dados =
+                documento.data();
+
+
+            // =========================================
+            // VERIFICAR ATIVO
+            // =========================================
+
+            if (
+                dados.ativo !== true
+            ) {
+
+                await auth.signOut();
+
+
+                mostrarMensagem(
+                    "A conta do Super Admin está desativada.",
+                    true
                 );
 
 
-            const telefone =
-                escaparHTML(
-                    escola.telefone ||
-                    escola.telefoneGestor ||
-                    "—"
-                );
+                botao.disabled =
+                    false;
+
+                botao.textContent =
+                    "Entrar no Super Admin";
 
 
-            const estado =
-                escola.estado ||
-                "pendente";
+                return;
+
+            }
 
 
-            let estadoTexto =
-                "Pendente";
+            // =========================================
+            // SUCESSO
+            // =========================================
+
+            mostrarMensagem(
+                "Login efetuado com sucesso!"
+            );
 
 
-            let estadoClasse =
-                "estado-pendente";
+            setTimeout(
+                () => {
+
+                    window.location.href =
+                        "./super-admin.html";
+
+                },
+                700
+            );
+
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "Erro no login Super Admin:",
+                erro
+            );
+
+
+            let texto =
+                "Não foi possível iniciar sessão.";
 
 
             if (
-                estado ===
-                "ativo"
+                erro.code ===
+                "auth/invalid-credential"
             ) {
 
-                estadoTexto =
-                    "Ativo";
-
-                estadoClasse =
-                    "estado-ativo";
+                texto =
+                    "E-mail ou palavra-passe incorretos.";
 
             }
 
             else if (
-                estado ===
-                "rejeitado"
+                erro.code ===
+                "auth/invalid-login-credentials"
             ) {
 
-                estadoTexto =
-                    "Rejeitado";
+                texto =
+                    "E-mail ou palavra-passe incorretos.";
 
-                estadoClasse =
-                    "estado-rejeitado";
+            }
+
+            else if (
+                erro.code ===
+                "auth/network-request-failed"
+            ) {
+
+                texto =
+                    "Sem ligação à Internet.";
 
             }
 
 
-            tr.innerHTML = `
-
-                <td>
-
-                    <strong>
-                        ${nome}
-                    </strong>
-
-                </td>
-
-
-                <td>
-                    ${gestor}
-                </td>
-
-
-                <td>
-                    ${email}
-                </td>
-
-
-                <td>
-                    ${telefone}
-                </td>
-
-
-                <td>
-
-                    <span
-                        class="estado ${estadoClasse}"
-                    >
-
-                        ${estadoTexto}
-
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <div class="acoes">
-
-                        <button
-                            class="btn-ver"
-                            onclick="verEscola('${escola.id}')"
-                        >
-                            👁️ Ver
-                        </button>
-
-
-                        ${
-                            estado !== "ativo"
-                            ? `
-                                <button
-                                    class="btn-aprovar"
-                                    onclick="aprovarEscola('${escola.id}')"
-                                >
-                                    ✓ Aprovar
-                                </button>
-                            `
-                            : ""
-                        }
-
-
-                        ${
-                            estado !== "rejeitado"
-                            ? `
-                                <button
-                                    class="btn-rejeitar"
-                                    onclick="rejeitarEscola('${escola.id}')"
-                                >
-                                    ✕ Rejeitar
-                                </button>
-                            `
-                            : ""
-                        }
-
-
-                        <button
-                            class="btn-eliminar"
-                            onclick="eliminarEscola('${escola.id}')"
-                        >
-                            🗑️ Eliminar
-                        </button>
-
-                    </div>
-
-                </td>
-
-            `;
-
-
-            listaEscolas.appendChild(
-                tr
-            );
-
-        }
-    );
-
-}
-
-
-// =====================================================
-// VER ESCOLA
-// =====================================================
-
-window.verEscola =
-async function(id) {
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "escolas",
-                id
-            );
-
-
-        const resultado =
-            await getDoc(
-                referencia
-            );
-
-
-        if (!resultado.exists()) {
-
-            alert(
-                "Escola não encontrada."
-            );
-
-            return;
-
-        }
-
-
-        const escola =
-            resultado.data();
-
-
-        const ensinos =
-            Array.isArray(
-                escola.ensinos
-            )
-                ? escola.ensinos.join(", ")
-                : (
-                    escola.ensinos ||
-                    ""
-                );
-
-
-        alert(
-
-`================================
-          ESCOLA
-================================
-
-Nome:
-${escola.nome || ""}
-
-Província:
-${escola.provincia || ""}
-
-Município:
-${escola.municipio || ""}
-
-Telefone:
-${escola.telefone || ""}
-
-E-mail:
-${escola.email || ""}
-
-Tipo:
-${escola.tipoEscola || ""}
-
-Ano letivo:
-${escola.anoLetivoAtual || ""}
-
-Ensinos:
-${ensinos}
-
-Gestor:
-${escola.nomeGestor || ""}
-
-E-mail do gestor:
-${escola.emailGestor || ""}
-
-Estado:
-${escola.estado || ""}
-
-Motivo da rejeição:
-${escola.motivoRejeicao || ""}
-
-ID:
-${id}
-
-================================`
-
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao ver escola:",
-            erro
-        );
-
-        mostrarMensagem(
-            "Erro ao consultar escola.",
-            "erro"
-        );
-
-    }
-
-};
-
-
-// =====================================================
-// APROVAR ESCOLA
-// =====================================================
-
-window.aprovarEscola =
-async function(id) {
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "escolas",
-                id
-            );
-
-
-        const resultado =
-            await getDoc(
-                referencia
-            );
-
-
-        if (!resultado.exists()) {
-
             mostrarMensagem(
-                "Escola não encontrada.",
-                "erro"
+                texto,
+                true
             );
 
-            return;
+
+            botao.disabled =
+                false;
+
+            botao.textContent =
+                "Entrar no Super Admin";
 
         }
 
-
-        const escola =
-            resultado.data();
-
-
-        const confirmar =
-            confirm(
-
-`Deseja aprovar esta escola?
-
-${escola.nome || "Sem nome"}
-
-O gestor poderá utilizar a escola após a aprovação.`
-
-            );
-
-
-        if (!confirmar) {
-
-            return;
-
-        }
-
-
-        await updateDoc(
-
-            referencia,
-
-            {
-
-                estado:
-                    "ativo",
-
-                ativo:
-                    true,
-
-                aprovadoEm:
-                    serverTimestamp(),
-
-                motivoRejeicao:
-                    ""
-
-            }
-
-        );
-
-
-        mostrarMensagem(
-            "Escola aprovada com sucesso!"
-        );
-
-
-        await carregarEscolas();
-
     }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao aprovar:",
-            erro
-        );
-
-
-        mostrarMensagem(
-            "Erro ao aprovar escola: " +
-            erro.message,
-            "erro"
-        );
-
-    }
-
-};
-
-
-// =====================================================
-// REJEITAR ESCOLA
-// =====================================================
-
-window.rejeitarEscola =
-async function(id) {
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "escolas",
-                id
-            );
-
-
-        const resultado =
-            await getDoc(
-                referencia
-            );
-
-
-        if (!resultado.exists()) {
-
-            mostrarMensagem(
-                "Escola não encontrada.",
-                "erro"
-            );
-
-            return;
-
-        }
-
-
-        const escola =
-            resultado.data();
-
-
-        const motivo =
-            prompt(
-
-`Motivo da rejeição:
-
-Escola:
-${escola.nome || "Sem nome"}
-
-Digite o motivo da rejeição:`
-
-            );
-
-
-        if (
-            motivo === null
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            motivo.trim() === ""
-        ) {
-
-            alert(
-                "Informe o motivo da rejeição."
-            );
-
-            return;
-
-        }
-
-
-        await updateDoc(
-
-            referencia,
-
-            {
-
-                estado:
-                    "rejeitado",
-
-                ativo:
-                    false,
-
-                motivoRejeicao:
-                    motivo.trim(),
-
-                rejeitadoEm:
-                    serverTimestamp()
-
-            }
-
-        );
-
-
-        mostrarMensagem(
-            "Escola rejeitada."
-        );
-
-
-        await carregarEscolas();
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao rejeitar:",
-            erro
-        );
-
-
-        mostrarMensagem(
-            "Erro ao rejeitar escola: " +
-            erro.message,
-            "erro"
-        );
-
-    }
-
-};
-
-
-// =====================================================
-// ELIMINAR ESCOLA
-// =====================================================
-
-window.eliminarEscola =
-async function(id) {
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "escolas",
-                id
-            );
-
-
-        const resultado =
-            await getDoc(
-                referencia
-            );
-
-
-        if (!resultado.exists()) {
-
-            mostrarMensagem(
-                "Escola não encontrada.",
-                "erro"
-            );
-
-            return;
-
-        }
-
-
-        const escola =
-            resultado.data();
-
-
-        const nome =
-            escola.nome ||
-            "Sem nome";
-
-
-        const confirmar =
-            confirm(
-
-`ATENÇÃO!
-
-Você está prestes a eliminar:
-
-${nome}
-
-Apenas o documento desta escola na coleção "escolas" será eliminado.
-
-Deseja continuar?`
-
-            );
-
-
-        if (!confirmar) {
-
-            return;
-
-        }
-
-
-        const confirmacao =
-            prompt(
-
-`CONFIRMAÇÃO FINAL
-
-Digite exatamente:
-
-ELIMINAR
-
-para confirmar a eliminação.
-
-Escola:
-${nome}`
-
-            );
-
-
-        if (
-            confirmacao !==
-            "ELIMINAR"
-        ) {
-
-            alert(
-                "Eliminação cancelada."
-            );
-
-            return;
-
-        }
-
-
-        await deleteDoc(
-            referencia
-        );
-
-
-        mostrarMensagem(
-            "Escola eliminada com sucesso!"
-        );
-
-
-        await carregarEscolas();
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao eliminar:",
-            erro
-        );
-
-
-        mostrarMensagem(
-            "Erro ao eliminar escola: " +
-            erro.message,
-            "erro"
-        );
-
-    }
-
-};
-
-
-// =====================================================
-// TERMINAR SESSÃO
-// =====================================================
-
-window.terminarSessao =
-async function() {
-
-    try {
-
-        await signOut(
-            auth
-        );
-
-
-        window.location.href =
-            "./login.html";
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            "Erro ao terminar sessão:",
-            erro
-        );
-
-
-        alert(
-            "Não foi possível terminar a sessão."
-        );
-
-    }
-
-};
-
-
-// =====================================================
-// INICIALIZAÇÃO
-// =====================================================
-
-mostrarCarregando();
-
-
-console.log(
-    "===================================="
-);
-
-console.log(
-    "INICIANDO SUPER ADMIN"
-);
-
-console.log(
-    "===================================="
-);
-
-
-onAuthStateChanged(
-
-    auth,
-
-    async usuario => {
-
-        console.log(
-            "AUTH STATE:",
-            usuario
-                ? usuario.email
-                : "não autenticado"
-        );
-
-
-        if (!usuario) {
-
-            console.log(
-                "Nenhum utilizador autenticado."
-            );
-
-
-            window.location.href =
-                "./login.html";
-
-            return;
-
-        }
-
-
-        await verificarSuperAdmin(
-            usuario
-        );
-
-    }
-
 );
