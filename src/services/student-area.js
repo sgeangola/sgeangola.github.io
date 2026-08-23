@@ -1707,19 +1707,19 @@ function construirTabelaNotas(
 
                     <td>
                         ${mostrarNota(
-                            alunoNota.MAC
+                            alunoNota.mac
                         )}
                     </td>
 
                     <td>
                         ${mostrarNota(
-                            alunoNota.NPT
+                            alunoNota.npt
                         )}
                     </td>
 
                     <td>
                         ${mostrarNota(
-                            alunoNota.MF
+                            alunoNota.mf
                         )}
                     </td>
 
