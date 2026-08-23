@@ -1039,13 +1039,13 @@ async function () {
                         ),
 
                     MAC:
-                        alunoNota.MAC ?? "",
+    alunoNota.mac ?? "",
 
-                    NPT:
-                        alunoNota.NPT ?? "",
+NPT:
+    alunoNota.npt ?? "",
 
-                    MF:
-                        alunoNota.MF ?? "",
+MF:
+    alunoNota.mf ?? "",
 
                     classificacao:
                         alunoNota.classificacao ||
