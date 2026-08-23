@@ -1,15 +1,20 @@
 /* =====================================================
    SGE — ÁREA DO ALUNO
    student-area.js
-   BLOCO 1/3
+   VERSÃO COMPLETA
 
    FUNÇÕES:
    - Sessão do aluno
-   - Identificação da escola
-   - Perfil do aluno
-   - Nome da escola
-   - Preparação do controlo financeiro
-   - Firebase
+   - Perfil
+   - Meus dados
+   - Alterar senha
+   - Ver notas
+   - Ver notas por ano letivo
+   - Ver notas por trimestre
+   - Ver boletim por ano/trimestre
+   - Verificação financeira por trimestre
+   - Baixar / imprimir notas
+   - Sair da conta
 ===================================================== */
 
 
@@ -26,6 +31,11 @@ import {
     doc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+
+alert(
+    "🎓 SGE — student-area.js iniciado"
+);
 
 
 console.log(
@@ -50,8 +60,10 @@ if (!dadosAluno) {
         "Faça login novamente."
     );
 
+
     window.location.href =
         "student-login.html";
+
 
     throw new Error(
         "Aluno não autenticado."
@@ -75,6 +87,7 @@ try {
         );
 
 }
+
 catch (erro) {
 
     console.error(
@@ -82,16 +95,20 @@ catch (erro) {
         erro
     );
 
+
     localStorage.removeItem(
         "alunoLogado"
     );
+
 
     alert(
         "A sessão do aluno está inválida."
     );
 
+
     window.location.href =
         "student-login.html";
+
 
     throw erro;
 
@@ -106,43 +123,64 @@ console.log(
     "================================"
 );
 
+
 console.log(
     "🎓 ALUNO LOGADO"
 );
 
+
 console.log(
     aluno
 );
+
 
 console.log(
     "ID:",
     aluno.id
 );
 
+
 console.log(
     "Nome:",
     aluno.nome
 );
+
 
 console.log(
     "Código:",
     aluno.codigoAluno
 );
 
+
 console.log(
     "Turma:",
     aluno.turmaNome
 );
+
 
 console.log(
     "Turma ID:",
     aluno.turmaId
 );
 
+
 console.log(
-    "Escola ID:",
+    "Número:",
+    aluno.numero
+);
+
+
+console.log(
+    "Estado:",
+    aluno.estado
+);
+
+
+console.log(
+    "Escola:",
     aluno.escolaId
 );
+
 
 console.log(
     "================================"
@@ -158,41 +196,23 @@ const nomeElemento =
         "nomeAluno"
     );
 
+
 const codigoElemento =
     document.getElementById(
         "codigo"
     );
+
 
 const turmaElemento =
     document.getElementById(
         "turma"
     );
 
+
 const estadoElemento =
     document.getElementById(
         "estado"
     );
-
-
-// =====================================================
-// NOME DA ESCOLA
-// =====================================================
-
-const nomeEscolaElemento =
-    document.getElementById(
-        "nomeEscola"
-    );
-
-
-// =====================================================
-// VARIÁVEIS
-// =====================================================
-
-let dadosEscola =
-    null;
-
-let escolaNome =
-    "Escola";
 
 
 // =====================================================
@@ -245,7 +265,7 @@ if (estadoElemento) {
 
 
 // =====================================================
-// FUNÇÃO ESCAPAR HTML
+// ESCAPAR HTML
 // =====================================================
 
 function escaparHTML(
@@ -280,108 +300,7 @@ function escaparHTML(
 
 
 // =====================================================
-// CARREGAR ESCOLA
-// =====================================================
-
-async function carregarEscola() {
-
-    try {
-
-        const escolaId =
-            String(
-                aluno.escolaId ||
-                sessionStorage.getItem(
-                    "escolaId"
-                ) ||
-                ""
-            ).trim();
-
-
-        if (!escolaId) {
-
-            console.warn(
-                "⚠️ escolaId não encontrado."
-            );
-
-            return;
-
-        }
-
-
-        const referencia =
-            doc(
-                db,
-                "escolas",
-                escolaId
-            );
-
-
-        const snapshot =
-            await getDoc(
-                referencia
-            );
-
-
-        if (
-            !snapshot.exists()
-        ) {
-
-            console.warn(
-                "⚠️ Escola não encontrada:",
-                escolaId
-            );
-
-            return;
-
-        }
-
-
-        dadosEscola =
-            snapshot.data();
-
-
-        escolaNome =
-            dadosEscola.nome ||
-            "Escola";
-
-
-        console.log(
-            "🏫 ESCOLA:",
-            escolaNome
-        );
-
-
-        if (nomeEscolaElemento) {
-
-            nomeEscolaElemento.textContent =
-                escolaNome;
-
-        }
-
-
-        // Guardar também para outras páginas
-
-        sessionStorage.setItem(
-            "nomeEscola",
-            escolaNome
-        );
-
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ Erro ao carregar escola:",
-            erro
-        );
-
-    }
-
-}
-
-
-// =====================================================
-// NORMALIZAR NOTA
+// MOSTRAR NOTA
 // =====================================================
 
 function mostrarNota(
@@ -416,9 +335,18 @@ function nomeTrimestre(
         String(
             trimestre || ""
         )
-        .replace("º", "")
-        .replace("°", "")
-        .replace("ª", "")
+        .replace(
+            "º",
+            ""
+        )
+        .replace(
+            "°",
+            ""
+        )
+        .replace(
+            "ª",
+            ""
+        )
         .replace(
             /Trimestre/gi,
             ""
@@ -426,28 +354,85 @@ function nomeTrimestre(
         .trim();
 
 
-    if (valor === "1") {
+    if (
+        valor === "1"
+    ) {
 
         return "1.º Trimestre";
 
     }
 
-    if (valor === "2") {
+
+    if (
+        valor === "2"
+    ) {
 
         return "2.º Trimestre";
 
     }
 
-    if (valor === "3") {
+
+    if (
+        valor === "3"
+    ) {
 
         return "3.º Trimestre";
 
     }
 
 
-    return
+    return (
         trimestre ||
-        "—";
+        "—"
+    );
+
+}
+
+
+// =====================================================
+// OBTER NÚMERO DO TRIMESTRE
+// =====================================================
+
+function obterNumeroTrimestre(
+    trimestre
+) {
+
+    const texto =
+        String(
+            trimestre || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    if (
+        texto.includes("1")
+    ) {
+
+        return "1";
+
+    }
+
+
+    if (
+        texto.includes("2")
+    ) {
+
+        return "2";
+
+    }
+
+
+    if (
+        texto.includes("3")
+    ) {
+
+        return "3";
+
+    }
+
+
+    return "";
 
 }
 
@@ -478,16 +463,107 @@ function obterAnoLetivo(
 
 
 // =====================================================
-// INICIAR
+// OBTER ESCOLA
 // =====================================================
 
-carregarEscola();
+async function obterDadosEscola() {
 
-// =====================================================
-// SGE — ÁREA DO ALUNO
-// student-area.js
-// BLOCO 2/3
-// =====================================================
+    const escolaId =
+        String(
+            aluno.escolaId ||
+            sessionStorage.getItem(
+                "escolaId"
+            ) ||
+            localStorage.getItem(
+                "escolaId"
+            ) ||
+            ""
+        ).trim();
+
+
+    if (!escolaId) {
+
+        return {
+
+            id: "",
+
+            nome:
+                "SGE — Sistema de Gestão Escolar"
+
+        };
+
+    }
+
+
+    try {
+
+        const referencia =
+            doc(
+                db,
+                "escolas",
+                escolaId
+            );
+
+
+        const snapshot =
+            await getDoc(
+                referencia
+            );
+
+
+        if (
+            snapshot.exists()
+        ) {
+
+            const dados =
+                snapshot.data();
+
+
+            return {
+
+                id:
+                    escolaId,
+
+                nome:
+                    dados.nome ||
+                    dados.nomeEscola ||
+                    dados.designacao ||
+                    "SGE — Sistema de Gestão Escolar",
+
+                logo:
+                    dados.logo ||
+                    ""
+
+            };
+
+        }
+
+    }
+
+    catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível carregar dados da escola:",
+            erro
+        );
+
+    }
+
+
+    return {
+
+        id:
+            escolaId,
+
+        nome:
+            "SGE — Sistema de Gestão Escolar",
+
+        logo:
+            ""
+
+    };
+
+}
 
 
 // =====================================================
@@ -632,14 +708,6 @@ function () {
                         color:#334155;
                     "
                 >
-
-                    <p>
-                        <strong>Escola:</strong><br>
-                        ${escaparHTML(
-                            escolaNome
-                        )}
-                    </p>
-
 
                     <p>
                         <strong>Nome:</strong><br>
@@ -817,9 +885,7 @@ async function () {
 
         const senhaAtual =
             String(
-                documento.dados.senha ||
-                documento.dados.senhaAcesso ||
-                ""
+                documento.dados.senha || ""
             );
 
 
@@ -897,9 +963,6 @@ async function () {
             {
 
                 senha:
-                    novaSenha.trim(),
-
-                senhaAcesso:
                     novaSenha.trim()
 
             }
@@ -909,13 +972,12 @@ async function () {
         aluno.senha =
             novaSenha.trim();
 
-        aluno.senhaAcesso =
-            novaSenha.trim();
-
 
         localStorage.setItem(
             "alunoLogado",
-            JSON.stringify(aluno)
+            JSON.stringify(
+                aluno
+            )
         );
 
 
@@ -980,204 +1042,286 @@ function () {
 
 
 // =====================================================
-// CONTROLO FINANCEIRO
-// =====================================================
-//
-// REGRA:
-//
-// Pago     → pode ver notas e boletim
-// Não pago → bloqueado
-//
-// Esta função deverá ser usada tanto pelo
-// Ver Notas como pelo Ver Boletim.
+// CARREGAR DOCUMENTOS DE NOTAS
 // =====================================================
 
-async function verificarFinanceiroAluno() {
+async function carregarDocumentosNotas() {
 
-    try {
-
-        const escolaId =
-            String(
-                aluno.escolaId || ""
-            ).trim();
+    const turmaId =
+        String(
+            aluno.turmaId || ""
+        ).trim();
 
 
-        const turmaId =
-            String(
-                aluno.turmaId || ""
-            ).trim();
+    const escolaId =
+        String(
+            aluno.escolaId || ""
+        ).trim();
 
 
-        const alunoId =
-            String(
-                aluno.id || ""
-            ).trim();
+    if (!turmaId) {
 
-
-        const codigoAluno =
-            String(
-                aluno.codigoAluno || ""
-            ).trim();
-
-
-        const numeroAluno =
-            String(
-                aluno.numero || ""
-            ).trim();
-
-
-        if (!escolaId) {
-
-            console.warn(
-                "⚠️ escolaId não encontrado."
-            );
-
-            return false;
-
-        }
-
-
-        const snapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "financeiro"
-                )
-            );
-
-
-        let encontrado =
-            null;
-
-
-        snapshot.forEach(
-            documento => {
-
-                if (encontrado) {
-                    return;
-                }
-
-
-                const dados =
-                    documento.data();
-
-
-                if (
-                    dados.escolaId &&
-                    String(
-                        dados.escolaId
-                    ).trim() !== escolaId
-                ) {
-
-                    return;
-
-                }
-
-
-                const dadosTurma =
-                    String(
-                        dados.turmaId || ""
-                    ).trim();
-
-
-                if (
-                    turmaId &&
-                    dadosTurma &&
-                    dadosTurma !== turmaId
-                ) {
-
-                    return;
-
-                }
-
-
-                const id =
-                    String(
-                        dados.alunoId || ""
-                    ).trim();
-
-
-                const codigo =
-                    String(
-                        dados.codigoAluno || ""
-                    ).trim();
-
-
-                const numero =
-                    String(
-                        dados.numero || ""
-                    ).trim();
-
-
-                if (
-                    (
-                        alunoId &&
-                        id === alunoId
-                    )
-                    ||
-                    (
-                        codigoAluno &&
-                        codigo === codigoAluno
-                    )
-                    ||
-                    (
-                        numeroAluno &&
-                        numero === numeroAluno
-                    )
-                ) {
-
-                    encontrado =
-                        dados;
-
-                }
-
-            }
+        throw new Error(
+            "Turma do aluno não identificada."
         );
-
-
-        if (!encontrado) {
-
-            console.warn(
-                "⚠️ Registo financeiro do aluno não encontrado."
-            );
-
-            return false;
-
-        }
-
-
-        const estado =
-            String(
-                encontrado.estado ||
-                encontrado.situacao ||
-                encontrado.status ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        const pago =
-            estado === "pago" ||
-            estado === "pagamento efetuado" ||
-            estado === "paga";
-
-
-        console.log(
-            "💰 ESTADO FINANCEIRO:",
-            estado
-        );
-
-
-        return pago;
 
     }
 
-    catch (erro) {
 
-        console.error(
-            "❌ Erro ao verificar financeiro:",
-            erro
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "notas"
+            )
+        );
+
+
+    const documentos = [];
+
+
+    snapshot.forEach(
+        documento => {
+
+            const dados =
+                documento.data();
+
+
+            if (
+                escolaId &&
+                dados.escolaId &&
+                String(
+                    dados.escolaId
+                ).trim() !== escolaId
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                String(
+                    dados.turmaId || ""
+                ).trim() !== turmaId
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !Array.isArray(
+                    dados.alunos
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const alunoNota =
+                dados.alunos.find(
+                    item => {
+
+                        const numero =
+                            String(
+                                item.numero || ""
+                            ).trim();
+
+
+                        const codigo =
+                            String(
+                                item.codigoAluno || ""
+                            ).trim();
+
+
+                        const id =
+                            String(
+                                item.id || ""
+                            ).trim();
+
+
+                        const nome =
+                            String(
+                                item.nome || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        return (
+
+                            (
+                                aluno.id &&
+                                id ===
+                                String(
+                                    aluno.id
+                                ).trim()
+                            )
+
+                            ||
+
+                            (
+                                aluno.numero &&
+                                numero ===
+                                String(
+                                    aluno.numero
+                                ).trim()
+                            )
+
+                            ||
+
+                            (
+                                aluno.codigoAluno &&
+                                codigo ===
+                                String(
+                                    aluno.codigoAluno
+                                ).trim()
+                            )
+
+                            ||
+
+                            (
+                                aluno.nome &&
+                                nome ===
+                                String(
+                                    aluno.nome
+                                )
+                                .trim()
+                                .toLowerCase()
+                            )
+
+                        );
+
+                    }
+                );
+
+
+            if (!alunoNota) {
+
+                return;
+
+            }
+
+
+            documentos.push({
+
+                id:
+                    documento.id,
+
+                disciplina:
+                    dados.disciplina ||
+                    documento.id,
+
+                trimestre:
+                    dados.trimestre ||
+                    "",
+
+                anoLetivo:
+                    obterAnoLetivo(
+                        dados
+                    ),
+
+                escolaId:
+                    dados.escolaId ||
+                    escolaId,
+
+                turmaId:
+                    dados.turmaId ||
+                    turmaId,
+
+                alunoNota:
+                    alunoNota
+
+            });
+
+        }
+    );
+
+
+    console.log(
+        "📊 DOCUMENTOS DE NOTAS:",
+        documentos
+    );
+
+
+    return documentos;
+
+}
+
+
+// =====================================================
+// VERIFICAR PAGAMENTO DO TRIMESTRE
+// =====================================================
+
+async function verificarPagamentoTrimestre(
+    trimestreSelecionado
+) {
+
+    const escolaId =
+        String(
+            aluno.escolaId ||
+            sessionStorage.getItem(
+                "escolaId"
+            ) ||
+            localStorage.getItem(
+                "escolaId"
+            ) ||
+            ""
+        ).trim();
+
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+
+    if (!escolaId) {
+
+        throw new Error(
+            "Escola do aluno não identificada."
+        );
+
+    }
+
+
+    if (!alunoId) {
+
+        throw new Error(
+            "ID do aluno não identificado."
+        );
+
+    }
+
+
+    const financeiroId =
+        `${escolaId}_${alunoId}`;
+
+
+    const referencia =
+        doc(
+            db,
+            "financeiro",
+            financeiroId
+        );
+
+
+    const snapshot =
+        await getDoc(
+            referencia
+        );
+
+
+    if (
+        !snapshot.exists()
+    ) {
+
+        console.log(
+            "💰 Documento financeiro não encontrado."
         );
 
 
@@ -1185,329 +1329,1905 @@ async function verificarFinanceiroAluno() {
 
     }
 
-}
+
+    const dados =
+        snapshot.data();
 
 
-// Tornar disponível para Ver Notas / Ver Boletim
-
-window.verificarFinanceiroAluno =
-    verificarFinanceiroAluno;
-
-// =====================================================
-// IMPRIMIR / BAIXAR NOTAS
-// =====================================================
-
-function imprimirNotasAluno(
-    documentos,
-    anoSelecionado = ""
-) {
-
-    const filtrados =
-        anoSelecionado
-            ? documentos.filter(
-                documento =>
-                    String(
-                        obterAnoLetivo(
-                            documento
-                        )
-                    ) ===
-                    String(
-                        anoSelecionado
-                    )
-            )
-            : documentos;
+    let chave =
+        "";
 
 
-    const linhas =
-        construirTabelaNotas(
-            filtrados
-        );
+    if (
+        String(
+            trimestreSelecionado
+        ) === "1"
+    ) {
 
+        chave =
+            "1trimestre";
 
-    const janela =
-        window.open(
-            "",
-            "_blank"
-        );
+    }
 
+    else if (
+        String(
+            trimestreSelecionado
+        ) === "2"
+    ) {
 
-    if (!janela) {
+        chave =
+            "2trimestre";
 
-        alert(
-            "⚠️ O navegador bloqueou a janela."
-        );
+    }
 
-        return;
+    else if (
+        String(
+            trimestreSelecionado
+        ) === "3"
+    ) {
+
+        chave =
+            "3trimestre";
 
     }
 
 
-    janela.document.write(`
+    if (!chave) {
 
-        <!DOCTYPE html>
+        return false;
 
-        <html lang="pt">
-
-        <head>
-
-            <meta charset="UTF-8">
-
-            <title>
-                Notas — ${escaparHTML(
-                    aluno.nome || "Aluno"
-                )}
-            </title>
+    }
 
 
-            <style>
-
-                body {
-
-                    font-family:
-                        Arial,
-                        Helvetica,
-                        sans-serif;
-
-                    padding:25px;
-
-                }
+    const pagamento =
+        dados?.[chave];
 
 
-                h1,
-                h2,
-                p {
-
-                    text-align:center;
-
-                }
+    console.log(
+        "💰 SITUAÇÃO FINANCEIRA:",
+        chave,
+        pagamento
+    );
 
 
-                table {
+    return (
+        pagamento &&
+        pagamento.pago === true
+    );
 
+}
+
+// =====================================================
+// MENU DE SELEÇÃO — ANO LETIVO + TRIMESTRE
+// =====================================================
+
+async function abrirSelecaoNotas(
+    tipo
+) {
+
+    try {
+
+        const documentos =
+            await carregarDocumentosNotas();
+
+
+        if (
+            documentos.length === 0
+        ) {
+
+            alert(
+                "📄 Ainda não existem notas disponíveis."
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // OBTER ANOS LETIVOS DISPONÍVEIS
+        // =================================================
+
+        const anos = [
+            ...new Set(
+                documentos.map(
+                    item =>
+                        String(
+                            item.anoLetivo || ""
+                        ).trim()
+                )
+            )
+        ]
+        .filter(
+            ano =>
+                ano !== ""
+        );
+
+
+        if (
+            anos.length === 0
+        ) {
+
+            alert(
+                "❌ Nenhum ano letivo disponível."
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // CRIAR JANELA
+        // =================================================
+
+        document
+            .getElementById(
+                "janelaSelecaoNotas"
+            )
+            ?.remove();
+
+
+        const janela =
+            document.createElement(
+                "div"
+            );
+
+
+        janela.id =
+            "janelaSelecaoNotas";
+
+
+        janela.style.cssText = `
+            position:fixed;
+            inset:0;
+            z-index:99999;
+            background:rgba(15,23,42,.65);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+        `;
+
+
+        janela.innerHTML = `
+
+            <div
+                style="
                     width:100%;
-
-                    border-collapse:collapse;
-
-                    margin-top:20px;
-
-                    font-size:12px;
-
-                }
-
-
-                th,
-                td {
-
-                    border:
-                        1px solid #222;
-
-                    padding:7px;
-
-                    text-align:center;
-
-                }
-
-
-                th {
-
-                    background:#e5e7eb;
-
-                }
-
-
-                .rodape {
-
-                    margin-top:40px;
-
-                    border-top:
-                        1px solid #999;
-
-                    padding-top:10px;
-
-                    text-align:center;
-
-                    font-size:11px;
-
-                    color:#555;
-
-                }
-
-
-                @page {
-
-                    size:A4 landscape;
-
-                    margin:10mm;
-
-                }
-
-            </style>
-
-        </head>
-
-
-        <body>
-
-
-            <h1>
-                SGE
-            </h1>
-
-
-            <h2>
-                Histórico de Notas
-            </h2>
-
-
-            <p>
-
-                <strong>Aluno:</strong>
-
-                ${escaparHTML(
-                    aluno.nome || "—"
-                )}
-
-            </p>
-
-
-            <p>
-
-                <strong>Código:</strong>
-
-                ${escaparHTML(
-                    aluno.codigoAluno || "—"
-                )}
-
-                &nbsp;&nbsp;&nbsp;
-
-                <strong>Turma:</strong>
-
-                ${escaparHTML(
-                    aluno.turmaNome || "—"
-                )}
-
-            </p>
-
-
-            ${
-                anoSelecionado
-                    ? `
-                        <p>
-
-                            <strong>
-                                Ano letivo:
-                            </strong>
-
-                            ${escaparHTML(
-                                anoSelecionado
-                            )}
-
-                        </p>
-                    `
-                    : ""
-            }
-
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Ano
-                        </th>
-
-                        <th>
-                            Disciplina
-                        </th>
-
-                        <th>
-                            Trimestre
-                        </th>
-
-                        <th>
-                            MAC
-                        </th>
-
-                        <th>
-                            NPT
-                        </th>
-
-                        <th>
-                            MF
-                        </th>
-
-                        <th>
-                            Classificação
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    ${linhas}
-
-                </tbody>
-
-            </table>
-
-
-            <div class="rodape">
-
-                SGE — Sistema de Gestão Escolar
-
-                <br>
-
-                Histórico de notas do aluno
+                    max-width:500px;
+                    background:white;
+                    border-radius:18px;
+                    padding:25px;
+                    box-shadow:0 10px 30px rgba(0,0,0,.25);
+                "
+            >
+
+                <div
+                    style="
+                        text-align:center;
+                        font-size:48px;
+                        margin-bottom:10px;
+                    "
+                >
+                    ${
+                        tipo === "boletim"
+                            ? "📄"
+                            : "📊"
+                    }
+                </div>
+
+
+                <h2
+                    style="
+                        text-align:center;
+                        color:#1e3a8a;
+                        margin:0 0 25px;
+                    "
+                >
+                    ${
+                        tipo === "boletim"
+                            ? "Ver Boletim"
+                            : "Ver Notas"
+                    }
+                </h2>
+
+
+                <label
+                    style="
+                        display:block;
+                        font-weight:bold;
+                        margin-bottom:8px;
+                    "
+                >
+                    Ano Letivo
+                </label>
+
+
+                <select
+                    id="anoLetivoSelecionado"
+                    style="
+                        width:100%;
+                        padding:13px;
+                        border:1px solid #cbd5e1;
+                        border-radius:10px;
+                        margin-bottom:20px;
+                        font-size:16px;
+                    "
+                >
+
+                    <option value="">
+                        Selecionar ano letivo
+                    </option>
+
+                    ${
+                        anos.map(
+                            ano => `
+                                <option value="${escaparHTML(ano)}">
+                                    ${escaparHTML(ano)}
+                                </option>
+                            `
+                        ).join("")
+                    }
+
+                </select>
+
+
+                <label
+                    style="
+                        display:block;
+                        font-weight:bold;
+                        margin-bottom:8px;
+                    "
+                >
+                    Trimestre
+                </label>
+
+
+                <select
+                    id="trimestreSelecionado"
+                    style="
+                        width:100%;
+                        padding:13px;
+                        border:1px solid #cbd5e1;
+                        border-radius:10px;
+                        margin-bottom:20px;
+                        font-size:16px;
+                    "
+                >
+
+                    <option value="">
+                        Selecionar trimestre
+                    </option>
+
+                    <option value="1">
+                        1.º Trimestre
+                    </option>
+
+                    <option value="2">
+                        2.º Trimestre
+                    </option>
+
+                    <option value="3">
+                        3.º Trimestre
+                    </option>
+
+                </select>
+
+
+                <div
+                    id="mensagemFinanceira"
+                    style="
+                        display:none;
+                        margin-bottom:15px;
+                        padding:12px;
+                        border-radius:10px;
+                        text-align:center;
+                        font-weight:bold;
+                    "
+                ></div>
+
+
+                <button
+                    id="abrirResultadoNotas"
+                    style="
+                        width:100%;
+                        padding:14px;
+                        border:none;
+                        border-radius:10px;
+                        background:#2563eb;
+                        color:white;
+                        font-size:16px;
+                        font-weight:bold;
+                        cursor:pointer;
+                    "
+                >
+                    ${
+                        tipo === "boletim"
+                            ? "📄 Ver Boletim"
+                            : "📊 Ver Notas"
+                    }
+                </button>
+
+
+                <button
+                    id="fecharSelecaoNotas"
+                    style="
+                        width:100%;
+                        padding:14px;
+                        border:none;
+                        border-radius:10px;
+                        background:#64748b;
+                        color:white;
+                        font-size:16px;
+                        margin-top:10px;
+                        cursor:pointer;
+                    "
+                >
+                    ← Voltar
+                </button>
 
             </div>
 
-
-        </body>
-
-        </html>
-
-    `);
+        `;
 
 
-    janela.document.close();
+        document.body.appendChild(
+            janela
+        );
 
 
-    janela.onload =
-        function () {
+        // =================================================
+        // ELEMENTOS
+        // =================================================
 
-            janela.focus();
+        const anoSelect =
+            document.getElementById(
+                "anoLetivoSelecionado"
+            );
 
-            janela.print();
 
-        };
+        const trimestreSelect =
+            document.getElementById(
+                "trimestreSelecionado"
+            );
+
+
+        const botao =
+            document.getElementById(
+                "abrirResultadoNotas"
+            );
+
+
+        const mensagem =
+            document.getElementById(
+                "mensagemFinanceira"
+            );
+
+
+        // =================================================
+        // FECHAR
+        // =================================================
+
+        document
+            .getElementById(
+                "fecharSelecaoNotas"
+            )
+            ?.addEventListener(
+                "click",
+                () => {
+
+                    janela.remove();
+
+                }
+            );
+
+
+        // =================================================
+        // VERIFICAR SE EXISTEM NOTAS
+        // =================================================
+
+        function verificarSelecao() {
+
+            const ano =
+                anoSelect.value;
+
+
+            const trimestre =
+                trimestreSelect.value;
+
+
+            botao.disabled =
+                !ano ||
+                !trimestre;
+
+
+            if (
+                !ano ||
+                !trimestre
+            ) {
+
+                mensagem.style.display =
+                    "none";
+
+                return;
+
+            }
+
+
+            const existe =
+                documentos.some(
+                    item => {
+
+                        const anoItem =
+                            String(
+                                item.anoLetivo ||
+                                ""
+                            ).trim();
+
+
+                        const trimestreItem =
+                            obterNumeroTrimestre(
+                                item.trimestre
+                            );
+
+
+                        return (
+                            anoItem === ano &&
+                            trimestreItem ===
+                            trimestre
+                        );
+
+                    }
+                );
+
+
+            if (!existe) {
+
+                mensagem.style.display =
+                    "block";
+
+                mensagem.style.background =
+                    "#fef3c7";
+
+                mensagem.style.color =
+                    "#92400e";
+
+                mensagem.textContent =
+                    "⚠️ Ainda não existem notas para este período.";
+
+                botao.disabled =
+                    true;
+
+                return;
+
+            }
+
+
+            mensagem.style.display =
+                "block";
+
+            mensagem.style.background =
+                "#e0f2fe";
+
+            mensagem.style.color =
+                "#075985";
+
+            mensagem.textContent =
+                "🔎 Verificando situação financeira...";
+
+        }
+
+
+        anoSelect.addEventListener(
+            "change",
+            verificarSelecao
+        );
+
+
+        trimestreSelect.addEventListener(
+            "change",
+            verificarSelecao
+        );
+
+
+        // =================================================
+        // ABRIR RESULTADO
+        // =================================================
+
+        botao.addEventListener(
+            "click",
+            async () => {
+
+                const ano =
+                    anoSelect.value;
+
+
+                const trimestre =
+                    trimestreSelect.value;
+
+
+                if (
+                    !ano ||
+                    !trimestre
+                ) {
+
+                    alert(
+                        "Selecione o ano letivo e o trimestre."
+                    );
+
+                    return;
+
+                }
+
+
+                botao.disabled =
+                    true;
+
+
+                botao.textContent =
+                    "⏳ A verificar...";
+
+
+                mensagem.style.display =
+                    "block";
+
+
+                mensagem.style.background =
+                    "#e0f2fe";
+
+                mensagem.style.color =
+                    "#075985";
+
+                mensagem.textContent =
+                    "🔎 A verificar situação financeira...";
+
+
+                try {
+
+                    // =====================================
+                    // VERIFICAR PAGAMENTO
+                    // =====================================
+
+                    const pago =
+                        await verificarPagamentoTrimestre(
+                            trimestre
+                        );
+
+
+                    console.log(
+                        "💰 PAGAMENTO:",
+                        pago
+                    );
+
+
+                    // =====================================
+                    // NÃO PAGO
+                    // =====================================
+
+                    if (!pago) {
+
+                        mensagem.style.background =
+                            "#fee2e2";
+
+                        mensagem.style.color =
+                            "#991b1b";
+
+
+                        mensagem.textContent =
+                            "🔒 Este trimestre está bloqueado porque a situação financeira não está regularizada.";
+
+
+                        alert(
+                            "🔒 Acesso bloqueado.\n\n" +
+                            "A situação financeira deste trimestre consta como não paga."
+                        );
+
+
+                        botao.disabled =
+                            false;
+
+
+                        botao.textContent =
+                            tipo === "boletim"
+                                ? "📄 Ver Boletim"
+                                : "📊 Ver Notas";
+
+
+                        return;
+
+                    }
+
+
+                    // =====================================
+                    // PAGO
+                    // =====================================
+
+                    mensagem.style.background =
+                        "#dcfce7";
+
+                    mensagem.style.color =
+                        "#166534";
+
+
+                    mensagem.textContent =
+                        "✅ Pagamento confirmado. A abrir...";
+
+
+                    const notasFiltradas =
+                        documentos.filter(
+                            item => {
+
+                                return (
+
+                                    String(
+                                        item.anoLetivo ||
+                                        ""
+                                    ).trim() ===
+                                    String(
+                                        ano
+                                    ).trim()
+
+                                    &&
+
+                                    obterNumeroTrimestre(
+                                        item.trimestre
+                                    ) ===
+                                    String(
+                                        trimestre
+                                    )
+
+                                );
+
+                            }
+                        );
+
+
+                    if (
+                        notasFiltradas.length === 0
+                    ) {
+
+                        alert(
+                            "Não existem notas para este período."
+                        );
+
+
+                        botao.disabled =
+                            false;
+
+
+                        return;
+
+                    }
+
+
+                    janela.remove();
+
+
+                    if (
+                        tipo === "boletim"
+                    ) {
+
+                        await mostrarBoletimSelecionado(
+                            notasFiltradas,
+                            ano,
+                            trimestre
+                        );
+
+                    }
+
+                    else {
+
+                        await mostrarNotasSelecionadas(
+                            notasFiltradas,
+                            ano,
+                            trimestre
+                        );
+
+                    }
+
+                }
+
+                catch (erro) {
+
+                    console.error(
+                        "❌ Erro ao verificar acesso:",
+                        erro
+                    );
+
+
+                    alert(
+                        "❌ Não foi possível verificar o acesso.\n\n" +
+                        erro.message
+                    );
+
+
+                    botao.disabled =
+                        false;
+
+
+                    botao.textContent =
+                        tipo === "boletim"
+                            ? "📄 Ver Boletim"
+                            : "📊 Ver Notas";
+
+                }
+
+            }
+        );
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao abrir seleção:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível carregar as opções.\n\n" +
+            erro.message
+        );
+
+    }
 
 }
 
 
 // =====================================================
-// INICIAR
+// MOSTRAR NOTAS SELECIONADAS
+// =====================================================
+
+async function mostrarNotasSelecionadas(
+    documentos,
+    ano,
+    trimestre
+) {
+
+    const escola =
+        await obterDadosEscola();
+
+
+    document
+        .getElementById(
+            "janelaNotasAluno"
+        )
+        ?.remove();
+
+
+    const janela =
+        document.createElement(
+            "div"
+        );
+
+
+    janela.id =
+        "janelaNotasAluno";
+
+
+    janela.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:99999;
+        background:#f1f5f9;
+        overflow-y:auto;
+        padding:20px;
+    `;
+
+
+    let linhas =
+        "";
+
+
+    documentos.forEach(
+        item => {
+
+            const nota =
+                item.alunoNota ||
+                {};
+
+
+            const mac =
+                nota.mac ??
+                nota.MAC ??
+                "";
+
+
+            const npt =
+                nota.npt ??
+                nota.NPT ??
+                "";
+
+
+            const mf =
+                nota.mf ??
+                nota.MF ??
+                "";
+
+
+            const classificacao =
+                nota.classificacao ||
+                "";
+
+
+            linhas += `
+
+                <tr>
+
+                    <td>
+                        ${escaparHTML(
+                            item.disciplina
+                        )}
+                    </td>
+
+                    <td>
+                        ${mostrarNota(mac)}
+                    </td>
+
+                    <td>
+                        ${mostrarNota(npt)}
+                    </td>
+
+                    <td>
+                        ${mostrarNota(mf)}
+                    </td>
+
+                    <td>
+                        ${escaparHTML(
+                            classificacao
+                        )}
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    janela.innerHTML = `
+
+        <div
+            style="
+                max-width:900px;
+                margin:20px auto;
+                background:white;
+                border-radius:18px;
+                padding:25px;
+                box-shadow:0 4px 20px rgba(0,0,0,.15);
+            "
+        >
+
+            <div
+                style="
+                    text-align:center;
+                    margin-bottom:20px;
+                "
+            >
+
+                ${
+                    escola.logo
+                    ? `
+                        <img
+                            src="${escaparHTML(
+                                escola.logo
+                            )}"
+                            style="
+                                max-width:90px;
+                                max-height:90px;
+                                object-fit:contain;
+                                margin-bottom:10px;
+                            "
+                        >
+                    `
+                    : ""
+                }
+
+
+                <h2
+                    style="
+                        color:#1e3a8a;
+                        margin:5px 0;
+                    "
+                >
+                    ${escaparHTML(
+                        escola.nome
+                    )}
+                </h2>
+
+
+                <h3
+                    style="
+                        margin:5px 0;
+                    "
+                >
+                    Minhas Notas
+                </h3>
+
+
+                <p>
+                    <strong>Aluno:</strong>
+                    ${escaparHTML(
+                        aluno.nome
+                    )}
+                </p>
+
+
+                <p>
+                    <strong>Turma:</strong>
+                    ${escaparHTML(
+                        aluno.turmaNome || "—"
+                    )}
+     </p>
+
+
+                <p>
+                    <strong>Ano Letivo:</strong>
+                    ${escaparHTML(
+                        ano
+                    )}
+                </p>
+
+
+                <p>
+                    <strong>Trimestre:</strong>
+                    ${escaparHTML(
+                        nomeTrimestre(
+                            trimestre
+                        )
+                    )}
+                </p>
+
+            </div>
+
+
+            <div
+                style="
+                    overflow-x:auto;
+                "
+            >
+
+                <table
+                    style="
+                        width:100%;
+                        border-collapse:collapse;
+                    "
+                >
+
+                    <thead>
+
+                        <tr
+                            style="
+                                background:#1e3a8a;
+                                color:white;
+                            "
+                        >
+
+                            <th style="padding:12px;">
+                                Disciplina
+                            </th>
+
+                            <th style="padding:12px;">
+                                MAC
+                            </th>
+
+                            <th style="padding:12px;">
+                                NPT
+                            </th>
+
+                            <th style="padding:12px;">
+                                MF
+                            </th>
+
+                            <th style="padding:12px;">
+                                Classificação
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${
+                            linhas ||
+                            `
+                                <tr>
+                                    <td
+                                        colspan="5"
+                                        style="
+                                            text-align:center;
+                                            padding:20px;
+                                        "
+                                    >
+                                        Nenhuma nota encontrada.
+                                    </td>
+                                </tr>
+                            `
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <button
+                id="imprimirBoletimAluno"
+                style="
+                    width:100%;
+                    padding:14px;
+                    margin-top:20px;
+                    border:none;
+                    border-radius:10px;
+                    background:#2563eb;
+                    color:white;
+                    font-size:16px;
+                    cursor:pointer;
+                "
+            >
+                🖨️ Imprimir / Guardar PDF
+            </button>
+
+
+            <button
+                id="fecharBoletimAluno"
+                style="
+                    width:100%;
+                    padding:14px;
+                    margin-top:10px;
+                    border:none;
+                    border-radius:10px;
+                    background:#64748b;
+                    color:white;
+                    font-size:16px;
+                    cursor:pointer;
+                "
+            >
+                ← Voltar
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        janela
+    );
+
+
+    document
+        .getElementById(
+            "fecharBoletimAluno"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                janela.remove();
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "imprimirBoletimAluno"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                window.print();
+
+            }
+        );
+
+}
+
+// =====================================================
+// CARREGAR DOCUMENTOS DE NOTAS
+// =====================================================
+
+async function carregarDocumentosNotas() {
+
+    const turmaId =
+        String(
+            aluno.turmaId || ""
+        ).trim();
+
+
+    const escolaId =
+        String(
+            aluno.escolaId || ""
+        ).trim();
+
+
+    if (!turmaId) {
+
+        throw new Error(
+            "Turma do aluno não identificada."
+        );
+
+    }
+
+
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "notas"
+            )
+        );
+
+
+    const documentos = [];
+
+
+    snapshot.forEach(
+        documento => {
+
+            const dados =
+                documento.data();
+
+
+            // =============================================
+            // FILTRAR TURMA
+            // =============================================
+
+            if (
+                String(
+                    dados.turmaId || ""
+                ).trim() !== turmaId
+            ) {
+
+                return;
+
+            }
+
+
+            // =============================================
+            // FILTRAR ESCOLA
+            // =============================================
+
+            if (
+                escolaId &&
+                dados.escolaId &&
+                String(
+                    dados.escolaId
+                ).trim() !== escolaId
+            ) {
+
+                return;
+
+            }
+
+
+            // =============================================
+            // PROCURAR ALUNO
+            // =============================================
+
+            if (
+                !Array.isArray(
+                    dados.alunos
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const alunoNota =
+                dados.alunos.find(
+                    item => {
+
+                        const id =
+                            String(
+                                item.id || ""
+                            ).trim();
+
+
+                        const numero =
+                            String(
+                                item.numero || ""
+                            ).trim();
+
+
+                        const codigo =
+                            String(
+                                item.codigoAluno || ""
+                            ).trim();
+
+
+                        const nome =
+                            String(
+                                item.nome || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        return (
+
+                            (
+                                aluno.id &&
+                                id ===
+                                String(
+                                    aluno.id
+                                ).trim()
+                            )
+
+                            ||
+
+                            (
+                                aluno.numero &&
+                                numero ===
+                                String(
+                                    aluno.numero
+                                ).trim()
+                            )
+
+                            ||
+
+                            (
+                                aluno.codigoAluno &&
+                                codigo ===
+                                String(
+                                    aluno.codigoAluno
+                                ).trim()
+                            )
+
+                            ||
+
+                            (
+                                aluno.nome &&
+                                nome ===
+                                String(
+                                    aluno.nome
+                                )
+                                .trim()
+                                .toLowerCase()
+                            )
+
+                        );
+
+                    }
+                );
+
+
+            if (!alunoNota) {
+
+                return;
+
+            }
+
+
+            documentos.push({
+
+                id:
+                    documento.id,
+
+                ...dados,
+
+                alunoNota:
+                    alunoNota
+
+            });
+
+        }
+    );
+
+
+    console.log(
+        "📊 DOCUMENTOS DE NOTAS DO ALUNO:",
+        documentos
+    );
+
+
+    return documentos;
+
+}
+
+
+// =====================================================
+// OBTER NÚMERO DO TRIMESTRE
+// =====================================================
+
+function obterNumeroTrimestre(
+    trimestre
+) {
+
+    const valor =
+        String(
+            trimestre || ""
+        )
+        .replace(
+            /º|°|ª/g,
+            ""
+        )
+        .replace(
+            /Trimestre/gi,
+            ""
+        )
+        .trim();
+
+
+    if (
+        valor.includes("1")
+    ) {
+
+        return "1";
+
+    }
+
+
+    if (
+        valor.includes("2")
+    ) {
+
+        return "2";
+
+    }
+
+
+    if (
+        valor.includes("3")
+    ) {
+
+        return "3";
+
+    }
+
+
+    return valor;
+
+}
+
+
+// =====================================================
+// OBTER DADOS DA ESCOLA
+// =====================================================
+
+async function obterDadosEscola() {
+
+    const escolaId =
+        String(
+            aluno.escolaId || ""
+        ).trim();
+
+
+    if (!escolaId) {
+
+        return {
+
+            nome:
+                "Escola",
+
+            logo:
+                ""
+
+        };
+
+    }
+
+
+    try {
+
+        const escolaRef =
+            doc(
+                db,
+                "escolas",
+                escolaId
+            );
+
+
+        const snapshot =
+            await getDoc(
+                escolaRef
+            );
+
+
+        if (
+            snapshot.exists()
+        ) {
+
+            const dados =
+                snapshot.data();
+
+
+            return {
+
+                nome:
+                    dados.nome ||
+                    dados.nomeEscola ||
+                    "Escola",
+
+                logo:
+                    dados.logo ||
+                    dados.logoUrl ||
+                    ""
+
+            };
+
+        }
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            "Erro ao carregar escola:",
+            erro
+        );
+
+    }
+
+
+    return {
+
+        nome:
+            "Escola",
+
+        logo:
+            ""
+
+    };
+
+}
+
+
+// =====================================================
+// VERIFICAR SITUAÇÃO FINANCEIRA
+// =====================================================
+
+async function verificarPagamentoTrimestre(
+    trimestre
+) {
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+
+    const turmaId =
+        String(
+            aluno.turmaId || ""
+        ).trim();
+
+
+    const escolaId =
+        String(
+            aluno.escolaId || ""
+        ).trim();
+
+
+    const codigoAluno =
+        String(
+            aluno.codigoAluno || ""
+        ).trim();
+
+
+    if (
+        !alunoId &&
+        !codigoAluno
+    ) {
+
+        throw new Error(
+            "Aluno não identificado para verificar o pagamento."
+        );
+
+    }
+
+
+    // =================================================
+    // PROCURAR REGISTOS FINANCEIROS
+    // =================================================
+
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "financeiro"
+            )
+        );
+
+
+    let encontrado =
+        false;
+
+
+    let pago =
+        false;
+
+
+    snapshot.forEach(
+        documento => {
+
+            const dados =
+                documento.data();
+
+
+            // =========================================
+            // ESCOLA
+            // =========================================
+
+            if (
+                escolaId &&
+                dados.escolaId &&
+                String(
+                    dados.escolaId
+                ).trim() !== escolaId
+            ) {
+
+                return;
+
+            }
+
+
+            // =========================================
+            // TURMA
+            // =========================================
+
+            if (
+                turmaId &&
+                dados.turmaId &&
+                String(
+                    dados.turmaId
+                ).trim() !== turmaId
+            ) {
+
+                return;
+
+            }
+
+
+            // =========================================
+            // IDENTIFICAR ALUNO
+            // =========================================
+
+            const idFinanceiro =
+                String(
+                    dados.alunoId ||
+                    dados.idAluno ||
+                    ""
+                ).trim();
+
+
+            const codigoFinanceiro =
+                String(
+                    dados.codigoAluno ||
+                    dados.codigo ||
+                    ""
+                ).trim();
+
+
+            const numeroFinanceiro =
+                String(
+                    dados.numero ||
+                    dados.numeroAluno ||
+                    ""
+                ).trim();
+
+
+            const pertenceAoAluno =
+
+                (
+                    alunoId &&
+                    idFinanceiro &&
+                    idFinanceiro === alunoId
+                )
+
+                ||
+
+                (
+                    codigoAluno &&
+                    codigoFinanceiro &&
+                    codigoFinanceiro === codigoAluno
+                )
+
+                ||
+
+                (
+                    aluno.numero &&
+                    numeroFinanceiro &&
+                    numeroFinanceiro ===
+                    String(
+                        aluno.numero
+                    ).trim()
+                );
+
+
+            if (
+                !pertenceAoAluno
+            ) {
+
+                return;
+
+            }
+
+
+            // =========================================
+            // TRIMESTRE
+            // =========================================
+
+            const trimestreFinanceiro =
+                obterNumeroTrimestre(
+                    dados.trimestre ||
+                    dados.periodo ||
+                    ""
+                );
+
+
+            if (
+                trimestreFinanceiro &&
+                trimestreFinanceiro !==
+                String(
+                    trimestre
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            encontrado =
+                true;
+
+
+            // =========================================
+            // VERIFICAR ESTADO
+            // =========================================
+
+            const estado =
+                String(
+                    dados.estado ||
+                    dados.status ||
+                    dados.situacao ||
+                    dados.estadoPagamento ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            if (
+                dados.pago === true ||
+                dados.pagamentoConfirmado === true ||
+                estado === "pago" ||
+                estado === "paga" ||
+                estado === "regularizado" ||
+                estado === "regularizada"
+            ) {
+
+                pago =
+                    true;
+
+            }
+
+        }
+    );
+
+
+    console.log(
+        "💰 RESULTADO FINANCEIRO:",
+        {
+            alunoId,
+            codigoAluno,
+            trimestre,
+            encontrado,
+            pago
+        }
+    );
+
+
+    // =================================================
+    // SEM REGISTO = NÃO PAGO
+    // =================================================
+
+    if (
+        !encontrado
+    ) {
+
+        return false;
+
+    }
+
+
+    return pago;
+
+}
+
+
+// =====================================================
+// MENU — VER NOTAS
+// =====================================================
+
+window.verNotas =
+async function () {
+
+    console.log(
+        "📊 VER NOTAS"
+    );
+
+
+    await abrirSelecaoNotas(
+        "notas"
+    );
+
+};
+
+
+// =====================================================
+// MENU — VER BOLETIM
+// =====================================================
+
+window.verBoletim =
+async function () {
+
+    console.log(
+        "📄 VER BOLETIM"
+    );
+
+
+    await abrirSelecaoNotas(
+        "boletim"
+    );
+
+};
+
+
+// =====================================================
+// LIGAÇÃO AUTOMÁTICA DOS BOTÕES
+// =====================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        // =============================================
+        // POSSÍVEIS IDs DO BOTÃO VER NOTAS
+        // =============================================
+
+        const botoesNotas = [
+
+            document.getElementById(
+                "verNotas"
+            ),
+
+            document.getElementById(
+                "btnVerNotas"
+            ),
+
+            document.getElementById(
+                "menuVerNotas"
+            )
+
+        ];
+
+
+        botoesNotas.forEach(
+            botao => {
+
+                if (!botao)
+                    return;
+
+
+                botao.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        window.verNotas();
+
+                    }
+                );
+
+            }
+        );
+
+
+        // =============================================
+        // POSSÍVEIS IDs DO BOTÃO VER BOLETIM
+        // =============================================
+
+        const botoesBoletim = [
+
+            document.getElementById(
+                "verBoletim"
+            ),
+
+            document.getElementById(
+                "btnVerBoletim"
+            ),
+
+            document.getElementById(
+                "menuVerBoletim"
+            )
+
+        ];
+
+
+        botoesBoletim.forEach(
+            botao => {
+
+                if (!botao)
+                    return;
+
+
+                botao.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        window.verBoletim();
+
+                    }
+                );
+
+            }
+        );
+
+    }
+);
+
+
+// =====================================================
+// COMPATIBILIDADE COM MENUS EXISTENTES
+// =====================================================
+
+window.abrirVerNotas =
+function () {
+
+    window.verNotas();
+
+};
+
+
+window.abrirVerBoletim =
+function () {
+
+    window.verBoletim();
+
+};
+
+
+// =====================================================
+// FINAL
 // =====================================================
 
 console.log(
-    "✅ BLOCO 1 — SESSÃO E PERFIL PRONTO"
+    "========================================"
 );
 
+alert("COMPLETO CARREGAMENTO");
 
 console.log(
-    "✅ BLOCO 2 — DADOS / SENHA PRONTO"
+    "🎓 STUDENT-AREA.JS CARREGADO COMPLETAMENTE"
 );
 
-
 console.log(
-    "✅ BLOCO 3 — NOTAS PRONTO"
+    "📊 Ver Notas: pronto"
 );
 
+console.log(
+    "📄 Ver Boletim: pronto"
+);
 
 console.log(
-    "🎓 ÁREA DO ALUNO PRONTA"
+    "💰 Controlo financeiro: pronto"
+);
+
+console.log(
+    "========================================"
 );
