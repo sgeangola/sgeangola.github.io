@@ -1,12 +1,17 @@
 // =====================================================
-// LOGIN DO ALUNO - SGE
-// NOVA VERSÃO
-// Usa a coleção:
-// acessosAlunos
+// STUDENT-LOGIN.JS
+// SGE ANGOLA
+// LOGIN DO ALUNO
 // =====================================================
 
-alert("STUDENT-LOGIN.JS CARREGADO ✅");
+console.log(
+    "STUDENT-LOGIN.JS CARREGADO ✅"
+);
 
+
+// =====================================================
+// FIREBASE
+// =====================================================
 
 import { db } from "./firebase.js";
 
@@ -28,84 +33,94 @@ const form =
 
 if (!form) {
 
-    alert(
-        "Formulário loginAluno não encontrado."
+    console.error(
+        "❌ Formulário #loginAluno não encontrado."
     );
 
     throw new Error(
-        "loginAluno não encontrado."
+        "Formulário loginAluno não encontrado."
     );
 
 }
 
 
 // =====================================================
-// LOGIN
+// SUBMIT
 // =====================================================
 
 form.addEventListener(
     "submit",
-    async function (event) {
+    async function(event) {
 
         event.preventDefault();
 
 
-        const campoCodigo =
-            document.getElementById(
-                "codigoAluno"
-            );
-
-
-        const campoSenha =
-            document.getElementById(
-                "senhaAluno"
-            );
-
-
-        if (
-            !campoCodigo ||
-            !campoSenha
-        ) {
-
-            alert(
-                "Campos de login não encontrados."
-            );
-
-            return;
-
-        }
-
-
-        const codigoAluno =
-            campoCodigo.value.trim();
-
-
-        const senha =
-            campoSenha.value.trim();
-
-
-        if (
-            !codigoAluno ||
-            !senha
-        ) {
-
-            alert(
-                "Preencha o código e a senha."
-            );
-
-            return;
-
-        }
-
-
         try {
 
+            // =============================================
+            // CAMPOS
+            // =============================================
+
+            const campoCodigo =
+                document.getElementById(
+                    "codigoAluno"
+                );
+
+
+            const campoSenha =
+                document.getElementById(
+                    "senhaAluno"
+                );
+
+
+            if (
+                !campoCodigo ||
+                !campoSenha
+            ) {
+
+                throw new Error(
+                    "Campos de login não encontrados."
+                );
+
+            }
+
+
+            const codigoAluno =
+                campoCodigo
+                    .value
+                    .trim();
+
+
+            const senha =
+                campoSenha
+                    .value
+                    .trim();
+
+
+            // =============================================
+            // VALIDAR
+            // =============================================
+
+            if (
+                !codigoAluno ||
+                !senha
+            ) {
+
+                alert(
+                    "⚠️ Preencha o código e a senha."
+                );
+
+                return;
+
+            }
+
+
             console.log(
-                "================================="
+                "===================================="
             );
 
             console.log(
-                "🎓 INICIANDO LOGIN DO ALUNO"
+                "🎓 LOGIN DO ALUNO"
             );
 
             console.log(
@@ -113,10 +128,14 @@ form.addEventListener(
                 codigoAluno
             );
 
+            console.log(
+                "===================================="
+            );
 
-            // =================================================
-            // NORMALIZAR CÓDIGO
-            // =================================================
+
+            // =============================================
+            // NORMALIZAR ID
+            // =============================================
 
             const codigoId =
                 codigoAluno
@@ -124,15 +143,9 @@ form.addEventListener(
                     .replace(/\//g, "-");
 
 
-            console.log(
-                "🔎 ID DE ACESSO:",
-                codigoId
-            );
-
-
-            // =================================================
+            // =============================================
             // PROCURAR ACESSO
-            // =================================================
+            // =============================================
 
             const acessoRef =
                 doc(
@@ -148,20 +161,22 @@ form.addEventListener(
                 );
 
 
-            // =================================================
+            // =============================================
             // NÃO EXISTE
-            // =================================================
+            // =============================================
 
             if (
                 !acessoSnap.exists()
             ) {
 
                 console.warn(
-                    "❌ Acesso não encontrado."
+                    "⚠️ Acesso não encontrado:",
+                    codigoId
                 );
 
+
                 alert(
-                    "Código ou senha incorretos."
+                    "❌ Código ou senha incorretos."
                 );
 
                 return;
@@ -169,58 +184,39 @@ form.addEventListener(
             }
 
 
-            const acesso =
+            const aluno =
                 acessoSnap.data();
 
 
             console.log(
-                "📦 ACESSO ENCONTRADO:",
-                acesso
+                "👨‍🎓 ACESSO ENCONTRADO:",
+                aluno
             );
 
 
-            // =================================================
-            // VERIFICAR ESTADO
-            // =================================================
-
-            if (
-                String(
-                    acesso.estado ||
-                    "ativo"
-                ).toLowerCase() !==
-                "ativo"
-            ) {
-
-                alert(
-                    "❌ Este acesso está inativo."
-                );
-
-                return;
-
-            }
-
-
-            // =================================================
+            // =============================================
             // VERIFICAR SENHA
-            // =================================================
+            // =============================================
 
-            const senhaFirebase =
+            const senhaCorreta =
                 String(
-                    acesso.senhaAcesso ||
+                    aluno.senhaAcesso ||
+                    aluno.senha ||
                     ""
                 ).trim();
 
 
             if (
-                senhaFirebase !== senha
+                senhaCorreta !== senha
             ) {
 
                 console.warn(
-                    "❌ Senha incorreta."
+                    "⚠️ Senha incorreta."
                 );
 
+
                 alert(
-                    "Código ou senha incorretos."
+                    "❌ Código ou senha incorretos."
                 );
 
                 return;
@@ -228,44 +224,103 @@ form.addEventListener(
             }
 
 
-            // =================================================
-            // CRIAR SESSÃO
-            // =================================================
+            // =============================================
+            // VERIFICAR ESTADO
+            // =============================================
+
+            const estado =
+                String(
+                    aluno.estado ||
+                    "ativo"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            if (
+                estado === "transferido" ||
+                estado === "desistente"
+            ) {
+
+                alert(
+
+                    "⚠️ O acesso deste aluno está " +
+                    estado +
+                    ".\n\n" +
+                    "O acesso à área do aluno está bloqueado."
+
+                );
+
+                return;
+
+            }
+
+
+            // =============================================
+            // DADOS DA SESSÃO
+            // =============================================
 
             const alunoLogado = {
 
                 id:
-                    acesso.alunoId || "",
+                    aluno.alunoId ||
+                    aluno.id ||
+                    "",
 
                 alunoId:
-                    acesso.alunoId || "",
+                    aluno.alunoId ||
+                    aluno.id ||
+                    "",
 
                 codigoAluno:
-                    acesso.codigoAluno ||
+                    aluno.codigoAluno ||
                     codigoAluno,
 
                 nome:
-                    acesso.nome || "",
+                    aluno.nome ||
+                    "",
+
+                numero:
+                    aluno.numero ||
+                    "",
+
+                sexo:
+                    aluno.sexo ||
+                    "",
 
                 turmaId:
-                    acesso.turmaId || "",
+                    aluno.turmaId ||
+                    "",
 
                 turmaNome:
-                    acesso.turmaNome || "",
+                    aluno.turmaNome ||
+                    "",
 
                 escolaId:
-                    acesso.escolaId || "",
+                    aluno.escolaId ||
+                    "",
 
                 estado:
-                    acesso.estado ||
-                    "ativo"
+                    estado,
+
+                classe:
+                    aluno.classe ||
+                    "",
+
+                ensino:
+                    aluno.ensino ||
+                    "",
+
+                anoLetivo:
+                    aluno.anoLetivo ||
+                    ""
 
             };
 
 
-            // =================================================
+            // =============================================
             // GUARDAR ESCOLA
-            // =================================================
+            // =============================================
 
             if (
                 alunoLogado.escolaId
@@ -276,23 +331,18 @@ form.addEventListener(
                     alunoLogado.escolaId
                 );
 
-                localStorage.setItem(
-                    "escolaId",
-                    alunoLogado.escolaId
-                );
-
             }
 
 
-            // =================================================
+            // =============================================
             // GUARDAR TURMA
-            // =================================================
+            // =============================================
 
             if (
                 alunoLogado.turmaId
             ) {
 
-                localStorage.setItem(
+                sessionStorage.setItem(
                     "turmaId",
                     alunoLogado.turmaId
                 );
@@ -300,15 +350,9 @@ form.addEventListener(
             }
 
 
-            localStorage.setItem(
-                "turmaNome",
-                alunoLogado.turmaNome
-            );
-
-
-            // =================================================
-            // GUARDAR ALUNO LOGADO
-            // =================================================
+            // =============================================
+            // GUARDAR ALUNO
+            // =============================================
 
             localStorage.setItem(
                 "alunoLogado",
@@ -318,26 +362,46 @@ form.addEventListener(
             );
 
 
+            // =============================================
+            // LOG
+            // =============================================
+
             console.log(
-                "================================="
+                "===================================="
             );
 
             console.log(
-                "✅ LOGIN DO ALUNO REALIZADO"
+                "✅ LOGIN REALIZADO"
             );
 
             console.log(
-                alunoLogado
+                "Aluno:",
+                alunoLogado.nome
             );
 
             console.log(
-                "================================="
+                "Código:",
+                alunoLogado.codigoAluno
+            );
+
+            console.log(
+                "Turma:",
+                alunoLogado.turmaNome
+            );
+
+            console.log(
+                "Escola:",
+                alunoLogado.escolaId
+            );
+
+            console.log(
+                "===================================="
             );
 
 
-            // =================================================
+            // =============================================
             // REDIRECIONAR
-            // =================================================
+            // =============================================
 
             window.location.href =
                 "../pages/student-area.html";
@@ -353,11 +417,19 @@ form.addEventListener(
 
 
             alert(
-                "Erro no login:\n\n" +
+
+                "❌ Não foi possível realizar o login.\n\n" +
+
                 erro.message
+
             );
 
         }
 
     }
+);
+
+
+console.log(
+    "✅ LOGIN DO ALUNO PRONTO."
 );
