@@ -3,7 +3,12 @@
 // SGE ANGOLA
 // =====================================================
 
-alert("GESTÃO DE ALUNOS CARREGADO");
+alert("GESTÃO DE ALUNOS CARREGADO ✅");
+
+
+// =====================================================
+// FIREBASE
+// =====================================================
 
 import { app } from "./firebase.js";
 
@@ -17,13 +22,15 @@ import {
     updateDoc,
     doc,
     deleteDoc,
+    setDoc,
     serverTimestamp,
     query,
     where
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 
-const db = getFirestore(app);
+const db =
+    getFirestore(app);
 
 
 // =====================================================
@@ -33,12 +40,14 @@ const db = getFirestore(app);
 let escolaId =
     sessionStorage.getItem("escolaId");
 
+
 if (!escolaId) {
 
     escolaId =
         localStorage.getItem("escolaId");
 
 }
+
 
 escolaId =
     escolaId
@@ -62,6 +71,7 @@ if (!escolaId) {
 
 }
 
+
 console.log(
     "🏫 ESCOLA ATUAL DOS ALUNOS:",
     escolaId
@@ -73,40 +83,75 @@ console.log(
 // =====================================================
 
 const turmaSelect =
-    document.getElementById("turmaSelect");
+    document.getElementById(
+        "turmaSelect"
+    );
+
 
 const nomeAluno =
-    document.getElementById("nomeAluno");
+    document.getElementById(
+        "nomeAluno"
+    );
+
 
 const numeroAluno =
-    document.getElementById("numeroAluno");
+    document.getElementById(
+        "numeroAluno"
+    );
+
 
 const sexoAluno =
-    document.getElementById("sexoAluno");
+    document.getElementById(
+        "sexoAluno"
+    );
+
 
 const dataAluno =
-    document.getElementById("dataAluno");
+    document.getElementById(
+        "dataAluno"
+    );
+
 
 const guardarAluno =
-    document.getElementById("guardarAluno");
+    document.getElementById(
+        "guardarAluno"
+    );
+
 
 const listaImportar =
-    document.getElementById("listaImportar");
+    document.getElementById(
+        "listaImportar"
+    );
+
 
 const importarAlunos =
-    document.getElementById("importarAlunos");
+    document.getElementById(
+        "importarAlunos"
+    );
+
 
 const arquivoPDF =
-    document.getElementById("arquivoPDF");
+    document.getElementById(
+        "arquivoPDF"
+    );
+
 
 const importarPDF =
-    document.getElementById("importarPDF");
+    document.getElementById(
+        "importarPDF"
+    );
+
 
 const listaAlunos =
-    document.getElementById("listaAlunos");
+    document.getElementById(
+        "listaAlunos"
+    );
+
 
 const pesquisarAluno =
-    document.getElementById("pesquisarAluno");
+    document.getElementById(
+        "pesquisarAluno"
+    );
 
 
 // =====================================================
@@ -119,88 +164,164 @@ let todosAlunos = [];
 
 
 // =====================================================
-// CARREGAR TURMAS
+// VERIFICAR ELEMENTOS PRINCIPAIS
 // =====================================================
 
-carregarTurmas();
+if (!turmaSelect) {
 
+    console.error(
+        "❌ #turmaSelect não encontrado."
+    );
+
+}
+
+
+if (!listaAlunos) {
+
+    console.error(
+        "❌ #listaAlunos não encontrado."
+    );
+
+}
+
+
+console.log(
+    "✅ BLOCO 1 DO STUDENT.JS CARREGADO."
+);
+
+// =====================================================
+// BLOCO 2 — CARREGAR TURMAS
+// =====================================================
 
 async function carregarTurmas() {
 
     try {
 
-        turmaSelect.innerHTML =
-            "<option>A procurar turmas...</option>";
-
-
-        const dados = await getDocs(
-
-            query(
-                collection(db, "turmas"),
-                where(
-                    "escolaId",
-                    "==",
-                    escolaId
-                )
-            )
-
+        console.log(
+            "📚 A carregar turmas da escola:",
+            escolaId
         );
+
+
+        if (!turmaSelect) {
+
+            throw new Error(
+                "Elemento turmaSelect não encontrado."
+            );
+
+        }
+
+
+        turmaSelect.innerHTML =
+            "<option value=''>A procurar turmas...</option>";
+
+
+        const dados =
+            await getDocs(
+
+                query(
+                    collection(
+                        db,
+                        "turmas"
+                    ),
+
+                    where(
+                        "escolaId",
+                        "==",
+                        escolaId
+                    )
+                )
+
+            );
 
 
         if (dados.empty) {
 
             turmaSelect.innerHTML =
-                "<option>Nenhuma turma encontrada</option>";
+                "<option value=''>Nenhuma turma encontrada</option>";
+
 
             turmaSelecionada = "";
 
-            listaAlunos.innerHTML =
-                "Nenhuma turma disponível.";
+
+            if (listaAlunos) {
+
+                listaAlunos.innerHTML =
+                    "Nenhuma turma disponível.";
+
+            }
+
 
             return;
 
         }
 
 
-        turmaSelect.innerHTML = "";
+        turmaSelect.innerHTML =
+            "";
 
 
-        dados.forEach(turmaDoc => {
+        dados.forEach(
+            turmaDoc => {
 
-            const turma =
-                turmaDoc.data();
+                const turma =
+                    turmaDoc.data();
 
 
-            turmaSelect.innerHTML += `
+                const option =
+                    document.createElement(
+                        "option"
+                    );
 
-                <option value="${turmaDoc.id}">
 
-                    ${turma.nome} - ${turma.classe}
+                option.value =
+                    turmaDoc.id;
 
-                </option>
 
-            `;
+                option.textContent =
+                    `${turma.nome || ""} - ${turma.classe || ""}`;
 
-        });
+
+                turmaSelect.appendChild(
+                    option
+                );
+
+            }
+        );
 
 
         turmaSelecionada =
             turmaSelect.value;
 
 
-        carregarAlunos();
+        console.log(
+            "✅ TURMA SELECIONADA:",
+            turmaSelecionada
+        );
 
+
+        await carregarAlunos();
 
     }
 
     catch (erro) {
 
-        turmaSelect.innerHTML =
-            "<option>Erro ao carregar turmas</option>";
+        console.error(
+            "❌ ERRO AO CARREGAR TURMAS:",
+            erro
+        );
+
+
+        if (turmaSelect) {
+
+            turmaSelect.innerHTML =
+                "<option value=''>Erro ao carregar turmas</option>";
+
+        }
 
 
         alert(
-            "Erro ao carregar turmas: " +
+            "Erro ao carregar turmas:\n\n" +
             erro.message
         );
 
@@ -213,18 +334,28 @@ async function carregarTurmas() {
 // ALTERAR TURMA
 // =====================================================
 
-turmaSelect.addEventListener(
-    "change",
-    () => {
+if (turmaSelect) {
 
-        turmaSelecionada =
-            turmaSelect.value;
+    turmaSelect.addEventListener(
+        "change",
+        async () => {
+
+            turmaSelecionada =
+                turmaSelect.value;
 
 
-        carregarAlunos();
+            console.log(
+                "🔄 NOVA TURMA:",
+                turmaSelecionada
+            );
 
-    }
-);
+
+            await carregarAlunos();
+
+        }
+    );
+
+}
 
 
 // =====================================================
@@ -233,26 +364,69 @@ turmaSelect.addEventListener(
 
 function gerarCodigoAluno(numero) {
 
-    const turmaTexto =
-        turmaSelect
-        .options[
+    if (!turmaSelect) {
+
+        throw new Error(
+            "turmaSelect não encontrado."
+        );
+
+    }
+
+
+    const option =
+        turmaSelect.options[
             turmaSelect.selectedIndex
-        ]
-        .text;
+        ];
+
+
+    if (!option) {
+
+        throw new Error(
+            "Nenhuma turma selecionada."
+        );
+
+    }
+
+
+    const turmaTexto =
+        option.textContent || "";
 
 
     let codigoTurma =
         turmaTexto
-        .replace("ª", "")
-        .replace(" ", "")
-        .split("-")[0];
+            .split("-")[0]
+            .trim()
+            .replace(/ª/g, "")
+            .replace(/\s+/g, "");
 
 
-    return (
+    if (!codigoTurma) {
+
+        codigoTurma =
+            "ALUNO";
+
+    }
+
+
+    const numeroNormalizado =
+        String(numero)
+            .trim()
+            .padStart(3, "0");
+
+
+    const codigo =
         codigoTurma +
         "-" +
-        String(numero).padStart(3, "0")
+        numeroNormalizado;
+
+
+    console.log(
+        "🔑 CÓDIGO GERADO:",
+        codigo
     );
+
+
+    return codigo;
 
 }
 
@@ -264,20 +438,26 @@ function gerarCodigoAluno(numero) {
 function gerarSenha() {
 
     const caracteres =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 
     let senha = "";
 
 
-    for (let i = 0; i < 6; i++) {
+    for (
+        let i = 0;
+        i < 6;
+        i++
+    ) {
 
         senha +=
             caracteres.charAt(
+
                 Math.floor(
                     Math.random() *
                     caracteres.length
                 )
+
             );
 
     }
@@ -289,215 +469,606 @@ function gerarSenha() {
 
 
 // =====================================================
-// GUARDAR ALUNO
+// TESTE
 // =====================================================
 
-guardarAluno.addEventListener(
-    "click",
-    async () => {
+console.log(
+    "✅ BLOCO 2 DO STUDENT.JS CARREGADO."
+);
 
-        try {
 
-            if (!turmaSelecionada) {
+// =====================================================
+// INICIAR CARREGAMENTO
+// =====================================================
 
-                alert(
-                    "Selecione uma turma."
-                );
+carregarTurmas();
 
-                return;
+        // =====================================================
+// BLOCO 3 — CRIAR ACESSO DO ALUNO
+// =====================================================
 
+async function criarAcessoAluno(aluno) {
+
+    try {
+
+        console.log(
+            "🔐 A criar acesso do aluno..."
+        );
+
+
+        // =================================================
+        // CÓDIGO DO ALUNO
+        // =================================================
+
+        const codigoOriginal =
+            String(
+                aluno.codigoAluno || ""
+            ).trim();
+
+
+        if (!codigoOriginal) {
+
+            throw new Error(
+                "O aluno não possui codigoAluno."
+            );
+
+        }
+
+
+        // =================================================
+        // SENHA DO ALUNO
+        // =================================================
+
+        const senha =
+            String(
+                aluno.senhaAcesso ||
+                aluno.senha ||
+                ""
+            ).trim();
+
+
+        if (!senha) {
+
+            throw new Error(
+                "O aluno não possui senhaAcesso."
+            );
+
+        }
+
+
+        // =================================================
+        // NORMALIZAR CÓDIGO PARA ID
+        // =================================================
+
+        const codigoId =
+            codigoOriginal
+                .replace(/\s+/g, "")
+                .replace(/\//g, "-");
+
+
+        // =================================================
+        // REFERÊNCIA DO ACESSO
+        // =================================================
+
+        const acessoRef =
+            doc(
+                db,
+                "acessosAlunos",
+                codigoId
+            );
+
+
+        // =================================================
+        // DADOS DO ACESSO
+        // =================================================
+
+        const dadosAcesso = {
+
+            codigoAluno:
+                codigoOriginal,
+
+            senhaAcesso:
+                senha,
+
+            alunoId:
+                aluno.alunoId ||
+                aluno.id ||
+                "",
+
+            turmaId:
+                aluno.turmaId ||
+                turmaSelecionada ||
+                "",
+
+            turmaNome:
+                aluno.turmaNome ||
+                "",
+
+            escolaId:
+                aluno.escolaId ||
+                escolaId ||
+                "",
+
+            nome:
+                aluno.nome ||
+                "",
+
+            numero:
+                aluno.numero ||
+                "",
+
+            sexo:
+                aluno.sexo ||
+                "",
+
+            classe:
+                aluno.classe ||
+                "",
+
+            ensino:
+                aluno.ensino ||
+                "",
+
+            estado:
+                aluno.estado ||
+                "ativo",
+
+            atualizadoEm:
+                serverTimestamp()
+
+        };
+
+
+        // =================================================
+        // GRAVAR ACESSO
+        // =================================================
+
+        await setDoc(
+            acessoRef,
+            dadosAcesso,
+            {
+                merge: true
             }
+        );
 
 
-            if (
-                nomeAluno.value.trim() === "" ||
-                numeroAluno.value.trim() === ""
-            ) {
+        console.log(
+            "===================================="
+        );
 
-                alert(
-                    "Preencha o nome e o número do aluno."
-                );
+        console.log(
+            "✅ ACESSO DO ALUNO CRIADO"
+        );
 
-                return;
+        console.log(
+            "Código:",
+            codigoOriginal
+        );
 
-            }
+        console.log(
+            "Senha:",
+            senha
+        );
+
+        console.log(
+            "Escola:",
+            dadosAcesso.escolaId
+        );
+
+        console.log(
+            "Turma:",
+            dadosAcesso.turmaId
+        );
+
+        console.log(
+            "===================================="
+        );
 
 
-            await addDoc(
+        return true;
 
-                collection(
-                    db,
-                    "turmas",
-                    turmaSelecionada,
-                    "alunos"
-                ),
+    }
 
-                {
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO AO CRIAR ACESSO DO ALUNO:",
+            erro
+        );
+
+        throw erro;
+
+    }
+
+}
+
+// =====================================================
+// BLOCO 4 — GUARDAR ALUNO
+// =====================================================
+
+if (guardarAluno) {
+
+    guardarAluno.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                // =========================================
+                // VERIFICAR TURMA
+                // =========================================
+
+                if (!turmaSelecionada) {
+
+                    alert(
+                        "❌ Selecione uma turma."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // VERIFICAR NOME
+                // =========================================
+
+                const nome =
+                    nomeAluno
+                        ?.value
+                        ?.trim() || "";
+
+
+                const numero =
+                    numeroAluno
+                        ?.value
+                        ?.trim() || "";
+
+
+                if (
+                    !nome ||
+                    !numero
+                ) {
+
+                    alert(
+                        "❌ Preencha o nome e o número do aluno."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // VERIFICAR SE O NÚMERO JÁ EXISTE
+                // =========================================
+
+                const alunosExistentes =
+                    await getDocs(
+
+                        collection(
+                            db,
+                            "turmas",
+                            turmaSelecionada,
+                            "alunos"
+                        )
+
+                    );
+
+
+                const numeroExiste =
+                    alunosExistentes.docs.some(
+                        alunoDoc => {
+
+                            const dados =
+                                alunoDoc.data();
+
+
+                            return (
+                                String(
+                                    dados.numero || ""
+                                ).trim() === numero
+                            );
+
+                        }
+                    );
+
+
+                if (numeroExiste) {
+
+                    alert(
+                        "⚠️ Já existe um aluno com este número nesta turma."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // DADOS DA TURMA
+                // =========================================
+
+                const turmaDoc =
+                    await getDocs(
+
+                        query(
+                            collection(
+                                db,
+                                "turmas"
+                            ),
+                            where(
+                                "__name__",
+                                "==",
+                                turmaSelecionada
+                            )
+                        )
+
+                    );
+
+
+                let turmaDados = {};
+
+
+                if (
+                    !turmaDoc.empty
+                ) {
+
+                    turmaDados =
+                        turmaDoc.docs[0].data();
+
+                }
+
+
+                // =========================================
+                // CÓDIGO
+                // =========================================
+
+                const codigoAluno =
+                    gerarCodigoAluno(
+                        numero
+                    );
+
+
+                // =========================================
+                // SENHA
+                // =========================================
+
+                const senhaAcesso =
+                    gerarSenha();
+
+
+                // =========================================
+                // NOME DA TURMA
+                // =========================================
+
+                const turmaNome =
+                    turmaSelect
+                        ?.options[
+                            turmaSelect.selectedIndex
+                        ]
+                        ?.textContent
+                        ?.trim() || "";
+
+
+                // =========================================
+                // DADOS DO ALUNO
+                // =========================================
+
+                const dadosAluno = {
 
                     nome:
-                        nomeAluno.value.trim(),
+                        nome,
 
                     numero:
-                        numeroAluno.value.trim(),
+                        numero,
 
                     sexo:
-                        sexoAluno.value,
+                        sexoAluno?.value || "",
 
                     dataNascimento:
-                        dataAluno.value.trim(),
+                        dataAluno?.value?.trim() || "",
 
                     turmaId:
                         turmaSelecionada,
 
+                    turmaNome:
+                        turmaNome,
+
                     escolaId:
                         escolaId,
 
-                    turmaNome:
-                        turmaSelect
-                        .options[
-                            turmaSelect.selectedIndex
-                        ]
-                        .text,
+                    classe:
+                        turmaDados.classe || "",
+
+                    ensino:
+                        turmaDados.ensino || "",
+
+                    anoLetivo:
+                        turmaDados.anoLetivo || "",
 
                     codigoAluno:
-                        gerarCodigoAluno(
-                            numeroAluno.value.trim()
-                        ),
+                        codigoAluno,
 
                     senhaAcesso:
-                        gerarSenha(),
-authUid: "",
-                    
+                        senhaAcesso,
+
+                    authUid:
+                        "",
+
                     estado:
                         "ativo",
 
                     criadoEm:
                         serverTimestamp()
 
+                };
+
+
+                console.log(
+                    "👨‍🎓 DADOS DO ALUNO:",
+                    dadosAluno
+                );
+
+
+                // =========================================
+                // CRIAR ALUNO NA TURMA
+                // =========================================
+
+                const alunoRef =
+                    await addDoc(
+
+                        collection(
+                            db,
+                            "turmas",
+                            turmaSelecionada,
+                            "alunos"
+                        ),
+
+                        dadosAluno
+
+                    );
+
+
+                console.log(
+                    "✅ ALUNO CRIADO:",
+                    alunoRef.id
+                );
+
+
+                // =========================================
+                // CRIAR ACESSO DO ALUNO
+                // =========================================
+
+                await criarAcessoAluno({
+
+                    ...dadosAluno,
+
+                    id:
+                        alunoRef.id
+
+                });
+
+
+                // =========================================
+                // SUCESSO
+                // =========================================
+
+                alert(
+
+                    "✅ ALUNO CADASTRADO COM SUCESSO!\n\n" +
+
+                    "Nome: " +
+                    nome +
+
+                    "\nNúmero: " +
+                    numero +
+
+                    "\nCódigo: " +
+                    codigoAluno +
+
+                    "\nSenha: " +
+                    senhaAcesso +
+
+                    "\nTurma: " +
+                    turmaNome
+
+                );
+
+
+                // =========================================
+                // LIMPAR FORMULÁRIO
+                // =========================================
+
+                if (nomeAluno) {
+
+                    nomeAluno.value = "";
+
                 }
 
-            );
+
+                if (numeroAluno) {
+
+                    numeroAluno.value = "";
+
+                }
 
 
-            alert(
-                "Aluno guardado com sucesso!"
-            );
+                if (sexoAluno) {
+
+                    sexoAluno.value = "";
+
+                }
 
 
-            nomeAluno.value = "";
+                if (dataAluno) {
 
-            numeroAluno.value = "";
+                    dataAluno.value = "";
 
-            sexoAluno.value = "";
-
-            dataAluno.value = "";
+                }
 
 
-            carregarAlunos();
+                // =========================================
+                // ATUALIZAR LISTA
+                // =========================================
+
+                await carregarAlunos();
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "❌ ERRO AO GUARDAR ALUNO:",
+                    erro
+                );
+
+
+                alert(
+
+                    "❌ Erro ao guardar aluno:\n\n" +
+
+                    erro.message
+
+                );
+
+            }
 
         }
-
-        catch (erro) {
-
-            console.error(
-                "Erro ao guardar aluno:",
-                erro
-            );
-
-
-            alert(
-                "Erro ao guardar aluno: " +
-                erro.message
-            );
-
-        }
-
-    }
-);
-
-
-// =====================================================
-// CALCULAR IDADE
-// =====================================================
-
-function calcularIdade(data) {
-
-    if (!data) {
-
-        return "";
-
-    }
-
-
-    const partes =
-        data.split("-");
-
-
-    if (partes.length !== 3) {
-
-        return "";
-
-    }
-
-
-    const dia =
-        Number(partes[0]);
-
-    const mes =
-        Number(partes[1]) - 1;
-
-    const ano =
-        Number(partes[2]);
-
-
-    const nascimento =
-        new Date(
-            ano,
-            mes,
-            dia
-        );
-
-
-    const hoje =
-        new Date();
-
-
-    let idade =
-        hoje.getFullYear() -
-        nascimento.getFullYear();
-
-
-    const diferencaMes =
-        hoje.getMonth() -
-        nascimento.getMonth();
-
-
-    if (
-        diferencaMes < 0 ||
-        (
-            diferencaMes === 0 &&
-            hoje.getDate() <
-            nascimento.getDate()
-        )
-    ) {
-
-        idade--;
-
-    }
-
-
-    return idade;
+    );
 
 }
 
 
-// =====================================================
-// CARREGAR ALUNOS
+console.log(
+    "✅ BLOCO 4 DO STUDENT.JS CARREGADO."
+);
+
+    // =====================================================
+// BLOCO 5 — CARREGAR ALUNOS DA TURMA
 // =====================================================
 
 async function carregarAlunos() {
 
     if (!turmaSelecionada) {
+
+        if (listaAlunos) {
+
+            listaAlunos.innerHTML =
+                "Selecione uma turma.";
+
+        }
+
+        return;
+
+    }
+
+
+    if (!listaAlunos) {
+
+        console.error(
+            "❌ #listaAlunos não encontrado."
+        );
 
         return;
 
@@ -505,10 +1076,16 @@ async function carregarAlunos() {
 
 
     listaAlunos.innerHTML =
-        "A carregar alunos...";
+        "⏳ A carregar alunos...";
 
 
     try {
+
+        console.log(
+            "👨‍🎓 A carregar alunos da turma:",
+            turmaSelecionada
+        );
+
 
         const dados =
             await getDocs(
@@ -529,24 +1106,39 @@ async function carregarAlunos() {
         dados.forEach(
             alunoDoc => {
 
-                alunos.push(
-                    {
-                        id: alunoDoc.id,
-                        ...alunoDoc.data()
-                    }
-                );
+                alunos.push({
+
+                    id:
+                        alunoDoc.id,
+
+                    ...alunoDoc.data()
+
+                });
 
             }
         );
 
 
+        // =========================================
+        // ORDENAR PELO NÚMERO
+        // =========================================
+
         alunos.sort(
             (a, b) => {
 
-                return (
-                    Number(a.numero) -
-                    Number(b.numero)
-                );
+                const numeroA =
+                    Number(
+                        a.numero || 0
+                    );
+
+
+                const numeroB =
+                    Number(
+                        b.numero || 0
+                    );
+
+
+                return numeroA - numeroB;
 
             }
         );
@@ -555,6 +1147,16 @@ async function carregarAlunos() {
         todosAlunos =
             alunos;
 
+
+        console.log(
+            "✅ ALUNOS ENCONTRADOS:",
+            alunos.length
+        );
+
+
+        // =========================================
+        // CONSTRUIR TABELA
+        // =========================================
 
         listaAlunos.innerHTML = `
 
@@ -596,27 +1198,165 @@ async function carregarAlunos() {
         `;
 
 
-        mostrarAlunos(todosAlunos);
+        mostrarAlunos(
+            todosAlunos
+        );
 
     }
 
     catch (erro) {
 
         console.error(
-            "Erro ao carregar alunos:",
+            "❌ ERRO AO CARREGAR ALUNOS:",
             erro
         );
 
 
         listaAlunos.innerHTML =
-            "Erro ao carregar alunos.";
+            "❌ Erro ao carregar alunos.";
+
 
         alert(
-            "Erro ao carregar alunos: " +
+            "Erro ao carregar alunos:\n\n" +
             erro.message
         );
 
     }
+
+}
+
+
+// =====================================================
+// CALCULAR IDADE
+// =====================================================
+
+function calcularIdade(data) {
+
+    if (!data) {
+
+        return "";
+
+    }
+
+
+    const partes =
+        String(data)
+            .trim()
+            .split("-");
+
+
+    if (
+        partes.length !== 3
+    ) {
+
+        return "";
+
+    }
+
+
+    let dia;
+    let mes;
+    let ano;
+
+
+    // =========================================
+    // FORMATO DD-MM-AAAA
+    // =========================================
+
+    if (
+        partes[0].length <= 2 &&
+        partes[2].length === 4
+    ) {
+
+        dia =
+            Number(
+                partes[0]
+            );
+
+        mes =
+            Number(
+                partes[1]
+            ) - 1;
+
+        ano =
+            Number(
+                partes[2]
+            );
+
+    }
+
+    // =========================================
+    // FORMATO AAAA-MM-DD
+    // =========================================
+
+    else {
+
+        ano =
+            Number(
+                partes[0]
+            );
+
+        mes =
+            Number(
+                partes[1]
+            ) - 1;
+
+        dia =
+            Number(
+                partes[2]
+            );
+
+    }
+
+
+    const nascimento =
+        new Date(
+            ano,
+            mes,
+            dia
+        );
+
+
+    if (
+        isNaN(
+            nascimento.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    const hoje =
+        new Date();
+
+
+    let idade =
+        hoje.getFullYear() -
+        nascimento.getFullYear();
+
+
+    const diferencaMes =
+        hoje.getMonth() -
+        nascimento.getMonth();
+
+
+    if (
+        diferencaMes < 0 ||
+        (
+            diferencaMes === 0 &&
+            hoje.getDate() <
+            nascimento.getDate()
+        )
+    ) {
+
+        idade--;
+
+    }
+
+
+    return idade;
 
 }
 
@@ -640,10 +1380,14 @@ function mostrarAlunos(lista) {
     }
 
 
-    corpoTabela.innerHTML = "";
+    corpoTabela.innerHTML =
+        "";
 
 
-    if (lista.length === 0) {
+    if (
+        !lista ||
+        lista.length === 0
+    ) {
 
         corpoTabela.innerHTML = `
 
@@ -651,7 +1395,10 @@ function mostrarAlunos(lista) {
 
                 <td
                     colspan="9"
-                    style="text-align:center;padding:20px;"
+                    style="
+                        text-align:center;
+                        padding:20px;
+                    "
                 >
 
                     Nenhum aluno encontrado.
@@ -667,11 +1414,27 @@ function mostrarAlunos(lista) {
     }
 
 
-    lista.forEach(aluno => {
+    lista.forEach(
+        aluno => {
 
-        corpoTabela.innerHTML += `
+            const estado =
+                aluno.estado ||
+                "ativo";
 
-            <tr>
+
+            const estadoTexto =
+                estado === "ativo"
+                    ? "Ativo"
+                    : estado;
+
+
+            const linha =
+                document.createElement(
+                    "tr"
+                );
+
+
+            linha.innerHTML = `
 
                 <td>
                     ${aluno.codigoAluno || ""}
@@ -704,129 +1467,315 @@ function mostrarAlunos(lista) {
                 </td>
 
                 <td>
-                    ${aluno.estado || "ativo"}
+                    ${estadoTexto}
                 </td>
 
                 <td>
 
                     <button
-                        onclick="alterarEstado('${aluno.codigoAluno}')"
+                        onclick="
+                            alterarEstado(
+                                '${aluno.codigoAluno || ""}'
+                            )
+                        "
                     >
                         ⚙️ Estado
                     </button>
 
 
                     <button
-                        onclick="verAluno('${aluno.codigoAluno}')"
+                        onclick="
+                            verAluno(
+                                '${aluno.codigoAluno || ""}'
+                            )
+                        "
                     >
                         👁️
                     </button>
 
 
                     <button
-                        onclick="editarAluno('${aluno.codigoAluno}')"
+                        onclick="
+                            editarAluno(
+                                '${aluno.codigoAluno || ""}'
+                            )
+                        "
                     >
                         ✏️
                     </button>
 
 
                     <button
-                        onclick="apagarAluno('${aluno.codigoAluno}')"
+                        onclick="
+                            apagarAluno(
+                                '${aluno.codigoAluno || ""}'
+                            )
+                        "
                     >
                         🗑️
                     </button>
 
                 </td>
 
-            </tr>
+            `;
 
-        `;
 
-    });
+            corpoTabela.appendChild(
+                linha
+            );
+
+        }
+    );
+
+
+    console.log(
+        "✅ TABELA DE ALUNOS ATUALIZADA."
+    );
 
 }
 
 
 // =====================================================
-// IMPORTAR ALUNOS POR LISTA
+// BLOCO 5 FINALIZADO
 // =====================================================
 
-importarAlunos.addEventListener(
-    "click",
-    async () => {
+console.log(
+    "✅ BLOCO 5 DO STUDENT.JS CARREGADO."
+);
 
-        try {
+// =====================================================
+// BLOCO 6 — IMPORTAR ALUNOS PELA LISTA
+// =====================================================
 
-            if (!turmaSelecionada) {
+if (importarAlunos) {
 
-                alert(
-                    "Selecione uma turma."
-                );
+    importarAlunos.addEventListener(
+        "click",
+        async () => {
 
-                return;
+            try {
 
-            }
+                // =========================================
+                // VERIFICAR TURMA
+                // =========================================
 
+                if (!turmaSelecionada) {
 
-            const texto =
-                listaImportar.value.trim();
+                    alert(
+                        "❌ Selecione uma turma."
+                    );
 
-
-            if (texto === "") {
-
-                alert(
-                    "Cole a lista de alunos."
-                );
-
-                return;
-
-            }
-
-
-            const linhas =
-                texto.split("\n");
-
-
-            let quantidadeImportada = 0;
-
-
-            for (
-                const linha of linhas
-            ) {
-
-                const dados =
-                    linha.split(";");
-
-
-                if (dados.length < 4) {
-
-                    continue;
+                    return;
 
                 }
 
 
-                await addDoc(
+                // =========================================
+                // LER TEXTO
+                // =========================================
 
-                    collection(
-                        db,
-                        "turmas",
-                        turmaSelecionada,
-                        "alunos"
-                    ),
+                const texto =
+                    listaImportar
+                        ?.value
+                        ?.trim() || "";
 
-                    {
+
+                if (!texto) {
+
+                    alert(
+                        "❌ Cole a lista de alunos."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // SEPARAR LINHAS
+                // =========================================
+
+                const linhas =
+                    texto
+                        .split(/\r?\n/)
+                        .filter(
+                            linha =>
+                                linha.trim() !== ""
+                        );
+
+
+                let quantidadeImportada =
+                    0;
+
+
+                let quantidadeIgnorada =
+                    0;
+
+
+                // =========================================
+                // IMPORTAR CADA ALUNO
+                // =========================================
+
+                for (
+                    const linha of linhas
+                ) {
+
+                    const dados =
+                        linha
+                            .split(";")
+                            .map(
+                                valor =>
+                                    valor.trim()
+                            );
+
+
+                    // =====================================
+                    // FORMATO:
+                    //
+                    // Nº ; NOME ; SEXO ; DATA
+                    // =====================================
+
+                    if (
+                        dados.length < 4
+                    ) {
+
+                        quantidadeIgnorada++;
+
+                        continue;
+
+                    }
+
+
+                    const numero =
+                        dados[0];
+
+
+                    const nome =
+                        dados[1];
+
+
+                    const sexo =
+                        dados[2];
+
+
+                    const dataNascimento =
+                        dados[3];
+
+
+                    if (
+                        !numero ||
+                        !nome
+                    ) {
+
+                        quantidadeIgnorada++;
+
+                        continue;
+
+                    }
+
+
+                    // =====================================
+                    // VERIFICAR DUPLICADO
+                    // =====================================
+
+                    const alunosExistentes =
+                        await getDocs(
+
+                            collection(
+                                db,
+                                "turmas",
+                                turmaSelecionada,
+                                "alunos"
+                            )
+
+                        );
+
+
+                    const jaExiste =
+                        alunosExistentes.docs.some(
+                            alunoDoc => {
+
+                                const aluno =
+                                    alunoDoc.data();
+
+
+                                return (
+                                    String(
+                                        aluno.numero || ""
+                                    ).trim() ===
+                                    String(
+                                        numero
+                                    ).trim()
+                                );
+
+                            }
+                        );
+
+
+                    if (jaExiste) {
+
+                        console.warn(
+                            "⚠️ Aluno já existe:",
+                            numero,
+                            nome
+                        );
+
+
+                        quantidadeIgnorada++;
+
+                        continue;
+
+                    }
+
+
+                    // =====================================
+                    // CÓDIGO
+                    // =====================================
+
+                    const codigoAluno =
+                        gerarCodigoAluno(
+                            numero
+                        );
+
+
+                    // =====================================
+                    // SENHA
+                    // =====================================
+
+                    const senhaAcesso =
+                        gerarSenha();
+
+
+                    // =====================================
+                    // NOME DA TURMA
+                    // =====================================
+
+                    const turmaNome =
+                        turmaSelect
+                            ?.options[
+                                turmaSelect.selectedIndex
+                            ]
+                            ?.textContent
+                            ?.trim() || "";
+
+
+                    // =====================================
+                    // DADOS
+                    // =====================================
+
+                    const dadosAluno = {
 
                         numero:
-                            dados[0].trim(),
+                            numero,
 
                         nome:
-                            dados[1].trim(),
+                            nome,
 
                         sexo:
-                            dados[2].trim(),
+                            sexo,
 
                         dataNascimento:
-                            dados[3].trim(),
+                            dataNascimento,
 
                         turmaId:
                             turmaSelecionada,
@@ -835,264 +1784,642 @@ importarAlunos.addEventListener(
                             escolaId,
 
                         turmaNome:
-                            turmaSelect
-                            .options[
-                                turmaSelect.selectedIndex
-                            ]
-                            .text,
+                            turmaNome,
 
                         codigoAluno:
-                            gerarCodigoAluno(
-                                dados[0].trim()
-                            ),
+                            codigoAluno,
 
                         senhaAcesso:
-                            gerarSenha(),
-                        authUid: "",
-                        
+                            senhaAcesso,
+
+                        authUid:
+                            "",
+
                         estado:
                             "ativo",
 
                         criadoEm:
                             serverTimestamp()
 
-                    }
+                    };
+
+
+                    // =====================================
+                    // CRIAR ALUNO
+                    // =====================================
+
+                    const alunoRef =
+                        await addDoc(
+
+                            collection(
+                                db,
+                                "turmas",
+                                turmaSelecionada,
+                                "alunos"
+                            ),
+
+                            dadosAluno
+
+                        );
+
+
+                    // =====================================
+                    // CRIAR ACESSO
+                    // =====================================
+
+                    await criarAcessoAluno({
+
+                        ...dadosAluno,
+
+                        id:
+                            alunoRef.id
+
+                    });
+
+
+                    quantidadeImportada++;
+
+
+                    console.log(
+                        "✅ ALUNO IMPORTADO:",
+                        nome,
+                        codigoAluno
+                    );
+
+                }
+
+
+                // =========================================
+                // LIMPAR CAMPO
+                // =========================================
+
+                if (listaImportar) {
+
+                    listaImportar.value =
+                        "";
+
+                }
+
+
+                // =========================================
+                // ATUALIZAR LISTA
+                // =========================================
+
+                await carregarAlunos();
+
+
+                // =========================================
+                // RESULTADO
+                // =========================================
+
+                alert(
+
+                    "✅ IMPORTAÇÃO CONCLUÍDA!\n\n" +
+
+                    "Alunos importados: " +
+                    quantidadeImportada +
+
+                    "\nAlunos ignorados: " +
+                    quantidadeIgnorada +
+
+                    "\n\n" +
+
+                    "Cada aluno recebeu automaticamente " +
+                    "um código e uma senha de acesso."
+
+                );
+
+            }
+
+            catch (erro) {
+
+                console.error(
+                    "❌ ERRO NA IMPORTAÇÃO:",
+                    erro
+                );
+
+
+                alert(
+
+                    "❌ Erro ao importar alunos:\n\n" +
+
+                    erro.message
+
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+console.log(
+    "✅ BLOCO 6 DO STUDENT.JS CARREGADO."
+);
+
+// =====================================================
+// BLOCO 7 — IMPORTAR ALUNOS PELO PDF
+// =====================================================
+
+if (importarPDF) {
+
+    importarPDF.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                // =========================================
+                // VERIFICAR TURMA
+                // =========================================
+
+                if (!turmaSelecionada) {
+
+                    alert(
+                        "❌ Selecione uma turma."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // VERIFICAR FICHEIRO
+                // =========================================
+
+                const file =
+                    arquivoPDF
+                        ?.files?.[0];
+
+
+                if (!file) {
+
+                    alert(
+                        "❌ Selecione um ficheiro PDF."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // LER PDF
+                // =========================================
+
+                alert(
+                    "📄 A ler PDF..."
+                );
+
+
+                const resultado =
+                    await lerPDF(file);
+
+
+                if (
+                    !resultado ||
+                    !Array.isArray(
+                        resultado.alunos
+                    )
+                ) {
+
+                    throw new Error(
+                        "Não foi possível obter os alunos do PDF."
+                    );
+
+                }
+
+
+                console.log(
+                    "📄 RESULTADO DO PDF:",
+                    resultado
+                );
+
+
+                if (
+                    resultado.alunos.length === 0
+                ) {
+
+                    alert(
+                        "⚠️ Nenhum aluno foi encontrado no PDF."
+                    );
+
+                    return;
+
+                }
+
+
+                alert(
+
+                    "👨‍🎓 Alunos encontrados: " +
+
+                    resultado.alunos.length +
+
+                    "\n\nA iniciar importação..."
 
                 );
 
 
-                quantidadeImportada++;
+                let quantidadeImportada =
+                    0;
+
+
+                let quantidadeIgnorada =
+                    0;
+
+
+                // =========================================
+                // PROCESSAR ALUNOS
+                // =========================================
+
+                for (
+                    const aluno of resultado.alunos
+                ) {
+
+                    const numero =
+                        String(
+                            aluno.numero || ""
+                        ).trim();
+
+
+                    const nome =
+                        String(
+                            aluno.nome || ""
+                        ).trim();
+
+
+                    const sexo =
+                        String(
+                            aluno.sexo || ""
+                        ).trim();
+
+
+                    // =====================================
+                    // VALIDAR
+                    // =====================================
+
+                    if (
+                        !numero ||
+                        !nome
+                    ) {
+
+                        console.warn(
+                            "⚠️ Aluno ignorado:",
+                            aluno
+                        );
+
+
+                        quantidadeIgnorada++;
+
+                        continue;
+
+                    }
+
+
+                    // =====================================
+                    // VERIFICAR DUPLICADO
+                    // =====================================
+
+                    const existentes =
+                        await getDocs(
+
+                            collection(
+                                db,
+                                "turmas",
+                                turmaSelecionada,
+                                "alunos"
+                            )
+
+                        );
+
+
+                    const jaExiste =
+                        existentes.docs.some(
+                            alunoDoc => {
+
+                                const dados =
+                                    alunoDoc.data();
+
+
+                                return (
+                                    String(
+                                        dados.numero || ""
+                                    ).trim() === numero
+                                );
+
+                            }
+                        );
+
+
+                    if (jaExiste) {
+
+                        console.warn(
+                            "⚠️ Aluno já existe:",
+                            numero,
+                            nome
+                        );
+
+
+                        quantidadeIgnorada++;
+
+                        continue;
+
+                    }
+
+
+                    // =====================================
+                    // CÓDIGO
+                    // =====================================
+
+                    const codigoAluno =
+                        gerarCodigoAluno(
+                            numero
+                        );
+
+
+                    // =====================================
+                    // SENHA
+                    // =====================================
+
+                    const senhaAcesso =
+                        gerarSenha();
+
+
+                    // =====================================
+                    // NOME DA TURMA
+                    // =====================================
+
+                    const turmaNome =
+                        turmaSelect
+                            ?.options[
+                                turmaSelect.selectedIndex
+                            ]
+                            ?.textContent
+                            ?.trim() || "";
+
+
+                    // =====================================
+                    // DADOS DO ALUNO
+                    // =====================================
+
+                    const dadosAluno = {
+
+                        numero:
+                            numero,
+
+                        nome:
+                            nome,
+
+                        sexo:
+                            sexo,
+
+                        dataNascimento:
+                            aluno.dataNascimento ||
+                            aluno.data ||
+                            "",
+
+                        turmaId:
+                            turmaSelecionada,
+
+                        turmaNome:
+                            turmaNome,
+
+                        escolaId:
+                            escolaId,
+
+                        classe:
+                            aluno.classe ||
+                            "",
+
+                        ensino:
+                            aluno.ensino ||
+                            "",
+
+                        anoLetivo:
+                            aluno.anoLetivo ||
+                            "",
+
+                        codigoAluno:
+                            codigoAluno,
+
+                        senhaAcesso:
+                            senhaAcesso,
+
+                        authUid:
+                            "",
+
+                        estado:
+                            "ativo",
+
+                        criadoEm:
+                            serverTimestamp()
+
+                    };
+
+
+                    // =====================================
+                    // CRIAR ALUNO
+                    // =====================================
+
+                    const alunoRef =
+                        await addDoc(
+
+                            collection(
+                                db,
+                                "turmas",
+                                turmaSelecionada,
+                                "alunos"
+                            ),
+
+                            dadosAluno
+
+                        );
+
+
+                    // =====================================
+                    // CRIAR ACESSO
+                    // =====================================
+
+                    await criarAcessoAluno({
+
+                        ...dadosAluno,
+
+                        id:
+                            alunoRef.id
+
+                    });
+
+
+                    quantidadeImportada++;
+
+
+                    console.log(
+                        "✅ ALUNO DO PDF IMPORTADO:",
+                        nome,
+                        codigoAluno
+                    );
+
+                }
+
+
+                // =========================================
+                // ATUALIZAR LISTA
+                // =========================================
+
+                await carregarAlunos();
+
+
+                // =========================================
+                // LIMPAR INPUT
+                // =========================================
+
+                if (arquivoPDF) {
+
+                    arquivoPDF.value =
+                        "";
+
+                }
+
+
+                // =========================================
+                // RESULTADO
+                // =========================================
+
+                alert(
+
+                    "✅ IMPORTAÇÃO DO PDF CONCLUÍDA!\n\n" +
+
+                    "Alunos importados: " +
+                    quantidadeImportada +
+
+                    "\nAlunos ignorados: " +
+                    quantidadeIgnorada +
+
+                    "\n\n" +
+
+                    "Os acessos dos alunos foram criados automaticamente."
+
+                );
 
             }
 
+            catch (erro) {
 
-            alert(
-                quantidadeImportada +
-                " aluno(s) importado(s) com sucesso!"
-            );
-
-
-            listaImportar.value = "";
+                console.error(
+                    "❌ ERRO AO IMPORTAR PDF:",
+                    erro
+                );
 
 
-            carregarAlunos();
+                alert(
 
-        }
+                    "❌ Erro ao importar PDF:\n\n" +
 
-        catch (erro) {
+                    erro.message
 
-            console.error(
-                "Erro na importação:",
-                erro
-            );
+                );
 
-
-            alert(
-                "Erro ao importar alunos: " +
-                erro.message
-            );
+            }
 
         }
+    );
 
-    }
+}
+
+
+console.log(
+    "✅ BLOCO 7 DO STUDENT.JS CARREGADO."
 );
 
-
 // =====================================================
-// IMPORTAR ALUNOS PELO PDF
+// BLOCO 8 — PESQUISA DE ALUNOS
 // =====================================================
 
-importarPDF.addEventListener(
-    "click",
-    async () => {
+if (pesquisarAluno) {
 
-        if (!turmaSelecionada) {
+    pesquisarAluno.addEventListener(
+        "input",
+        () => {
 
-            alert(
-                "Selecione uma turma."
-            );
-
-            return;
-
-        }
+            const texto =
+                pesquisarAluno.value
+                    .toLowerCase()
+                    .trim();
 
 
-        const file =
-            arquivoPDF.files[0];
+            if (!texto) {
 
+                mostrarAlunos(
+                    todosAlunos
+                );
 
-        if (!file) {
+                return;
 
-            alert(
-                "Selecione um PDF."
-            );
-
-            return;
-
-        }
-
-
-        try {
-
-            alert(
-                "A ler PDF..."
-            );
+            }
 
 
             const resultado =
-                await lerPDF(file);
+                todosAlunos.filter(
+                    aluno => {
+
+                        const nome =
+                            String(
+                                aluno.nome || ""
+                            ).toLowerCase();
 
 
-            if (
-                !resultado ||
-                !resultado.alunos
-            ) {
-
-                throw new Error(
-                    "Não foi possível obter os alunos do PDF."
-                );
-
-            }
+                        const numero =
+                            String(
+                                aluno.numero || ""
+                            ).toLowerCase();
 
 
-            alert(
-                "Alunos encontrados: " +
-                resultado.quantidade
-            );
+                        const codigo =
+                            String(
+                                aluno.codigoAluno || ""
+                            ).toLowerCase();
 
 
-            for (
-                const aluno of resultado.alunos
-            ) {
-
-                await addDoc(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turmaSelecionada,
-                        "alunos"
-                    ),
-
-                    {
-
-                        numero:
-                            aluno.numero,
-
-                        nome:
-                            aluno.nome,
-
-                        sexo:
-                            aluno.sexo || "",
-
-                        turmaId:
-                            turmaSelecionada,
-
-                        escolaId:
-                            escolaId,
-
-                        turmaNome:
-                            turmaSelect
-                            .options[
-                                turmaSelect.selectedIndex
-                            ]
-                            .text,
-
-                        codigoAluno:
-                            gerarCodigoAluno(
-                                aluno.numero
-                            ),
-
-                        senhaAcesso:
-                            gerarSenha(),
-                        authUid: "",
-
-                        estado:
-                            "ativo",
-
-                        criadoEm:
-                            serverTimestamp()
+                        return (
+                            nome.includes(texto) ||
+                            numero.includes(texto) ||
+                            codigo.includes(texto)
+                        );
 
                     }
-
                 );
 
-            }
 
-
-            alert(
-                "Importação concluída com sucesso!"
-            );
-
-
-            carregarAlunos();
-
-        }
-
-        catch (erro) {
-
-            console.error(
-                "Erro ao importar PDF:",
-                erro
-            );
-
-
-            alert(
-                "Erro ao importar PDF: " +
-                erro.message
+            mostrarAlunos(
+                resultado
             );
 
         }
+    );
 
-    }
-);
+}
 
 
 // =====================================================
-// PESQUISAR ALUNOS
+// LOCALIZAR ALUNO PELO CÓDIGO
 // =====================================================
 
-pesquisarAluno.addEventListener(
-    "input",
-    () => {
+function encontrarAlunoPorCodigo(codigo) {
 
-        const texto =
-            pesquisarAluno.value
-            .toLowerCase();
+    return todosAlunos.find(
+        aluno =>
+            String(
+                aluno.codigoAluno || ""
+            ).trim() ===
+            String(
+                codigo || ""
+            ).trim()
+    );
 
-
-        const resultado =
-            todosAlunos.filter(
-                aluno =>
-
-                    (
-                        aluno.nome || ""
-                    )
-                    .toLowerCase()
-                    .includes(texto)
-
-                    ||
-
-                    String(
-                        aluno.numero
-                    )
-                    .includes(texto)
-
-                    ||
-
-                    (
-                        aluno.codigoAluno || ""
-                    )
-                    .toLowerCase()
-                    .includes(texto)
-
-            );
-
-
-        mostrarAlunos(resultado);
-
-    }
-);
+}
 
 
 // =====================================================
@@ -1102,140 +2429,188 @@ pesquisarAluno.addEventListener(
 window.alterarEstado =
     async function(codigo) {
 
-        const opcao =
-            prompt(
+        try {
 
-                "Digite o novo estado:\n\n" +
-
-                "1 - ativo\n" +
-
-                "2 - transferido\n" +
-
-                "3 - desistiu\n" +
-
-                "4 - removido"
-
-            );
+            const aluno =
+                encontrarAlunoPorCodigo(
+                    codigo
+                );
 
 
-        let novoEstado = "";
+            if (!aluno) {
+
+                alert(
+                    "❌ Aluno não encontrado."
+                );
+
+                return;
+
+            }
 
 
-        if (opcao === "1") {
+            const opcao =
+                prompt(
 
-            novoEstado = "ativo";
+                    "ALTERAR ESTADO DO ALUNO\n\n" +
 
-        }
+                    "1 - ativo\n" +
 
-        else if (opcao === "2") {
+                    "2 - transferido\n" +
 
-            novoEstado = "transferido";
+                    "3 - desistente\n" +
 
-        }
+                    "4 - concluído\n\n" +
 
-        else if (opcao === "3") {
+                    "Estado atual: " +
+                    (
+                        aluno.estado ||
+                        "ativo"
+                    ) +
 
-            novoEstado = "desistiu";
-
-        }
-
-        else if (opcao === "4") {
-
-            novoEstado = "removido";
-
-        }
-
-        else {
-
-            return;
-
-        }
-
-
-        const turmas =
-            await getDocs(
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
-            );
-
-
-        for (
-            const turma of turmas.docs
-        ) {
-
-            const alunos =
-                await getDocs(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
+                    "\n\nDigite o número:"
 
                 );
 
 
-            for (
-                const aluno of alunos.docs
-            ) {
+            if (!opcao) {
 
-                if (
-                    aluno.data()
-                    .codigoAluno === codigo
-                ) {
+                return;
 
-                    const motivo =
-                        prompt(
-                            "Digite o motivo da alteração:"
-                        );
+            }
 
 
-                    await updateDoc(
+            const estados = {
 
-                        doc(
-                            db,
-                            "turmas",
-                            turma.id,
-                            "alunos",
-                            aluno.id
-                        ),
+                "1":
+                    "ativo",
 
-                        {
+                "2":
+                    "transferido",
 
-                            estado:
-                                novoEstado,
+                "3":
+                    "desistente",
 
-                            motivoEstado:
-                                motivo || "",
+                "4":
+                    "concluido"
 
-                            dataEstado:
-                                serverTimestamp()
-
-                        }
-
-                    );
+            };
 
 
-                    alert(
-                        "Estado atualizado com sucesso."
-                    );
+            const novoEstado =
+                estados[
+                    opcao.trim()
+                ];
 
 
-                    carregarAlunos();
+            if (!novoEstado) {
+
+                alert(
+                    "❌ Opção inválida."
+                );
+
+                return;
+
+            }
 
 
-                    return;
+            // =========================================
+            // ATUALIZAR ALUNO
+            // =========================================
+
+            await updateDoc(
+
+                doc(
+                    db,
+                    "turmas",
+                    turmaSelecionada,
+                    "alunos",
+                    aluno.id
+                ),
+
+                {
+
+                    estado:
+                        novoEstado,
+
+                    atualizadoEm:
+                        serverTimestamp()
 
                 }
 
+            );
+
+
+            // =========================================
+            // ATUALIZAR ACESSO
+            // =========================================
+
+            if (
+                aluno.codigoAluno
+            ) {
+
+                const codigoId =
+                    String(
+                        aluno.codigoAluno
+                    )
+                    .replace(/\s+/g, "")
+                    .replace(/\//g, "-");
+
+
+                await updateDoc(
+
+                    doc(
+                        db,
+                        "acessosAlunos",
+                        codigoId
+                    ),
+
+                    {
+
+                        estado:
+                            novoEstado,
+
+                        atualizadoEm:
+                            serverTimestamp()
+
+                    }
+
+                )
+                .catch(
+                    erro => {
+
+                        console.warn(
+                            "⚠️ Acesso do aluno não encontrado:",
+                            erro
+                        );
+
+                    }
+                );
+
             }
+
+
+            alert(
+                "✅ Estado alterado para: " +
+                novoEstado
+            );
+
+
+            await carregarAlunos();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "❌ ERRO AO ALTERAR ESTADO:",
+                erro
+            );
+
+
+            alert(
+                "❌ Não foi possível alterar o estado:\n\n" +
+                erro.message
+            );
 
         }
 
@@ -1243,84 +2618,96 @@ window.alterarEstado =
 
 
 // =====================================================
-// VER DETALHES DO ALUNO
+// VISUALIZAR ALUNO
 // =====================================================
 
 window.verAluno =
-    async function(codigo) {
+    function(codigo) {
 
-        const turmas =
-            await getDocs(
-
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
-
+        const aluno =
+            encontrarAlunoPorCodigo(
+                codigo
             );
 
 
-        for (
-            const turma of turmas.docs
-        ) {
+        if (!aluno) {
 
-            const alunos =
-                await getDocs(
+            alert(
+                "❌ Aluno não encontrado."
+            );
 
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
-
-                );
-
-
-            for (
-                const aluno of alunos.docs
-            ) {
-
-                const dados =
-                    aluno.data();
-
-
-                if (
-                    dados.codigoAluno === codigo
-                ) {
-
-                    alert(
-
-`Código: ${dados.codigoAluno}
-
-Nome: ${dados.nome}
-
-Número: ${dados.numero}
-
-Sexo: ${dados.sexo || ""}
-
-Data nascimento: ${dados.dataNascimento || ""}
-
-Turma: ${dados.turmaNome || ""}
-
-Estado: ${dados.estado || "ativo"}
-
-Senha: ${dados.senhaAcesso || ""}`
-
-                    );
-
-
-                    return;
-
-                }
-
-            }
+            return;
 
         }
+
+
+        alert(
+
+            "👨‍🎓 DADOS DO ALUNO\n\n" +
+
+            "Nome: " +
+            (
+                aluno.nome ||
+                ""
+            ) +
+
+            "\n\nCódigo: " +
+            (
+                aluno.codigoAluno ||
+                ""
+            ) +
+
+            "\nNúmero: " +
+            (
+                aluno.numero ||
+                ""
+            ) +
+
+            "\nSexo: " +
+            (
+                aluno.sexo ||
+                ""
+            ) +
+
+            "\nData de nascimento: " +
+            (
+                aluno.dataNascimento ||
+                "Não informado"
+            ) +
+
+            "\nIdade: " +
+            (
+                calcularIdade(
+                    aluno.dataNascimento
+                ) ||
+                "Não disponível"
+            ) +
+
+            "\nTurma: " +
+            (
+                aluno.turmaNome ||
+                ""
+            ) +
+
+            "\nEstado: " +
+            (
+                aluno.estado ||
+                "ativo"
+            ) +
+
+            "\n\n🔐 Código de acesso: " +
+            (
+                aluno.codigoAluno ||
+                ""
+            ) +
+
+            "\nSenha de acesso: " +
+            (
+                aluno.senhaAcesso ||
+                "Não disponível"
+            )
+
+        );
 
     };
 
@@ -1332,148 +2719,201 @@ Senha: ${dados.senhaAcesso || ""}`
 window.editarAluno =
     async function(codigo) {
 
-        const turmas =
-            await getDocs(
+        try {
 
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
-                )
+            const aluno =
+                encontrarAlunoPorCodigo(
+                    codigo
+                );
+
+
+            if (!aluno) {
+
+                alert(
+                    "❌ Aluno não encontrado."
+                );
+
+                return;
+
+            }
+
+
+            const novoNome =
+                prompt(
+                    "Nome do aluno:",
+                    aluno.nome || ""
+                );
+
+
+            if (
+                novoNome === null
+            ) {
+
+                return;
+
+            }
+
+
+            const novoNumero =
+                prompt(
+                    "Número do aluno:",
+                    aluno.numero || ""
+                );
+
+
+            if (
+                novoNumero === null
+            ) {
+
+                return;
+
+            }
+
+
+            const novoSexo =
+                prompt(
+                    "Sexo:",
+                    aluno.sexo || ""
+                );
+
+
+            if (
+                novoSexo === null
+            ) {
+
+                return;
+
+            }
+
+
+            const novaData =
+                prompt(
+                    "Data de nascimento:",
+                    aluno.dataNascimento || ""
+                );
+
+
+            if (
+                novaData === null
+            ) {
+
+                return;
+
+            }
+
+
+            // =========================================
+            // ATUALIZAR ALUNO
+            // =========================================
+
+            await updateDoc(
+
+                doc(
+                    db,
+                    "turmas",
+                    turmaSelecionada,
+                    "alunos",
+                    aluno.id
+                ),
+
+                {
+
+                    nome:
+                        novoNome.trim(),
+
+                    numero:
+                        novoNumero.trim(),
+
+                    sexo:
+                        novoSexo.trim(),
+
+                    dataNascimento:
+                        novaData.trim(),
+
+                    atualizadoEm:
+                        serverTimestamp()
+
+                }
 
             );
 
 
-        for (
-            const turma of turmas.docs
-        ) {
+            // =========================================
+            // ATUALIZAR ACESSO
+            // =========================================
 
-            const alunos =
-                await getDocs(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
-
-                );
-
-
-            for (
-                const aluno of alunos.docs
+            if (
+                aluno.codigoAluno
             ) {
 
-                const dados =
-                    aluno.data();
+                const codigoId =
+                    String(
+                        aluno.codigoAluno
+                    )
+                    .replace(/\s+/g, "")
+                    .replace(/\//g, "-");
 
 
-                if (
-                    dados.codigoAluno === codigo
-                ) {
+                await updateDoc(
 
-                    const novoNome =
-                        prompt(
-                            "Nome do aluno:",
-                            dados.nome
-                        );
+                    doc(
+                        db,
+                        "acessosAlunos",
+                        codigoId
+                    ),
 
+                    {
 
-                    if (novoNome === null) {
+                        nome:
+                            novoNome.trim(),
 
-                        return;
+                        numero:
+                            novoNumero.trim(),
 
-                    }
+                        sexo:
+                            novoSexo.trim(),
 
-
-                    const novoNumero =
-                        prompt(
-                            "Número do aluno:",
-                            dados.numero
-                        );
-
-
-                    if (novoNumero === null) {
-
-                        return;
+                        atualizadoEm:
+                            serverTimestamp()
 
                     }
 
+                )
+                .catch(
+                    erro => {
 
-                    const novoSexo =
-                        prompt(
-                            "Sexo:",
-                            dados.sexo || ""
+                        console.warn(
+                            "⚠️ Acesso não encontrado:",
+                            erro
                         );
 
-
-                    if (novoSexo === null) {
-
-                        return;
-
                     }
-
-
-                    const novaData =
-                        prompt(
-                            "Data de nascimento:",
-                            dados.dataNascimento || ""
-                        );
-
-
-                    if (novaData === null) {
-
-                        return;
-
-                    }
-
-
-                    await updateDoc(
-
-                        doc(
-                            db,
-                            "turmas",
-                            turma.id,
-                            "alunos",
-                            aluno.id
-                        ),
-
-                        {
-
-                            nome:
-                                novoNome,
-
-                            numero:
-                                novoNumero,
-
-                            sexo:
-                                novoSexo,
-
-                            dataNascimento:
-                                novaData
-
-                        }
-
-                    );
-
-
-                    alert(
-                        "Aluno atualizado com sucesso."
-                    );
-
-
-                    carregarAlunos();
-
-
-                    return;
-
-                }
+                );
 
             }
+
+
+            alert(
+                "✅ Dados do aluno atualizados."
+            );
+
+
+            await carregarAlunos();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "❌ ERRO AO EDITAR ALUNO:",
+                erro
+            );
+
+
+            alert(
+                "❌ Não foi possível editar o aluno:\n\n" +
+                erro.message
+            );
 
         }
 
@@ -1482,100 +2922,131 @@ window.editarAluno =
 
 // =====================================================
 // APAGAR ALUNO
-// APENAS DUPLICADOS OU ERROS
 // =====================================================
 
 window.apagarAluno =
     async function(codigo) {
 
-        const confirmar =
-            confirm(
+        try {
 
-                "Tem certeza que deseja remover este aluno?\n\n" +
-
-                "Use esta opção apenas para duplicados " +
-                "ou erros de cadastro."
-
-            );
+            const aluno =
+                encontrarAlunoPorCodigo(
+                    codigo
+                );
 
 
-        if (!confirmar) {
+            if (!aluno) {
 
-            return;
+                alert(
+                    "❌ Aluno não encontrado."
+                );
 
-        }
+                return;
+
+            }
 
 
-        const turmas =
-            await getDocs(
+            const confirmar =
+                confirm(
 
-                query(
-                    collection(db, "turmas"),
-                    where(
-                        "escolaId",
-                        "==",
-                        escolaId
-                    )
+                    "⚠️ ATENÇÃO!\n\n" +
+
+                    "Deseja realmente apagar:\n\n" +
+
+                    aluno.nome +
+
+                    "\nCódigo: " +
+                    aluno.codigoAluno +
+
+                    "\n\nEsta operação não pode ser desfeita."
+
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            // =========================================
+            // APAGAR ALUNO
+            // =========================================
+
+            await deleteDoc(
+
+                doc(
+                    db,
+                    "turmas",
+                    turmaSelecionada,
+                    "alunos",
+                    aluno.id
                 )
 
             );
 
 
-        for (
-            const turma of turmas.docs
-        ) {
+            // =========================================
+            // APAGAR ACESSO
+            // =========================================
 
-            const alunos =
-                await getDocs(
-
-                    collection(
-                        db,
-                        "turmas",
-                        turma.id,
-                        "alunos"
-                    )
-
-                );
-
-
-            for (
-                const aluno of alunos.docs
+            if (
+                aluno.codigoAluno
             ) {
 
-                const dados =
-                    aluno.data();
+                const codigoId =
+                    String(
+                        aluno.codigoAluno
+                    )
+                    .replace(/\s+/g, "")
+                    .replace(/\//g, "-");
 
 
-                if (
-                    dados.codigoAluno === codigo
-                ) {
+                await deleteDoc(
 
-                    await deleteDoc(
+                    doc(
+                        db,
+                        "acessosAlunos",
+                        codigoId
+                    )
 
-                        doc(
-                            db,
-                            "turmas",
-                            turma.id,
-                            "alunos",
-                            aluno.id
-                        )
+                )
+                .catch(
+                    erro => {
 
-                    );
+                        console.warn(
+                            "⚠️ Acesso do aluno não encontrado:",
+                            erro
+                        );
 
-
-                    alert(
-                        "Aluno removido com sucesso."
-                    );
-
-
-                    carregarAlunos();
-
-
-                    return;
-
-                }
+                    }
+                );
 
             }
+
+
+            alert(
+                "✅ Aluno apagado com sucesso."
+            );
+
+
+            await carregarAlunos();
+
+        }
+
+        catch (erro) {
+
+            console.error(
+                "❌ ERRO AO APAGAR ALUNO:",
+                erro
+            );
+
+
+            alert(
+                "❌ Não foi possível apagar o aluno:\n\n" +
+                erro.message
+            );
 
         }
 
@@ -1583,8 +3054,19 @@ window.apagarAluno =
 
 
 // =====================================================
-// INICIALIZAÇÃO
+// BLOCO 8 FINALIZADO
 // =====================================================
 
-carregarTurmas();
-                       
+console.log(
+    "===================================="
+);
+
+alert("FIM");
+
+console.log(
+    "✅ BLOCO 8 DO STUDENT.JS CARREGADO"
+);
+
+console.log(
+    "===================================="
+);
