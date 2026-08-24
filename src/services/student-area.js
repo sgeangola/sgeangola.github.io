@@ -20,7 +20,7 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-
+alert("Carregar...");
 console.log(
     "🎓 SGE — student-area.js iniciado"
 );
