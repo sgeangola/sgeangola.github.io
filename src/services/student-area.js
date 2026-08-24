@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 1 — student-area.js carregado");
+alert("✅ BLOCO 1 df — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -1603,56 +1603,71 @@ async function () {
 // ABRIR VER BOLETINS
 // =====================================================
 
-window.verBoletins =
-async function () {
+janela . verBoletins =
+ função  assíncrona ( )  {
 
-    console.log(
-        "📄 VER BOLETINS CLICADO"
-    );
-
-
-    try {
-
-        const anos =
-            await obterAnosLetivos();
+    console.log (​​
+        "📄 VER BOLETINS CLICADOS"
+    ) ;
 
 
-        criarJanelaSelecao(
-            "boletins",
+    tentar  {
+
+        const  anos =
+            aguarde  obterAnosLetivos ( ) ;
+
+
+        criarJanelaSelecao (
+            "boletos" ,
             anos
-        );
+        ) ;
 
     }
-    catch (erro) {
+    pegar  ( erro )  {
 
-        console.error(
-            "❌ Erro em Ver Boletins:",
+        console.erro (​​
+            "❌ Erro em Ver Boletins:" ,
             erro
-        );
+        ) ;
 
 
-        alert(
-            "❌ Não foi possível abrir os boletins.\n\n" +
-            erro.message
-        );
+        alerta (
+            "❌ Não foi possível abrir os boletins. \n\n " +
+            erro . mensagem
+        ) ;
 
     }
 
-};
+} ;
 
 
 // =====================================================
 // ALIASES PARA HTML ANTIGO
 // =====================================================
 
-window.abrirVerNotas =
-window.verNotas;
+janela . abrirVerNotas =
+janela . verNotas ;
 
 
-window.abrirVerBoletins =
-window.verBoletins;
+janela . abrirVerBoletins =
+janela . verBoletins ;
 
 
-console.log(
+console.log (​​
     "✅ BLOCO 2/4 CARREGADO"
-);
+) ;
+
+// =====================================================
+// BOTÃO VER BOLETIM
+// O HTML chama: verBoletim()
+// =====================================================
+
+window.verBoletim = async function () {
+
+    console.log(
+        "📄 VER BOLETIM CLICADO"
+    );
+
+    await window.verBoletins();
+
+};
