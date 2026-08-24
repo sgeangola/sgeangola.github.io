@@ -9,6 +9,7 @@
    - Escola
    - Identificação
 ===================================================== */
+alert("TESTE: student-area.js foi carregado");
 
 import { db } from "./firebase.js";
 
