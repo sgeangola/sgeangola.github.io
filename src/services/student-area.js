@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 1 df — student-area.js carregado");
+alert("✅ BLOCO 1 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -926,134 +926,94 @@ alert(
 );
 
 /* =====================================================
-   SGE ANGOLA — ÁREA DO ALUNO
+   SGE — ÁREA DO ALUNO
    student-area.js
    BLOCO 2/4
 
-   FUNÇÕES:
    - Anos letivos
-   - Seleção do ano
-   - Seleção do trimestre
+   - Seleção de ano
+   - Seleção de trimestre
    - Menu Ver Notas
    - Menu Ver Boletins
-   - Preparação dos dados selecionados
 ===================================================== */
 
 
 // =====================================================
-// VARIÁVEIS DA SELEÇÃO
-// =====================================================
-
-let tipoVisualizacao = "";
-
-let anoSelecionado = "";
-
-let trimestreSelecionado = "";
-
-
-// =====================================================
-// OBTER ANOS LETIVOS DISPONÍVEIS
+// OBTER ANOS LETIVOS
 // =====================================================
 
 async function obterAnosLetivos() {
 
-    const turmaId =
-        String(
-            aluno.turmaId || ""
-        ).trim();
+    const anos = new Set();
 
+    // -------------------------------------------------
+    // 1. ANO EXISTENTE NA SESSÃO DO ALUNO
+    // -------------------------------------------------
 
-    if (!turmaId) {
+    const anoSessao =
+        aluno.anoLetivo ||
+        aluno.anoLectivo ||
+        aluno.ano ||
+        aluno.anoLetivoAtual ||
+        "";
 
-        throw new Error(
-            "Turma do aluno não identificada."
+    if (anoSessao) {
+
+        anos.add(
+            String(anoSessao).trim()
         );
 
     }
 
 
-    console.log(
-        "📅 Procurando anos letivos..."
-    );
+    // -------------------------------------------------
+    // 2. ANO DA TURMA
+    // -------------------------------------------------
 
+    if (aluno.turmaId) {
 
-    const snapshot =
-        await getDocs(
-            collection(
-                db,
-                "notas"
-            )
-        );
+        try {
 
-
-    const anos =
-        new Set();
-
-
-    snapshot.forEach(
-        documento => {
-
-            const dados =
-                documento.data();
-
-
-            const turmaDocumento =
-                String(
-                    dados.turmaId || ""
-                ).trim();
-
-
-            if (
-                turmaDocumento !== turmaId
-            ) {
-
-                return;
-
-            }
-
-
-            const ano =
-                obterAnoLetivo(
-                    dados
+            const turmaSnap =
+                await getDoc(
+                    doc(
+                        db,
+                        "turmas",
+                        String(aluno.turmaId).trim()
+                    )
                 );
 
 
-            if (ano) {
+            if (turmaSnap.exists()) {
 
-                anos.add(
-                    String(
-                        ano
-                    ).trim()
-                );
+                const turma =
+                    turmaSnap.data();
+
+
+                const anoTurma =
+                    turma.anoLetivo ||
+                    turma.anoLectivo ||
+                    turma.ano ||
+                    turma.anoLetivoAtual ||
+                    "";
+
+
+                if (anoTurma) {
+
+                    anos.add(
+                        String(anoTurma).trim()
+                    );
+
+                }
 
             }
 
         }
-    );
+        catch (erro) {
 
-
-    // -------------------------------------------------
-    // SE NÃO ENCONTRAR NAS NOTAS,
-    // TENTAR O ANO DA SESSÃO DO ALUNO
-    // -------------------------------------------------
-
-    if (
-        anos.size === 0
-    ) {
-
-        const anoAluno =
-            aluno.anoLetivo ||
-            aluno.anoLectivo ||
-            aluno.ano ||
-            "";
-
-
-        if (anoAluno) {
-
-            anos.add(
-                String(
-                    anoAluno
-                ).trim()
+            console.warn(
+                "⚠️ Não foi possível obter o ano da turma:",
+                erro
             );
 
         }
@@ -1061,24 +1021,167 @@ async function obterAnosLetivos() {
     }
 
 
+    // -------------------------------------------------
+    // 3. PROCURAR NOS DOCUMENTOS DE NOTAS
+    // -------------------------------------------------
+
+    try {
+
+        const notasSnapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "notas"
+                )
+            );
+
+
+        notasSnapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
+
+
+                // Apenas notas desta turma
+                if (
+                    dados.turmaId &&
+                    String(
+                        dados.turmaId
+                    ).trim() !==
+                    String(
+                        aluno.turmaId
+                    ).trim()
+                ) {
+
+                    return;
+
+                }
+
+
+                const ano =
+                    dados.anoLetivo ||
+                    dados.anoLectivo ||
+                    dados.ano ||
+                    dados.anoLetivoAtual ||
+                    "";
+
+
+                if (ano) {
+
+                    anos.add(
+                        String(
+                            ano
+                        ).trim()
+                    );
+
+                }
+
+            }
+        );
+
+    }
+    catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível consultar notas:",
+            erro
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // 4. PROCURAR NOS BOLETINS
+    // -------------------------------------------------
+
+    try {
+
+        const boletinsSnapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "boletins"
+                )
+            );
+
+
+        boletinsSnapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
+
+
+                if (
+                    dados.turmaId &&
+                    String(
+                        dados.turmaId
+                    ).trim() !==
+                    String(
+                        aluno.turmaId
+                    ).trim()
+                ) {
+
+                    return;
+
+                }
+
+
+                const ano =
+                    dados.anoLetivo ||
+                    dados.anoLectivo ||
+                    dados.ano ||
+                    dados.anoLetivoAtual ||
+                    "";
+
+
+                if (ano) {
+
+                    anos.add(
+                        String(
+                            ano
+                        ).trim()
+                    );
+
+                }
+
+            }
+        );
+
+    }
+    catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível consultar boletins:",
+            erro
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // RESULTADO
+    // -------------------------------------------------
+
     const resultado =
         Array.from(
             anos
         )
         .filter(
             ano =>
-                ano !== ""
+                ano &&
+                ano !== "undefined" &&
+                ano !== "null"
         )
         .sort(
             (a, b) =>
-                b.localeCompare(
-                    a
-                )
+                b.localeCompare(a)
         );
 
 
     console.log(
-        "📅 ANOS ENCONTRADOS:",
+        "📅 ANOS LETIVOS ENCONTRADOS:",
         resultado
     );
 
@@ -1089,218 +1192,31 @@ async function obterAnosLetivos() {
 
 
 // =====================================================
-// OBTER TRIMESTRES DISPONÍVEIS
+// CRIAR MENU DE SELEÇÃO
 // =====================================================
 
-async function obterTrimestres(
-    ano
+function criarJanelaSelecao(
+    tipo,
+    anos
 ) {
 
-    const turmaId =
-        String(
-            aluno.turmaId || ""
-        ).trim();
-
-
-    const snapshot =
-        await getDocs(
-            collection(
-                db,
-                "notas"
-            )
-        );
-
-
-    const trimestres =
-        new Set();
-
-
-    snapshot.forEach(
-        documento => {
-
-            const dados =
-                documento.data();
-
-
-            const turmaDocumento =
-                String(
-                    dados.turmaId || ""
-                ).trim();
-
-
-            if (
-                turmaDocumento !== turmaId
-            ) {
-
-                return;
-
-            }
-
-
-            const anoDocumento =
-                String(
-                    obterAnoLetivo(
-                        dados
-                    )
-                ).trim();
-
-
-            if (
-                anoDocumento !==
-                String(
-                    ano
-                ).trim()
-            ) {
-
-                return;
-
-            }
-
-
-            const trimestre =
-                dados.trimestre ||
-                dados.Trimestre ||
-                "";
-
-
-            if (trimestre) {
-
-                trimestres.add(
-                    normalizarTrimestre(
-                        trimestre
-                    )
-                );
-
-            }
-
-        }
-    );
-
-
-    // -------------------------------------------------
-    // SE NÃO EXISTIREM TRIMESTRES NO FIRESTORE,
-    // MOSTRAR OS 3 PADRÕES
-    // -------------------------------------------------
-
-    if (
-        trimestres.size === 0
-    ) {
-
-        trimestres.add("1");
-        trimestres.add("2");
-        trimestres.add("3");
-
-    }
-
-
-    const resultado =
-        Array.from(
-            trimestres
-        )
-        .filter(
-            valor =>
-                valor === "1" ||
-                valor === "2" ||
-                valor === "3"
-        )
-        .sort();
-
-
-    console.log(
-        "📚 TRIMESTRES:",
-        resultado
-    );
-
-
-    return resultado;
-
-}
-
-
-// =====================================================
-// FECHAR JANELA
-// =====================================================
-
-function fecharSelecaoNotas() {
-
-    document
-        .getElementById(
+    const antigo =
+        document.getElementById(
             "janelaSelecaoNotas"
-        )
-        ?.remove();
-
-}
-
-
-// =====================================================
-// ABRIR MENU DE SELEÇÃO
-// =====================================================
-
-async function abrirSelecaoNotas(
-    tipo
-) {
-
-    tipoVisualizacao =
-        tipo;
-
-
-    fecharSelecaoNotas();
-
-
-    let anos = [];
-
-
-    try {
-
-        anos =
-            await obterAnosLetivos();
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ Erro ao obter anos:",
-            erro
         );
 
-        alert(
-            "❌ Não foi possível carregar os anos letivos.\n\n" +
-            erro.message
-        );
 
-        return;
+    if (antigo) {
+
+        antigo.remove();
 
     }
 
 
-    // -------------------------------------------------
-    // SE NÃO EXISTIR ANO
-    // -------------------------------------------------
-
-    if (
-        anos.length === 0
-    ) {
-
-        alert(
-            "ℹ️ Ainda não existem anos letivos disponíveis."
-        );
-
-        return;
-
-    }
-
-
-    const opcoesAnos =
-        anos
-        .map(
-            ano =>
-                `
-                <option value="${escaparHTML(ano)}">
-                    ${escaparHTML(ano)}
-                </option>
-                `
-        )
-        .join("");
+    const titulo =
+        tipo === "notas"
+            ? "📊 Ver Notas"
+            : "📄 Ver Boletins";
 
 
     const html = `
@@ -1312,7 +1228,7 @@ async function abrirSelecaoNotas(
                 inset:0;
                 z-index:999999;
                 background:#f1f5f9;
-                overflow-y:auto;
+                overflow:auto;
                 padding:20px;
             "
         >
@@ -1324,49 +1240,19 @@ async function abrirSelecaoNotas(
                     background:white;
                     border-radius:18px;
                     padding:25px;
-                    box-shadow:0 5px 20px rgba(0,0,0,.18);
+                    box-shadow:0 8px 30px rgba(0,0,0,.15);
                 "
             >
-
-                <div
-                    style="
-                        text-align:center;
-                        font-size:50px;
-                        margin-bottom:10px;
-                    "
-                >
-                    ${
-                        tipo === "notas"
-                            ? "📊"
-                            : "📄"
-                    }
-                </div>
-
 
                 <h2
                     style="
                         text-align:center;
                         color:#1e3a8a;
-                        margin-bottom:8px;
-                    "
-                >
-                    ${
-                        tipo === "notas"
-                            ? "Ver Notas"
-                            : "Ver Boletim"
-                    }
-                </h2>
-
-
-                <p
-                    style="
-                        text-align:center;
-                        color:#64748b;
                         margin-bottom:25px;
                     "
                 >
-                    Selecione o ano letivo e o trimestre.
-                </p>
+                    ${titulo}
+                </h2>
 
 
                 <label
@@ -1376,12 +1262,12 @@ async function abrirSelecaoNotas(
                         margin-bottom:8px;
                     "
                 >
-                    📅 Ano letivo
+                    Ano letivo
                 </label>
 
 
                 <select
-                    id="anoNotasSelect"
+                    id="selecionarAnoLetivo"
                     style="
                         width:100%;
                         padding:14px;
@@ -1392,11 +1278,24 @@ async function abrirSelecaoNotas(
                     "
                 >
 
-                    <option value="">
-                        Selecionar ano letivo
-                    </option>
-
-                    ${opcoesAnos}
+                    ${
+                        anos.length
+                        ?
+                        anos.map(
+                            ano =>
+                                `
+                                <option value="${escaparHTML(ano)}">
+                                    ${escaparHTML(ano)}
+                                </option>
+                                `
+                        ).join("")
+                        :
+                        `
+                        <option value="">
+                            Nenhum ano letivo encontrado
+                        </option>
+                        `
+                    }
 
                 </select>
 
@@ -1408,13 +1307,12 @@ async function abrirSelecaoNotas(
                         margin-bottom:8px;
                     "
                 >
-                    📚 Trimestre
+                    Trimestre
                 </label>
 
 
                 <select
-                    id="trimestreNotasSelect"
-                    disabled
+                    id="selecionarTrimestre"
                     style="
                         width:100%;
                         padding:14px;
@@ -1422,41 +1320,47 @@ async function abrirSelecaoNotas(
                         border-radius:10px;
                         font-size:16px;
                         margin-bottom:25px;
-                        background:#f8fafc;
                     "
                 >
 
-                    <option value="">
-                        Primeiro selecione o ano
+                    <option value="1">
+                        1.º Trimestre
+                    </option>
+
+                    <option value="2">
+                        2.º Trimestre
+                    </option>
+
+                    <option value="3">
+                        3.º Trimestre
                     </option>
 
                 </select>
 
 
                 <button
-                    id="continuarNotas"
-                    disabled
+                    id="confirmarSelecaoAluno"
                     style="
                         width:100%;
-                        padding:14px;
+                        padding:15px;
                         border:none;
                         border-radius:10px;
                         background:#2563eb;
                         color:white;
                         font-size:16px;
+                        font-weight:bold;
                         cursor:pointer;
-                        opacity:.5;
                     "
                 >
-                    Continuar →
+                    Continuar
                 </button>
 
 
                 <button
-                    id="fecharSelecaoNotas"
+                    id="fecharSelecaoAluno"
                     style="
                         width:100%;
-                        padding:14px;
+                        padding:15px;
                         margin-top:10px;
                         border:none;
                         border-radius:10px;
@@ -1482,298 +1386,273 @@ async function abrirSelecaoNotas(
     );
 
 
-    const anoSelect =
-        document.getElementById(
-            "anoNotasSelect"
-        );
+    // -------------------------------------------------
+    // VOLTAR
+    // -------------------------------------------------
 
+    document
+        .getElementById(
+            "fecharSelecaoAluno"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
-    const trimestreSelect =
-        document.getElementById(
-            "trimestreNotasSelect"
-        );
-
-
-    const continuar =
-        document.getElementById(
-            "continuarNotas"
-        );
-
-
-    const fechar =
-        document.getElementById(
-            "fecharSelecaoNotas"
-        );
-
-
-    // =================================================
-    // SELECIONAR ANO
-    // =================================================
-
-    anoSelect?.addEventListener(
-        "change",
-        async function () {
-
-            const ano =
-                this.value;
-
-
-            anoSelecionado =
-                ano;
-
-
-            trimestreSelecionado =
-                "";
-
-
-            continuar.disabled =
-                true;
-
-
-            continuar.style.opacity =
-                ".5";
-
-
-            trimestreSelect.innerHTML = `
-                <option value="">
-                    Carregando trimestres...
-                </option>
-            `;
-
-
-            trimestreSelect.disabled =
-                true;
-
-
-            if (!ano) {
-
-                trimestreSelect.innerHTML = `
-                    <option value="">
-                        Primeiro selecione o ano
-                    </option>
-                `;
-
-                return;
+                document
+                    .getElementById(
+                        "janelaSelecaoNotas"
+                    )
+                    ?.remove();
 
             }
+        );
 
 
-            try {
+    // -------------------------------------------------
+    // CONTINUAR
+    // -------------------------------------------------
 
-                const trimestres =
-                    await obterTrimestres(
-                        ano
+    document
+        .getElementById(
+            "confirmarSelecaoAluno"
+        )
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                const ano =
+                    document
+                        .getElementById(
+                            "selecionarAnoLetivo"
+                        )
+                        ?.value;
+
+
+                const trimestreSelecionado =
+                    document
+                        .getElementById(
+                            "selecionarTrimestre"
+                        )
+                        ?.value;
+
+
+                if (!ano) {
+
+                    alert(
+                        "⚠️ Selecione um ano letivo."
                     );
 
+                    return;
 
-                trimestreSelect.innerHTML = `
+                }
 
-                    <option value="">
-                        Selecionar trimestre
-                    </option>
 
-                    ${
-                        trimestres
-                        .map(
-                            trimestre =>
-                                `
-                                <option value="${trimestre}">
-                                    ${nomeTrimestre(trimestre)}
-                                </option>
-                                `
-                        )
-                        .join("")
+                if (!trimestreSelecionado) {
+
+                    alert(
+                        "⚠️ Selecione um trimestre."
+                    );
+
+                    return;
+
+                }
+
+
+                console.log(
+                    "📅 ANO SELECIONADO:",
+                    ano
+                );
+
+                console.log(
+                    "📚 TRIMESTRE SELECIONADO:",
+                    trimestreSelecionado
+                );
+
+
+                // Guardar temporariamente
+                sessionStorage.setItem(
+                    "alunoAnoLetivo",
+                    ano
+                );
+
+
+                sessionStorage.setItem(
+                    "alunoTrimestre",
+                    trimestreSelecionado
+                );
+
+
+                sessionStorage.setItem(
+                    "alunoTipoConsulta",
+                    tipo
+                );
+
+
+                // -------------------------------------------------
+                // CHAMAR BLOCO ESPECÍFICO
+                // -------------------------------------------------
+
+                if (
+                    tipo === "notas"
+                ) {
+
+                    if (
+                        typeof window.carregarNotasAluno ===
+                        "function"
+                    ) {
+
+                        await window.carregarNotasAluno(
+                            ano,
+                            trimestreSelecionado
+                        );
+
+                    }
+                    else {
+
+                        alert(
+                            "⚠️ O módulo de notas ainda não foi carregado."
+                        );
+
+                        console.error(
+                            "window.carregarNotasAluno não existe."
+                        );
+
                     }
 
-                `;
+                }
 
 
-                trimestreSelect.disabled =
-                    false;
+                if (
+                    tipo === "boletins"
+                ) {
 
-            }
-            catch (erro) {
+                    if (
+                        typeof window.carregarBoletimAluno ===
+                        "function"
+                    ) {
 
-                console.error(
-                    "❌ Erro nos trimestres:",
-                    erro
-                );
+                        await window.carregarBoletimAluno(
+                            ano,
+                            trimestreSelecionado
+                        );
 
+                    }
+                    else {
 
-                trimestreSelect.innerHTML = `
-                    <option value="">
-                        Erro ao carregar
-                    </option>
-                `;
+                        alert(
+                            "⚠️ O módulo de boletins ainda não foi carregado."
+                        );
 
-            }
+                        console.error(
+                            "window.carregarBoletimAluno não existe."
+                        );
 
-        }
-    );
+                    }
 
-
-    // =================================================
-    // SELECIONAR TRIMESTRE
-    // =================================================
-
-    trimestreSelect?.addEventListener(
-        "change",
-        function () {
-
-            trimestreSelecionado =
-                normalizarTrimestre(
-                    this.value
-                );
-
-
-            const podeContinuar =
-                anoSelecionado !== "" &&
-                trimestreSelecionado !== "";
-
-
-            continuar.disabled =
-                !podeContinuar;
-
-
-            continuar.style.opacity =
-                podeContinuar
-                    ? "1"
-                    : ".5";
-
-        }
-    );
-
-
-    // =================================================
-    // CONTINUAR
-    // =================================================
-
-    continuar?.addEventListener(
-        "click",
-        function () {
-
-            if (
-                !anoSelecionado ||
-                !trimestreSelecionado
-            ) {
-
-                alert(
-                    "Selecione o ano e o trimestre."
-                );
-
-                return;
+                }
 
             }
-
-
-            console.log(
-                "================================"
-            );
-
-            console.log(
-                "📌 SELEÇÃO CONFIRMADA"
-            );
-
-            console.log(
-                "Tipo:",
-                tipoVisualizacao
-            );
-
-            console.log(
-                "Ano:",
-                anoSelecionado
-            );
-
-            console.log(
-                "Trimestre:",
-                trimestreSelecionado
-            );
-
-            console.log(
-                "================================"
-            );
-
-
-            // -------------------------------------------------
-            // GUARDAR TEMPORARIAMENTE
-            // PARA O BLOCO 3
-            // -------------------------------------------------
-
-            window.sgeSelecaoAluno = {
-
-                tipo:
-                    tipoVisualizacao,
-
-                anoLetivo:
-                    anoSelecionado,
-
-                trimestre:
-                    trimestreSelecionado
-
-            };
-
-
-            fecharSelecaoNotas();
-
-
-            alert(
-                "✅ Seleção realizada!\n\n" +
-                "Ano: " +
-                anoSelecionado +
-                "\n" +
-                "Trimestre: " +
-                nomeTrimestre(
-                    trimestreSelecionado
-                ) +
-                "\n\n" +
-                "O próximo bloco fará a verificação financeira."
-            );
-
-        }
-    );
-
-
-    // =================================================
-    // FECHAR
-    // =================================================
-
-    fechar?.addEventListener(
-        "click",
-        fecharSelecaoNotas
-    );
+        );
 
 }
 
 
 // =====================================================
-// FUNÇÕES PÚBLICAS DOS MENUS
+// ABRIR VER NOTAS
 // =====================================================
 
 window.verNotas =
-function () {
+async function () {
 
-    abrirSelecaoNotas(
-        "notas"
+    console.log(
+        "📊 VER NOTAS CLICADO"
     );
+
+
+    try {
+
+        const anos =
+            await obterAnosLetivos();
+
+
+        criarJanelaSelecao(
+            "notas",
+            anos
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro em Ver Notas:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível carregar os anos letivos.\n\n" +
+            erro.message
+        );
+
+    }
 
 };
 
+
+// =====================================================
+// ABRIR VER BOLETINS
+// =====================================================
 
 window.verBoletins =
-function () {
+async function () {
 
-    abrirSelecaoNotas(
-        "boletins"
+    console.log(
+        "📄 VER BOLETINS CLICADO"
     );
 
+
+    try {
+
+        const anos =
+            await obterAnosLetivos();
+
+
+        criarJanelaSelecao(
+            "boletins",
+            anos
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro em Ver Boletins:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível abrir os boletins.\n\n" +
+            erro.message
+        );
+
+    }
+
 };
+
+
+// =====================================================
+// ALIASES PARA HTML ANTIGO
+// =====================================================
+
+window.abrirVerNotas =
+window.verNotas;
+
+
+window.abrirVerBoletins =
+window.verBoletins;
 
 
 console.log(
-    "✅ BLOCO 2/4 carregado."
-);
-
-alert(
-    "✅ BLOCO 2/4 carregado!\n\n" +
-    "Agora teste os botões Ver Notas e Ver Boletins."
+    "✅ BLOCO 2/4 CARREGADO"
 );
