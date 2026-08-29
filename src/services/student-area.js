@@ -2055,58 +2055,29 @@ async function processarSelecaoNotas(
 // VER NOTAS
 // =====================================================
 
-window.verNotas =
-async function () {
+window.verNotas = async function () {
 
-    console.log(
-        "📊 BOTÃO VER NOTAS CLICADO"
+    alert(
+        "TESTE DOS DADOS DO ALUNO\n\n" +
+
+        "Nome: " +
+        (aluno.nome || "—") +
+
+        "\n\nTurma ID: " +
+        (aluno.turmaId || "—") +
+
+        "\n\nAno Letivo: " +
+        (aluno.anoLetivo || "—") +
+
+        "\nAno Lectivo: " +
+        (aluno.anoLectivo || "—") +
+
+        "\nAno: " +
+        (aluno.ano || "—") +
+
+        "\nAno Letivo Atual: " +
+        (aluno.anoLetivoAtual || "—")
     );
-
-
-    try {
-
-        const anos =
-            await obterAnosParaNotas();
-
-
-        console.log(
-            "📅 ANOS DISPONÍVEIS:",
-            anos
-        );
-
-
-        if (
-            anos.length === 0
-        ) {
-
-            alert(
-                "⚠️ Ainda não existem anos letivos disponíveis para este aluno."
-            );
-
-            return;
-
-        }
-
-
-        criarJanelaSelecaoNotas(
-            anos
-        );
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ Erro ao abrir Ver Notas:",
-            erro
-        );
-
-
-        alert(
-            "❌ Não foi possível abrir Ver Notas.\n\n" +
-            erro.message
-        );
-
-    }
 
 };
 
