@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 1 df — student-area.js carregado");
+alert("✅ BLOCO 1 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -925,105 +925,152 @@ alert(
     "✅ BLOCO 1/4 funcionando!"
 );
 
-/* =====================================================
-   SGE — ÁREA DO ALUNO
-   student-area.js
-   BLOCO 2/4
-
-   - Anos letivos
-   - Seleção de ano
-   - Seleção de trimestre
-   - Menu Ver Notas
-   - Menu Ver Boletins
-===================================================== */
+// =====================================================
+// SGE ANGOLA — ÁREA DO ALUNO
+// student-area.js
+// BLOCO 2/4
+//
+// VER NOTAS
+// - Seleção do ano letivo
+// - Seleção do trimestre
+// - Verificação financeira
+// - Preparação para carregar notas
+//
+// IMPORTANTE:
+// Este bloco NÃO altera o Bloco 1.
+// =====================================================
 
 
 // =====================================================
-// OBTER ANOS LETIVOS
+// NORMALIZAR TEXTO
 // =====================================================
 
-async function obterAnosLetivos() {
+function normalizarTexto(valor) {
 
-    const anos = new Set();
+    return String(valor ?? "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 
-    // -------------------------------------------------
-    // 1. ANO EXISTENTE NA SESSÃO DO ALUNO
-    // -------------------------------------------------
+}
 
-    const anoSessao =
+
+// =====================================================
+// NORMALIZAR ANO LETIVO
+// =====================================================
+
+function normalizarAno(valor) {
+
+    return String(valor ?? "")
+        .trim();
+
+}
+
+
+// =====================================================
+// NORMALIZAR TRIMESTRE
+// =====================================================
+
+function normalizarTrimestreAluno(valor) {
+
+    const texto =
+        String(valor ?? "")
+            .trim()
+            .replace(/º|°|ª/g, "")
+            .replace(/trimestre/gi, "")
+            .replace(/\s+/g, "");
+
+    if (texto === "1")
+        return "1";
+
+    if (texto === "2")
+        return "2";
+
+    if (texto === "3")
+        return "3";
+
+    return texto;
+
+}
+
+
+// =====================================================
+// NOME DO TRIMESTRE
+// =====================================================
+
+function nomeTrimestreAluno(valor) {
+
+    const trimestre =
+        normalizarTrimestreAluno(valor);
+
+    if (trimestre === "1")
+        return "1.º Trimestre";
+
+    if (trimestre === "2")
+        return "2.º Trimestre";
+
+    if (trimestre === "3")
+        return "3.º Trimestre";
+
+    return String(valor || "Trimestre");
+
+}
+
+
+// =====================================================
+// OBTER ANO DO ALUNO
+// =====================================================
+
+function obterAnoAluno() {
+
+    return normalizarAno(
+
         aluno.anoLetivo ||
+
         aluno.anoLectivo ||
+
         aluno.ano ||
+
         aluno.anoLetivoAtual ||
-        "";
 
-    if (anoSessao) {
+        ""
 
-        anos.add(
-            String(anoSessao).trim()
+    );
+
+}
+
+
+// =====================================================
+// PROCURAR ANOS LETIVOS NAS NOTAS
+//
+// Procuramos documentos da coleção "notas"
+// associados à turma do aluno.
+//
+// NÃO mostramos "não existem anos" imediatamente.
+// Se não houver documentos, usamos o ano do aluno.
+// =====================================================
+
+async function obterAnosParaNotas() {
+
+    const turmaId =
+        String(
+            aluno.turmaId || ""
+        ).trim();
+
+
+    if (!turmaId) {
+
+        throw new Error(
+            "A turma do aluno não foi identificada."
         );
 
     }
 
 
-    // -------------------------------------------------
-    // 2. ANO DA TURMA
-    // -------------------------------------------------
+    const anos =
+        new Set();
 
-    if (aluno.turmaId) {
-
-        try {
-
-            const turmaSnap =
-                await getDoc(
-                    doc(
-                        db,
-                        "turmas",
-                        String(aluno.turmaId).trim()
-                    )
-                );
-
-
-            if (turmaSnap.exists()) {
-
-                const turma =
-                    turmaSnap.data();
-
-
-                const anoTurma =
-                    turma.anoLetivo ||
-                    turma.anoLectivo ||
-                    turma.ano ||
-                    turma.anoLetivoAtual ||
-                    "";
-
-
-                if (anoTurma) {
-
-                    anos.add(
-                        String(anoTurma).trim()
-                    );
-
-                }
-
-            }
-
-        }
-        catch (erro) {
-
-            console.warn(
-                "⚠️ Não foi possível obter o ano da turma:",
-                erro
-            );
-
-        }
-
-    }
-
-
-    // -------------------------------------------------
-    // 3. PROCURAR NOS DOCUMENTOS DE NOTAS
-    // -------------------------------------------------
 
     try {
 
@@ -1040,18 +1087,18 @@ async function obterAnosLetivos() {
             documento => {
 
                 const dados =
-                    documento.data();
+                    documento.data() || {};
 
 
-                // Apenas notas desta turma
+                const turmaNota =
+                    String(
+                        dados.turmaId || ""
+                    ).trim();
+
+
                 if (
-                    dados.turmaId &&
-                    String(
-                        dados.turmaId
-                    ).trim() !==
-                    String(
-                        aluno.turmaId
-                    ).trim()
+                    turmaNota &&
+                    turmaNota !== turmaId
                 ) {
 
                     return;
@@ -1060,19 +1107,25 @@ async function obterAnosLetivos() {
 
 
                 const ano =
-                    dados.anoLetivo ||
-                    dados.anoLectivo ||
-                    dados.ano ||
-                    dados.anoLetivoAtual ||
-                    "";
+                    normalizarAno(
+
+                        dados.anoLetivo ||
+
+                        dados.anoLectivo ||
+
+                        dados.ano ||
+
+                        dados.anoLetivoAtual ||
+
+                        ""
+
+                    );
 
 
                 if (ano) {
 
                     anos.add(
-                        String(
-                            ano
-                        ).trim()
+                        ano
                     );
 
                 }
@@ -1083,8 +1136,8 @@ async function obterAnosLetivos() {
     }
     catch (erro) {
 
-        console.warn(
-            "⚠️ Não foi possível consultar notas:",
+        console.error(
+            "❌ Erro ao procurar anos nas notas:",
             erro
         );
 
@@ -1092,131 +1145,74 @@ async function obterAnosLetivos() {
 
 
     // -------------------------------------------------
-    // 4. PROCURAR NOS BOLETINS
+    // SE O FIRESTORE NÃO TIVER O ANO,
+    // USAR O ANO GUARDADO NA SESSÃO DO ALUNO
     // -------------------------------------------------
 
-    try {
-
-        const boletinsSnapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "boletins"
-                )
-            );
+    const anoAluno =
+        obterAnoAluno();
 
 
-        boletinsSnapshot.forEach(
-            documento => {
+    if (anoAluno) {
 
-                const dados =
-                    documento.data();
-
-
-                if (
-                    dados.turmaId &&
-                    String(
-                        dados.turmaId
-                    ).trim() !==
-                    String(
-                        aluno.turmaId
-                    ).trim()
-                ) {
-
-                    return;
-
-                }
-
-
-                const ano =
-                    dados.anoLetivo ||
-                    dados.anoLectivo ||
-                    dados.ano ||
-                    dados.anoLetivoAtual ||
-                    "";
-
-
-                if (ano) {
-
-                    anos.add(
-                        String(
-                            ano
-                        ).trim()
-                    );
-
-                }
-
-            }
-        );
-
-    }
-    catch (erro) {
-
-        console.warn(
-            "⚠️ Não foi possível consultar boletins:",
-            erro
+        anos.add(
+            anoAluno
         );
 
     }
 
 
     // -------------------------------------------------
-    // RESULTADO
+    // ORDENAR DO MAIS RECENTE PARA O MAIS ANTIGO
     // -------------------------------------------------
 
-    const resultado =
-        Array.from(
-            anos
-        )
-        .filter(
-            ano =>
-                ano &&
-                ano !== "undefined" &&
-                ano !== "null"
-        )
-        .sort(
-            (a, b) =>
-                b.localeCompare(a)
-        );
-
-
-    console.log(
-        "📅 ANOS LETIVOS ENCONTRADOS:",
-        resultado
+    return Array.from(
+        anos
+    ).sort(
+        (a, b) =>
+            b.localeCompare(a)
     );
-
-
-    return resultado;
 
 }
 
 
 // =====================================================
-// CRIAR MENU DE SELEÇÃO
+// CRIAR JANELA DE SELEÇÃO
 // =====================================================
 
-function criarJanelaSelecao(
-    tipo,
+function criarJanelaSelecaoNotas(
     anos
 ) {
 
-    const antigo =
+    const antiga =
         document.getElementById(
             "janelaSelecaoNotas"
         );
 
 
-    if (antigo) {
+    if (antiga) {
 
-        antigo.remove();
+        antiga.remove();
 
     }
 
 
-    const titulo =
-        tipo === "notas"
-            ? "📊 Ver Notas"
-            : "📄 Ver Boletins";
+    const opcoesAno =
+        anos.length
+
+            ? anos.map(
+                ano => `
+                    <option value="${escaparHTML(ano)}">
+                        ${escaparHTML(ano)}
+                    </option>
+                `
+            ).join("")
+
+            : `
+                <option value="">
+                    Nenhum ano letivo disponível
+                </option>
+            `;
 
 
     const html = `
@@ -1235,67 +1231,74 @@ function criarJanelaSelecao(
 
             <div
                 style="
-                    max-width:550px;
+                    width:100%;
+                    max-width:500px;
                     margin:40px auto;
                     background:white;
                     border-radius:18px;
                     padding:25px;
-                    box-shadow:0 8px 30px rgba(0,0,0,.15);
+                    box-shadow:0 5px 20px rgba(0,0,0,.15);
                 "
             >
+
+                <div
+                    style="
+                        text-align:center;
+                        font-size:45px;
+                        margin-bottom:10px;
+                    "
+                >
+                    📊
+                </div>
+
 
                 <h2
                     style="
                         text-align:center;
                         color:#1e3a8a;
+                        margin-top:0;
+                    "
+                >
+                    Ver Notas
+                </h2>
+
+
+                <p
+                    style="
+                        text-align:center;
+                        color:#64748b;
                         margin-bottom:25px;
                     "
                 >
-                    ${titulo}
-                </h2>
+                    Selecione o ano letivo e o trimestre.
+                </p>
 
 
                 <label
                     style="
                         display:block;
+                        margin-bottom:7px;
                         font-weight:bold;
-                        margin-bottom:8px;
                     "
                 >
-                    Ano letivo
+                    Ano Letivo
                 </label>
 
 
                 <select
-                    id="selecionarAnoLetivo"
+                    id="anoNotasAluno"
                     style="
                         width:100%;
-                        padding:14px;
+                        padding:13px;
                         border:1px solid #cbd5e1;
                         border-radius:10px;
+                        margin-bottom:18px;
                         font-size:16px;
-                        margin-bottom:20px;
+                        background:white;
                     "
                 >
 
-                    ${
-                        anos.length
-                        ?
-                        anos.map(
-                            ano =>
-                                `
-                                <option value="${escaparHTML(ano)}">
-                                    ${escaparHTML(ano)}
-                                </option>
-                                `
-                        ).join("")
-                        :
-                        `
-                        <option value="">
-                            Nenhum ano letivo encontrado
-                        </option>
-                        `
-                    }
+                    ${opcoesAno}
 
                 </select>
 
@@ -1303,8 +1306,8 @@ function criarJanelaSelecao(
                 <label
                     style="
                         display:block;
+                        margin-bottom:7px;
                         font-weight:bold;
-                        margin-bottom:8px;
                     "
                 >
                     Trimestre
@@ -1312,16 +1315,21 @@ function criarJanelaSelecao(
 
 
                 <select
-                    id="selecionarTrimestre"
+                    id="trimestreNotasAluno"
                     style="
                         width:100%;
-                        padding:14px;
+                        padding:13px;
                         border:1px solid #cbd5e1;
                         border-radius:10px;
+                        margin-bottom:20px;
                         font-size:16px;
-                        margin-bottom:25px;
+                        background:white;
                     "
                 >
+
+                    <option value="">
+                        Selecionar trimestre
+                    </option>
 
                     <option value="1">
                         1.º Trimestre
@@ -1339,33 +1347,34 @@ function criarJanelaSelecao(
 
 
                 <button
-                    id="confirmarSelecaoAluno"
+                    id="confirmarSelecaoNotas"
+                    type="button"
                     style="
                         width:100%;
-                        padding:15px;
+                        padding:14px;
                         border:none;
                         border-radius:10px;
-                        background:#2563eb;
+                        background:#1e3a8a;
                         color:white;
                         font-size:16px;
-                        font-weight:bold;
                         cursor:pointer;
                     "
                 >
-                    Continuar
+                    🔎 Continuar
                 </button>
 
 
                 <button
-                    id="fecharSelecaoAluno"
+                    id="fecharSelecaoNotas"
+                    type="button"
                     style="
                         width:100%;
-                        padding:15px;
+                        padding:13px;
                         margin-top:10px;
                         border:none;
                         border-radius:10px;
-                        background:#64748b;
-                        color:white;
+                        background:#e2e8f0;
+                        color:#334155;
                         font-size:16px;
                         cursor:pointer;
                     "
@@ -1386,17 +1395,13 @@ function criarJanelaSelecao(
     );
 
 
-    // -------------------------------------------------
-    // VOLTAR
-    // -------------------------------------------------
-
     document
         .getElementById(
-            "fecharSelecaoAluno"
+            "fecharSelecaoNotas"
         )
         ?.addEventListener(
             "click",
-            () => {
+            function () {
 
                 document
                     .getElementById(
@@ -1408,30 +1413,26 @@ function criarJanelaSelecao(
         );
 
 
-    // -------------------------------------------------
-    // CONTINUAR
-    // -------------------------------------------------
-
     document
         .getElementById(
-            "confirmarSelecaoAluno"
+            "confirmarSelecaoNotas"
         )
         ?.addEventListener(
             "click",
-            async () => {
+            async function () {
 
                 const ano =
                     document
                         .getElementById(
-                            "selecionarAnoLetivo"
+                            "anoNotasAluno"
                         )
                         ?.value;
 
 
-                const trimestreSelecionado =
+                const trimestre =
                     document
                         .getElementById(
-                            "selecionarTrimestre"
+                            "trimestreNotasAluno"
                         )
                         ?.value;
 
@@ -1439,7 +1440,7 @@ function criarJanelaSelecao(
                 if (!ano) {
 
                     alert(
-                        "⚠️ Selecione um ano letivo."
+                        "❌ Selecione o ano letivo."
                     );
 
                     return;
@@ -1447,10 +1448,10 @@ function criarJanelaSelecao(
                 }
 
 
-                if (!trimestreSelecionado) {
+                if (!trimestre) {
 
                     alert(
-                        "⚠️ Selecione um trimestre."
+                        "❌ Selecione o trimestre."
                     );
 
                     return;
@@ -1458,98 +1459,10 @@ function criarJanelaSelecao(
                 }
 
 
-                console.log(
-                    "📅 ANO SELECIONADO:",
-                    ano
+                await processarSelecaoNotas(
+                    ano,
+                    trimestre
                 );
-
-                console.log(
-                    "📚 TRIMESTRE SELECIONADO:",
-                    trimestreSelecionado
-                );
-
-
-                // Guardar temporariamente
-                sessionStorage.setItem(
-                    "alunoAnoLetivo",
-                    ano
-                );
-
-
-                sessionStorage.setItem(
-                    "alunoTrimestre",
-                    trimestreSelecionado
-                );
-
-
-                sessionStorage.setItem(
-                    "alunoTipoConsulta",
-                    tipo
-                );
-
-
-                // -------------------------------------------------
-                // CHAMAR BLOCO ESPECÍFICO
-                // -------------------------------------------------
-
-                if (
-                    tipo === "notas"
-                ) {
-
-                    if (
-                        typeof window.carregarNotasAluno ===
-                        "function"
-                    ) {
-
-                        await window.carregarNotasAluno(
-                            ano,
-                            trimestreSelecionado
-                        );
-
-                    }
-                    else {
-
-                        alert(
-                            "⚠️ O módulo de notas ainda não foi carregado."
-                        );
-
-                        console.error(
-                            "window.carregarNotasAluno não existe."
-                        );
-
-                    }
-
-                }
-
-
-                if (
-                    tipo === "boletins"
-                ) {
-
-                    if (
-                        typeof window.carregarBoletimAluno ===
-                        "function"
-                    ) {
-
-                        await window.carregarBoletimAluno(
-                            ano,
-                            trimestreSelecionado
-                        );
-
-                    }
-                    else {
-
-                        alert(
-                            "⚠️ O módulo de boletins ainda não foi carregado."
-                        );
-
-                        console.error(
-                            "window.carregarBoletimAluno não existe."
-                        );
-
-                    }
-
-                }
 
             }
         );
@@ -1558,25 +1471,624 @@ function criarJanelaSelecao(
 
 
 // =====================================================
-// ABRIR VER NOTAS
+// VERIFICAR SITUAÇÃO FINANCEIRA
+//
+// IMPORTANTE:
+// Aqui NÃO vamos inventar uma coleção financeira.
+// Primeiro procuramos os dados financeiros existentes
+// no documento do aluno.
+//
+// Se o documento tiver campos financeiros conhecidos,
+// eles serão analisados.
+// =====================================================
+
+async function verificarSituacaoFinanceira(
+    ano,
+    trimestre
+) {
+
+    console.log(
+        "💰 Verificando situação financeira:",
+        {
+            ano,
+            trimestre
+        }
+    );
+
+
+    try {
+
+        const documento =
+            await obterDocumentoAluno();
+
+
+        const dadosAlunoFirestore =
+            documento.dados || {};
+
+
+        console.log(
+            "💰 DADOS FINANCEIROS DO ALUNO:",
+            dadosAlunoFirestore
+        );
+
+
+        // -------------------------------------------------
+        // CAMPOS DIRETOS DE ESTADO
+        // -------------------------------------------------
+
+        const camposEstado = [
+
+            "situacaoFinanceira",
+
+            "situacao_financeira",
+
+            "estadoFinanceiro",
+
+            "estado_financeiro",
+
+            "financeiro",
+
+            "pagamento",
+
+            "statusPagamento",
+
+            "estadoPagamento",
+
+            "mensalidade",
+
+            "propina"
+
+        ];
+
+
+        for (
+            const campo
+            of camposEstado
+        ) {
+
+            if (
+                dadosAlunoFirestore[campo] !==
+                undefined &&
+                dadosAlunoFirestore[campo] !==
+                null
+            ) {
+
+                const valor =
+                    dadosAlunoFirestore[campo];
+
+
+                console.log(
+                    "💰 Campo financeiro encontrado:",
+                    campo,
+                    valor
+                );
+
+
+                if (
+                    typeof valor === "object" &&
+                    !Array.isArray(valor)
+                ) {
+
+                    const resultado =
+                        analisarObjetoFinanceiro(
+                            valor,
+                            ano,
+                            trimestre
+                        );
+
+
+                    if (
+                        resultado !== null
+                    ) {
+
+                        return resultado;
+
+                    }
+
+                }
+
+
+                const resultado =
+                    interpretarEstadoPagamento(
+                        valor
+                    );
+
+
+                if (
+                    resultado !== null
+                ) {
+
+                    return resultado;
+
+                }
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // CAMPOS DE PAGAMENTO DENTRO DO ALUNO
+        // -------------------------------------------------
+
+        const possiveisPagamentos = [
+
+            dadosAlunoFirestore.pagamentos,
+
+            dadosAlunoFirestore.pagamentosPorAno,
+
+            dadosAlunoFirestore.financeiroPorAno,
+
+            dadosAlunoFirestore.mensalidades
+
+        ];
+
+
+        for (
+            const pagamentos
+            of possiveisPagamentos
+        ) {
+
+            if (!pagamentos)
+                continue;
+
+
+            const resultado =
+                analisarObjetoFinanceiro(
+                    pagamentos,
+                    ano,
+                    trimestre
+                );
+
+
+            if (
+                resultado !== null
+            ) {
+
+                return resultado;
+
+            }
+
+        }
+
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao verificar situação financeira:",
+            erro
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // ATENÇÃO:
+    // Se ainda não encontrarmos a estrutura financeira,
+    // NÃO vamos bloquear definitivamente nesta fase.
+    //
+    // Retornamos "desconhecido" para podermos identificar
+    // a estrutura real no teste.
+    // -------------------------------------------------
+
+    return {
+
+        pago: null,
+
+        encontrado: false,
+
+        mensagem:
+            "Situação financeira não identificada."
+
+    };
+
+}
+
+
+// =====================================================
+// ANALISAR OBJETO FINANCEIRO
+// =====================================================
+
+function analisarObjetoFinanceiro(
+    objeto,
+    ano,
+    trimestre
+) {
+
+    if (
+        !objeto ||
+        typeof objeto !== "object"
+    ) {
+
+        return null;
+
+    }
+
+
+    // -------------------------------------------------
+    // PROCURAR PELO ANO
+    // -------------------------------------------------
+
+    const anoChave =
+        Object.keys(objeto)
+            .find(
+                chave =>
+                    normalizarAno(chave) ===
+                    normalizarAno(ano)
+            );
+
+
+    if (anoChave) {
+
+        const dadosAno =
+            objeto[anoChave];
+
+
+        // ---------------------------------------------
+        // SE FOR UM ESTADO DIRETO
+        // ---------------------------------------------
+
+        const estado =
+            interpretarEstadoPagamento(
+                dadosAno
+            );
+
+
+        if (
+            estado !== null
+        ) {
+
+            return {
+
+                pago: estado,
+
+                encontrado: true
+
+            };
+
+        }
+
+
+        // ---------------------------------------------
+        // PROCURAR TRIMESTRE
+        // ---------------------------------------------
+
+        if (
+            dadosAno &&
+            typeof dadosAno === "object"
+        ) {
+
+            const chavesTrimestre =
+                Object.keys(
+                    dadosAno
+                );
+
+
+            for (
+                const chave
+                of chavesTrimestre
+            ) {
+
+                if (
+                    normalizarTrimestreAluno(
+                        chave
+                    ) ===
+                    normalizarTrimestreAluno(
+                        trimestre
+                    )
+                ) {
+
+                    const resultado =
+                        interpretarEstadoPagamento(
+                            dadosAno[chave]
+                        );
+
+
+                    if (
+                        resultado !== null
+                    ) {
+
+                        return {
+
+                            pago: resultado,
+
+                            encontrado: true
+
+                        };
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+// =====================================================
+// INTERPRETAR ESTADO DE PAGAMENTO
+// =====================================================
+
+function interpretarEstadoPagamento(
+    valor
+) {
+
+    if (
+        typeof valor === "boolean"
+    ) {
+
+        return valor;
+
+    }
+
+
+    if (
+        typeof valor === "number"
+    ) {
+
+        return valor > 0;
+
+    }
+
+
+    if (
+        typeof valor !== "string"
+    ) {
+
+        return null;
+
+    }
+
+
+    const texto =
+        normalizarTexto(
+            valor
+        );
+
+
+    if (
+        [
+            "pago",
+            "pagamento pago",
+            "regular",
+            "ativo",
+            "quitado",
+            "liquidado",
+            "sim",
+            "true"
+        ].includes(texto)
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        [
+            "nao pago",
+            "não pago",
+            "pendente",
+            "em atraso",
+            "atrasado",
+            "em divida",
+            "divida",
+            "devedor",
+            "bloqueado",
+            "nao",
+            "false"
+        ].includes(texto)
+    ) {
+
+        return false;
+
+    }
+
+
+    return null;
+
+}
+
+
+// =====================================================
+// PROCESSAR SELEÇÃO
+// =====================================================
+
+async function processarSelecaoNotas(
+    ano,
+    trimestre
+) {
+
+    const botao =
+        document.getElementById(
+            "confirmarSelecaoNotas"
+        );
+
+
+    if (botao) {
+
+        botao.disabled =
+            true;
+
+        botao.textContent =
+            "⏳ A verificar...";
+
+    }
+
+
+    try {
+
+        const resultadoFinanceiro =
+            await verificarSituacaoFinanceira(
+                ano,
+                trimestre
+            );
+
+
+        console.log(
+            "💰 RESULTADO FINANCEIRO:",
+            resultadoFinanceiro
+        );
+
+
+        // -------------------------------------------------
+        // NÃO IDENTIFICADO
+       // =====================================================
+    
+        if (
+            resultadoFinanceiro.pago === null
+        ) {
+
+            alert(
+                "⚠️ Não foi possível identificar a situação financeira deste aluno.\n\n" +
+                "O acesso às notas não será aberto até a situação financeira ser confirmada."
+            );
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // NÃO PAGO
+        // -------------------------------------------------
+
+        if (
+            resultadoFinanceiro.pago !== true
+        ) {
+
+            alert(
+                "🔒 Acesso às notas bloqueado.\n\n" +
+                "O pagamento referente ao período selecionado não está regularizado."
+            );
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // PAGO
+        // -------------------------------------------------
+
+        document
+            .getElementById(
+                "janelaSelecaoNotas"
+            )
+            ?.remove();
+
+
+        alert(
+            "✅ Pagamento confirmado.\n\n" +
+            `${ano} — ${nomeTrimestreAluno(trimestre)}\n\n` +
+            "A carregar notas..."
+        );
+
+
+        // -------------------------------------------------
+        // AQUI ENTRARÁ O CARREGAMENTO DAS NOTAS
+        // NO PRÓXIMO BLOCO.
+        // -------------------------------------------------
+
+        console.log(
+            "📊 ACESSO ÀS NOTAS LIBERADO:",
+            {
+                ano,
+                trimestre
+            }
+        );
+
+
+        localStorage.setItem(
+            "notasAnoSelecionado",
+            String(ano)
+        );
+
+
+        localStorage.setItem(
+            "notasTrimestreSelecionado",
+            String(trimestre)
+        );
+
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao processar notas:",
+            erro
+        );
+
+
+        alert(
+            "❌ Ocorreu um erro ao verificar o acesso às notas.\n\n" +
+            erro.message
+        );
+
+    }
+    finally {
+
+        if (botao) {
+
+            botao.disabled =
+                false;
+
+            botao.textContent =
+                "🔎 Continuar";
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// VER NOTAS
 // =====================================================
 
 window.verNotas =
 async function () {
 
     console.log(
-        "📊 VER NOTAS CLICADO"
+        "📊 BOTÃO VER NOTAS CLICADO"
     );
 
 
     try {
 
         const anos =
-            await obterAnosLetivos();
+            await obterAnosParaNotas();
 
 
-        criarJanelaSelecao(
-            "notas",
+        console.log(
+            "📅 ANOS DISPONÍVEIS:",
+            anos
+        );
+
+
+        if (
+            anos.length === 0
+        ) {
+
+            alert(
+                "⚠️ Ainda não existem anos letivos disponíveis para este aluno."
+            );
+
+            return;
+
+        }
+
+
+        criarJanelaSelecaoNotas(
             anos
         );
 
@@ -1584,13 +2096,13 @@ async function () {
     catch (erro) {
 
         console.error(
-            "❌ Erro em Ver Notas:",
+            "❌ Erro ao abrir Ver Notas:",
             erro
         );
 
 
         alert(
-            "❌ Não foi possível carregar os anos letivos.\n\n" +
+            "❌ Não foi possível abrir Ver Notas.\n\n" +
             erro.message
         );
 
@@ -1599,75 +2111,6 @@ async function () {
 };
 
 
-// =====================================================
-// ABRIR VER BOLETINS
-// =====================================================
-
-janela . verBoletins =
- função  assíncrona ( )  {
-
-    console.log (​​
-        "📄 VER BOLETINS CLICADOS"
-    ) ;
-
-
-    tentar  {
-
-        const  anos =
-            aguarde  obterAnosLetivos ( ) ;
-
-
-        criarJanelaSelecao (
-            "boletos" ,
-            anos
-        ) ;
-
-    }
-    pegar  ( erro )  {
-
-        console.erro (​​
-            "❌ Erro em Ver Boletins:" ,
-            erro
-        ) ;
-
-
-        alerta (
-            "❌ Não foi possível abrir os boletins. \n\n " +
-            erro . mensagem
-        ) ;
-
-    }
-
-} ;
-
-
-// =====================================================
-// ALIASES PARA HTML ANTIGO
-// =====================================================
-
-janela . abrirVerNotas =
-janela . verNotas ;
-
-
-janela . abrirVerBoletins =
-janela . verBoletins ;
-
-
-console.log (​​
-    "✅ BLOCO 2/4 CARREGADO"
-) ;
-
-// =====================================================
-// BOTÃO VER BOLETIM
-// O HTML chama: verBoletim()
-// =====================================================
-
-window.verBoletim = async function () {
-
-    console.log(
-        "📄 VER BOLETIM CLICADO"
-    );
-
-    await window.verBoletins();
-
-};
+console.log(
+    "✅ BLOCO 2/4 — VER NOTAS carregado."
+);
