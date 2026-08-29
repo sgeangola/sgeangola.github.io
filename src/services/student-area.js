@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 2 — student-area.js carregado");
+alert("✅ BLOCO 1 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -924,6 +924,376 @@ console.log(
 alert(
     "✅ BLOCO 1/4 funcionando!"
 );
+
+/* =====================================================
+   SGE ANGOLA — ÁREA DO ALUNO
+   BLOCO 2/4
+
+   - Carregar dados da turma
+   - Obter ano letivo
+   - Verificar anos disponíveis
+   - Preparar acesso às notas
+===================================================== */
+
+
+// =====================================================
+// DADOS DA TURMA
+// =====================================================
+
+let dadosTurmaAluno = null;
+
+let anoLetivoAluno = "";
+
+
+// =====================================================
+// CARREGAR TURMA DO ALUNO
+// =====================================================
+
+async function carregarTurmaAluno() {
+
+    try {
+
+        const turmaId =
+            String(
+                aluno.turmaId || ""
+            ).trim();
+
+
+        if (!turmaId) {
+
+            throw new Error(
+                "O aluno não possui turmaId."
+            );
+
+        }
+
+
+        const turmaRef =
+            doc(
+                db,
+                "turmas",
+                turmaId
+            );
+
+
+        const turmaSnap =
+            await getDoc(
+                turmaRef
+            );
+
+
+        if (!turmaSnap.exists()) {
+
+            throw new Error(
+                "A turma do aluno não foi encontrada."
+            );
+
+        }
+
+
+        dadosTurmaAluno =
+            turmaSnap.data();
+
+
+        console.log(
+            "🏫 DADOS DA TURMA:",
+            dadosTurmaAluno
+        );
+
+
+        // =================================================
+        // ANO LETIVO
+        // =================================================
+
+        anoLetivoAluno =
+            String(
+                dadosTurmaAluno.anoLetivo ||
+                dadosTurmaAluno.anoLectivo ||
+                dadosTurmaAluno.ano ||
+                ""
+            ).trim();
+
+
+        console.log(
+            "📅 ANO LETIVO DO ALUNO:",
+            anoLetivoAluno
+        );
+
+
+        if (!anoLetivoAluno) {
+
+            throw new Error(
+                "A turma não possui ano letivo definido."
+            );
+
+        }
+
+
+        return dadosTurmaAluno;
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao carregar turma:",
+            erro
+        );
+
+        throw erro;
+
+    }
+
+}
+
+
+// =====================================================
+// OBTER NOTAS DO ALUNO
+// =====================================================
+
+async function obterNotasAluno() {
+
+    try {
+
+        await carregarTurmaAluno();
+
+
+        const turmaId =
+            String(
+                aluno.turmaId
+            ).trim();
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "notas"
+                )
+            );
+
+
+        const notasEncontradas = [];
+
+
+        snapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
+
+
+                // -----------------------------------------
+                // VERIFICAR TURMA
+                // -----------------------------------------
+
+                if (
+                    String(
+                        dados.turmaId || ""
+                    ).trim() !== turmaId
+                ) {
+
+                    return;
+
+                }
+
+
+                // -----------------------------------------
+                // VERIFICAR ANO LETIVO
+                // -----------------------------------------
+
+                const ano =
+                    String(
+                        dados.anoLetivo ||
+                        dados.anoLectivo ||
+                        dados.ano ||
+                        ""
+                    ).trim();
+
+
+                if (
+                    ano &&
+                    ano !== anoLetivoAluno
+                ) {
+
+                    return;
+
+                }
+
+
+                notasEncontradas.push({
+
+                    id:
+                        documento.id,
+
+                    ...dados
+
+                });
+
+            }
+        );
+
+
+        console.log(
+            "📚 NOTAS ENCONTRADAS:",
+            notasEncontradas
+        );
+
+
+        return notasEncontradas;
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao procurar notas:",
+            erro
+        );
+
+        throw erro;
+
+    }
+
+}
+
+
+// =====================================================
+// VER NOTAS
+// =====================================================
+
+window.verNotas =
+async function () {
+
+    try {
+
+        // ---------------------------------------------
+        // CARREGAR TURMA
+        // ---------------------------------------------
+
+        await carregarTurmaAluno();
+
+
+        // ---------------------------------------------
+        // CONFIRMAR ANO
+        // ---------------------------------------------
+
+        if (!anoLetivoAluno) {
+
+            alert(
+                "⚠️ A turma ainda não possui ano letivo definido."
+            );
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // PROCURAR NOTAS
+        // ---------------------------------------------
+
+        const notas =
+            await obterNotasAluno();
+
+
+        // ---------------------------------------------
+        // TESTE
+        // ---------------------------------------------
+
+        if (
+            notas.length === 0
+        ) {
+
+            alert(
+                "📚 VER NOTAS\n\n" +
+
+                "Aluno: " +
+                (
+                    aluno.nome ||
+                    "—"
+                ) +
+
+                "\n\nTurma: " +
+                (
+                    dadosTurmaAluno.nome ||
+                    aluno.turmaNome ||
+                    "—"
+                ) +
+
+                "\n\nAno letivo: " +
+                anoLetivoAluno +
+
+                "\n\n⚠️ Ainda não existem notas lançadas para esta turma."
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            "✅ NOTAS ENCONTRADAS!\n\n" +
+
+            "Ano letivo: " +
+            anoLetivoAluno +
+
+            "\n\nQuantidade de lançamentos: " +
+            notas.length
+        );
+
+
+        console.log(
+            "📊 LANÇAMENTOS:",
+            notas
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO AO VER NOTAS:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível carregar as notas.\n\n" +
+            erro.message
+        );
+
+    }
+
+};
+
+
+// =====================================================
+// INICIALIZAR BLOCO 2
+// =====================================================
+
+carregarTurmaAluno()
+    .then(
+        () => {
+
+            console.log(
+                "✅ BLOCO 2/4 — TURMA CARREGADA"
+            );
+
+            console.log(
+                "📅 Ano letivo:",
+                anoLetivoAluno
+            );
+
+        }
+    )
+    .catch(
+        erro => {
+
+            console.error(
+                "❌ BLOCO 2:",
+                erro
+            );
+
+        }
+    );
 
 // =====================================================
 // SGE ANGOLA — ÁREA DO ALUNO
@@ -2054,93 +2424,6 @@ async function processarSelecaoNotas(
 // =====================================================
 // VER NOTAS
 // =====================================================
-
-window.verNotas = async function () {
-
-    try {
-
-        const turmaId =
-            String(
-                aluno.turmaId || ""
-            ).trim();
-
-
-        if (!turmaId) {
-
-            alert(
-                "❌ O aluno não possui turmaId."
-            );
-
-            return;
-
-        }
-
-
-        const turmaRef =
-            doc(
-                db,
-                "turmas",
-                turmaId
-            );
-
-
-        const turmaSnap =
-            await getDoc(
-                turmaRef
-            );
-
-
-        if (!turmaSnap.exists()) {
-
-            alert(
-                "❌ A turma não foi encontrada no Firestore.\n\n" +
-                "ID: " +
-                turmaId
-            );
-
-            return;
-
-        }
-
-
-        const dadosTurma =
-            turmaSnap.data();
-
-
-        console.log(
-            "🏫 DADOS COMPLETOS DA TURMA:",
-            dadosTurma
-        );
-
-
-        alert(
-            "DADOS DA TURMA\n\n" +
-
-            JSON.stringify(
-                dadosTurma,
-                null,
-                2
-            )
-        );
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ ERRO:",
-            erro
-        );
-
-
-        alert(
-            "❌ Erro ao consultar a turma:\n\n" +
-            erro.message
-        );
-
-    }
-
-};
-
 
 console.log(
     "✅ BLOCO 2/4 — VER NOTAS carregado."
