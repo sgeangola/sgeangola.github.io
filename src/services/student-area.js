@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 1 — student-area.js carregado");
+alert("✅ BLOCO 2 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -2057,27 +2057,87 @@ async function processarSelecaoNotas(
 
 window.verNotas = async function () {
 
-    alert(
-        "TESTE DOS DADOS DO ALUNO\n\n" +
+    try {
 
-        "Nome: " +
-        (aluno.nome || "—") +
+        const turmaId =
+            String(
+                aluno.turmaId || ""
+            ).trim();
 
-        "\n\nTurma ID: " +
-        (aluno.turmaId || "—") +
 
-        "\n\nAno Letivo: " +
-        (aluno.anoLetivo || "—") +
+        if (!turmaId) {
 
-        "\nAno Lectivo: " +
-        (aluno.anoLectivo || "—") +
+            alert(
+                "❌ O aluno não possui turmaId."
+            );
 
-        "\nAno: " +
-        (aluno.ano || "—") +
+            return;
 
-        "\nAno Letivo Atual: " +
-        (aluno.anoLetivoAtual || "—")
-    );
+        }
+
+
+        const turmaRef =
+            doc(
+                db,
+                "turmas",
+                turmaId
+            );
+
+
+        const turmaSnap =
+            await getDoc(
+                turmaRef
+            );
+
+
+        if (!turmaSnap.exists()) {
+
+            alert(
+                "❌ A turma não foi encontrada no Firestore.\n\n" +
+                "ID: " +
+                turmaId
+            );
+
+            return;
+
+        }
+
+
+        const dadosTurma =
+            turmaSnap.data();
+
+
+        console.log(
+            "🏫 DADOS COMPLETOS DA TURMA:",
+            dadosTurma
+        );
+
+
+        alert(
+            "DADOS DA TURMA\n\n" +
+
+            JSON.stringify(
+                dadosTurma,
+                null,
+                2
+            )
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ ERRO:",
+            erro
+        );
+
+
+        alert(
+            "❌ Erro ao consultar a turma:\n\n" +
+            erro.message
+        );
+
+    }
 
 };
 
