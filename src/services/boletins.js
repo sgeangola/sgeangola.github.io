@@ -2947,3 +2947,663 @@ window.calcularResultadoTrimestreBoletim =
 console.log(
     "✅ BLOCO 2 — Funções do boletim disponíveis."
 );
+
+// =====================================================
+// SGE — BLOCO 3
+// MONTAR BOLETIM REAL DO ALUNO
+// =====================================================
+
+console.log("📋 BLOCO 3 — BOLETIM REAL CARREGADO");
+
+
+// =====================================================
+// OBTER DADOS DO ALUNO LOGADO
+// =====================================================
+
+function obterAlunoLogadoBoletim() {
+
+    try {
+
+        const dados =
+            sessionStorage.getItem("alunoLogado") ||
+            localStorage.getItem("alunoLogado");
+
+        if (!dados) {
+
+            console.warn(
+                "⚠️ Nenhum aluno logado encontrado."
+            );
+
+            return null;
+
+        }
+
+        return JSON.parse(dados);
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao ler aluno logado:",
+            erro
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// =====================================================
+// BUSCAR TURMA
+// =====================================================
+
+async function obterTurmaBoletim(turmaId) {
+
+    if (!turmaId) {
+
+        return null;
+
+    }
+
+    try {
+
+        const ref =
+            doc(
+                db,
+                "turmas",
+                turmaId
+            );
+
+        const resultado =
+            await getDoc(ref);
+
+        if (!resultado.exists()) {
+
+            return null;
+
+        }
+
+        return {
+
+            id: resultado.id,
+
+            ...resultado.data()
+
+        };
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao buscar turma:",
+            erro
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// =====================================================
+// BUSCAR NOTAS DO ALUNO
+// =====================================================
+
+async function obterNotasAlunoBoletim(
+    turmaId,
+    alunoId
+) {
+
+    try {
+
+        const notasRef =
+            collection(
+                db,
+                "turmas",
+                turmaId,
+                "alunos",
+                alunoId,
+                "notas"
+            );
+
+        const resultado =
+            await getDocs(notasRef);
+
+        return resultado.docs.map(
+            documento => ({
+
+                id: documento.id,
+
+                ...documento.data()
+
+            })
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro ao buscar notas do aluno:",
+            erro
+        );
+
+        return [];
+
+    }
+
+}
+
+
+// =====================================================
+// FILTRAR NOTAS DO TRIMESTRE
+// =====================================================
+
+function filtrarNotasTrimestre(
+    notas,
+    trimestre
+) {
+
+    return notas.filter(
+        nota => {
+
+            const valor =
+                String(
+                    nota.trimestre ?? ""
+                ).trim();
+
+            return valor ===
+                String(trimestre);
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// CONSTRUIR LINHA DA DISCIPLINA
+// =====================================================
+
+function construirLinhaBoletim(
+    nota
+) {
+
+    const disciplina =
+        nota.disciplina ||
+        "Disciplina";
+
+    const mac =
+        nota.mac ??
+        "";
+
+    const npt =
+        nota.npt ??
+        "";
+
+    const mf =
+        nota.mf ??
+        "";
+
+    const classificacao =
+        nota.classificacao ||
+        nota.classificação ||
+        "";
+
+
+    return `
+
+        <tr>
+
+            <td>
+                ${disciplina}
+            </td>
+
+            <td>
+                ${mac || "—"}
+            </td>
+
+            <td>
+                ${npt || "—"}
+            </td>
+
+            <td>
+                ${mf || "—"}
+            </td>
+
+            <td>
+                ${classificacao || "—"}
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+// =====================================================
+// CONSTRUIR BOLETIM DO TRIMESTRE
+// =====================================================
+
+function construirBoletimTrimestre(
+    aluno,
+    turma,
+    notas,
+    trimestre
+) {
+
+    const notasTrimestre =
+        filtrarNotasTrimestre(
+            notas,
+            trimestre
+        );
+
+
+    let tabela = "";
+
+
+    if (
+        notasTrimestre.length === 0
+    ) {
+
+        tabela = `
+
+            <tr>
+
+                <td colspan="5"
+                    style="
+                        text-align:center;
+                        padding:20px;
+                    "
+                >
+
+                    Ainda não existem notas
+                    lançadas neste trimestre.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+    else {
+
+        notasTrimestre.forEach(
+            nota => {
+
+                tabela +=
+                    construirLinhaBoletim(
+                        nota
+                    );
+
+            }
+        );
+
+    }
+
+
+    // =============================================
+    // CALCULAR RESULTADO
+    // =============================================
+
+    const resultado =
+        calcularResultadoTrimestreBoletim(
+            turma?.ensino,
+            notasTrimestre
+        );
+
+
+    let resultadoHTML = "";
+
+
+    if (
+        resultado.resultado ===
+        "APTO"
+    ) {
+
+        resultadoHTML = `
+
+            <div
+                style="
+                    margin-top:20px;
+                    padding:15px;
+                    text-align:center;
+                    font-weight:bold;
+                "
+            >
+
+                🟢 RESULTADO:
+                APTO
+
+            </div>
+
+        `;
+
+    }
+    else if (
+        resultado.resultado ===
+        "NÃO APTO"
+    ) {
+
+        resultadoHTML = `
+
+            <div
+                style="
+                    margin-top:20px;
+                    padding:15px;
+                    text-align:center;
+                    font-weight:bold;
+                "
+            >
+
+                🔴 RESULTADO:
+                NÃO APTO
+
+            </div>
+
+        `;
+
+    }
+    else {
+
+        resultadoHTML = `
+
+            <div
+                style="
+                    margin-top:20px;
+                    padding:15px;
+                    text-align:center;
+                    font-weight:bold;
+                "
+            >
+
+                ⚠️ RESULTADO:
+                INDISPONÍVEL
+
+            </div>
+
+        `;
+
+    }
+
+
+    return `
+
+        <div
+            class="boletim-trimestre"
+            data-trimestre="${trimestre}"
+        >
+
+            <h2>
+                ${trimestre}.º Trimestre
+            </h2>
+
+
+            <div>
+
+                <strong>Aluno:</strong>
+                ${aluno?.nome || "—"}
+
+            </div>
+
+
+            <div>
+
+                <strong>Código:</strong>
+                ${
+                    aluno?.codigoAluno ||
+                    aluno?.codigo ||
+                    "—"
+                }
+
+            </div>
+
+
+            <div>
+
+                <strong>Turma:</strong>
+                ${
+                    turma?.nome ||
+                    aluno?.turmaNome ||
+                    "—"
+                }
+
+            </div>
+
+
+            <div>
+
+                <strong>Ano letivo:</strong>
+                ${
+                    turma?.anoLetivo ||
+                    "—"
+                }
+
+            </div>
+
+
+            <br>
+
+
+            <table
+                class="boletim-tabela"
+                style="
+                    width:100%;
+                    border-collapse:collapse;
+                "
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Disciplina
+                        </th>
+
+                        <th>
+                            MAC
+                        </th>
+
+                        <th>
+                            NPT
+                        </th>
+
+                        <th>
+                            MF
+                        </th>
+
+                        <th>
+                            Classificação
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    ${tabela}
+
+                </tbody>
+
+            </table>
+
+
+            ${resultadoHTML}
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// ABRIR BOLETIM COMPLETO
+// =====================================================
+
+async function abrirBoletimAluno() {
+
+    const aluno =
+        obterAlunoLogadoBoletim();
+
+
+    if (!aluno) {
+
+        alert(
+            "Aluno não identificado. Faça login novamente."
+        );
+
+        return;
+
+    }
+
+
+    const turmaId =
+        aluno.turmaId ||
+        aluno.turmaid;
+
+
+    const alunoId =
+        aluno.id ||
+        aluno.alunoId;
+
+
+    if (!turmaId || !alunoId) {
+
+        alert(
+            "Não foi possível identificar a turma ou o aluno."
+        );
+
+        return;
+
+    }
+
+
+    const turma =
+        await obterTurmaBoletim(
+            turmaId
+        );
+
+
+    if (!turma) {
+
+        alert(
+            "Não foi possível encontrar a turma."
+        );
+
+        return;
+
+    }
+
+
+    const notas =
+        await obterNotasAlunoBoletim(
+            turmaId,
+            alunoId
+        );
+
+
+    const nomeEscola =
+        turma.nomeEscola ||
+        turma.escolaNome ||
+        "Complexo Escolar";
+
+
+    // =============================================
+    // PROCURAR CONTAINER
+    // =============================================
+
+    const container =
+        document.getElementById(
+            "boletimContainer"
+        ) ||
+        document.getElementById(
+            "boletinsContainer"
+        );
+
+
+    if (!container) {
+
+        alert(
+            "❌ Container do boletim não encontrado."
+        );
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <div class="boletim-completo">
+
+            <div
+                class="boletim-cabecalho"
+                style="text-align:center;"
+            >
+
+                <h1>
+                    ${nomeEscola}
+                </h1>
+
+                <h2>
+                    BOLETIM DO ALUNO
+                </h2>
+
+            </div>
+
+
+            ${construirBoletimTrimestre(
+                aluno,
+                turma,
+                notas,
+                1
+            )}
+
+
+            ${construirBoletimTrimestre(
+                aluno,
+                turma,
+                notas,
+                2
+            )}
+
+
+            ${construirBoletimTrimestre(
+                aluno,
+                turma,
+                notas,
+                3
+            )}
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// DISPONIBILIZAR GLOBALMENTE
+// =====================================================
+
+window.abrirBoletimAluno =
+    abrirBoletimAluno;
+
+window.obterNotasAlunoBoletim =
+    obterNotasAlunoBoletim;
+
+window.construirBoletimTrimestre =
+    construirBoletimTrimestre;
+
+
+console.log(
+    "✅ BOLETIM REAL DISPONÍVEL."
+);
