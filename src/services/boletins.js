@@ -2701,3 +2701,249 @@ document.addEventListener(
 
     }
 );
+
+// =====================================================
+// SGE — BLOCO 2
+// RESULTADO DO BOLETIM POR ENSINO
+// =====================================================
+
+console.log("🧮 BLOCO 2 — RESULTADO DO BOLETIM CARREGADO");
+
+
+// =====================================================
+// NORMALIZAR ENSINO
+// =====================================================
+
+function normalizarEnsinoBoletim(ensino) {
+
+    return String(ensino || "")
+        .trim()
+        .toLowerCase();
+
+}
+
+
+// =====================================================
+// RESULTADO DE UMA DISCIPLINA
+// =====================================================
+
+function resultadoDisciplinaBoletim(
+    ensino,
+    mf
+) {
+
+    const valor = Number(mf);
+
+    const ensinoNormalizado =
+        normalizarEnsinoBoletim(ensino);
+
+
+    if (Number.isNaN(valor)) {
+
+        return {
+            resultado: "INDISPONÍVEL",
+            classificacao: "Indisponível"
+        };
+
+    }
+
+
+    // =============================================
+    // ENSINO PRIMÁRIO
+    // =============================================
+
+    if (
+        ensinoNormalizado ===
+        "ensinoprimario"
+    ) {
+
+        return {
+
+            resultado:
+                valor >= 5
+                    ? "APTO"
+                    : "NÃO APTO",
+
+            classificacao:
+                valor >= 17
+                    ? "Muito Bom"
+                    : valor >= 14
+                    ? "Bom"
+                    : valor >= 10
+                    ? "Suficiente"
+                    : valor >= 5
+                    ? "Medíocre"
+                    : "Mau"
+
+        };
+
+    }
+
+
+    // =============================================
+    // 1.º CICLO
+    // =============================================
+
+    if (
+        ensinoNormalizado ===
+        "primeirociclo"
+    ) {
+
+        return {
+
+            resultado:
+                valor >= 10
+                    ? "APTO"
+                    : "NÃO APTO",
+
+            classificacao:
+                valor >= 17
+                    ? "Muito Bom"
+                    : valor >= 14
+                    ? "Bom"
+                    : valor >= 10
+                    ? "Suficiente"
+                    : valor >= 5
+                    ? "Medíocre"
+                    : "Mau"
+
+        };
+
+    }
+
+
+    return {
+
+        resultado:
+            "INDISPONÍVEL",
+
+        classificacao:
+            "Indisponível"
+
+    };
+
+}
+
+
+// =====================================================
+// RESULTADO GERAL DO TRIMESTRE
+// =====================================================
+
+function calcularResultadoTrimestreBoletim(
+    ensino,
+    notas
+) {
+
+    if (
+        !Array.isArray(notas) ||
+        notas.length === 0
+    ) {
+
+        return {
+
+            resultado:
+                "INDISPONÍVEL",
+
+            motivo:
+                "Ainda não existem notas lançadas neste trimestre."
+
+        };
+
+    }
+
+
+    let existemNotasValidas = false;
+
+    let existeReprovacao = false;
+
+
+    for (
+        const nota
+        of notas
+    ) {
+
+        const mf =
+            nota.mf ??
+            nota.MF ??
+            "";
+
+
+        if (
+            mf === "" ||
+            mf === null ||
+            mf === undefined
+        ) {
+
+            continue;
+
+        }
+
+
+        existemNotasValidas = true;
+
+
+        const avaliacao =
+            resultadoDisciplinaBoletim(
+                ensino,
+                mf
+            );
+
+
+        if (
+            avaliacao.resultado ===
+            "NÃO APTO"
+        ) {
+
+            existeReprovacao = true;
+
+        }
+
+    }
+
+
+    if (!existemNotasValidas) {
+
+        return {
+
+            resultado:
+                "INDISPONÍVEL",
+
+            motivo:
+                "Ainda não existem notas lançadas neste trimestre."
+
+        };
+
+    }
+
+
+    return {
+
+        resultado:
+            existeReprovacao
+                ? "NÃO APTO"
+                : "APTO",
+
+        motivo:
+            existeReprovacao
+                ? "Existe pelo menos uma disciplina abaixo do mínimo."
+                : "Todas as disciplinas avaliadas atingiram o mínimo."
+
+    };
+
+}
+
+
+// =====================================================
+// DISPONIBILIZAR GLOBALMENTE
+// =====================================================
+
+window.resultadoDisciplinaBoletim =
+    resultadoDisciplinaBoletim;
+
+window.calcularResultadoTrimestreBoletim =
+    calcularResultadoTrimestreBoletim;
+
+
+console.log(
+    "✅ BLOCO 2 — Funções do boletim disponíveis."
+);
