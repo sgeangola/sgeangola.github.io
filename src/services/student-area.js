@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 8 — student-area.js carregado");
+alert("✅ BLOCO — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -5775,4 +5775,188 @@ window.verDados = async function () {
 
 console.log(
     "✅ Função verDados() carregada."
+);
+
+       // =====================================================
+// SGE — BLOCO DE AVALIAÇÃO POR ENSINO
+// NÃO ALTERA AS NOTAS EXISTENTES
+// =====================================================
+
+console.log("🧮 BLOCO DE AVALIAÇÃO CARREGADO");
+
+// =====================================================
+// NORMALIZAR ENSINO
+// =====================================================
+
+function normalizarEnsino(ensino) {
+
+    return String(ensino || "")
+        .trim()
+        .toLowerCase();
+
+}
+
+
+// =====================================================
+// OBTER CLASSIFICAÇÃO PELA MF
+// =====================================================
+
+function obterClassificacaoPorMF(mf) {
+
+    const valor = Number(mf);
+
+    if (Number.isNaN(valor)) {
+
+        return "Indisponível";
+
+    }
+
+    if (valor < 5) {
+
+        return "Mau";
+
+    }
+
+    if (valor < 10) {
+
+        return "Medíocre";
+
+    }
+
+    if (valor < 14) {
+
+        return "Suficiente";
+
+    }
+
+    if (valor < 17) {
+
+        return "Bom";
+
+    }
+
+    return "Muito Bom";
+
+}
+
+
+// =====================================================
+// CALCULAR RESULTADO POR ENSINO
+// =====================================================
+
+function calcularResultadoPorEnsino(
+    ensino,
+    mf
+) {
+
+    const ensinoNormalizado =
+        normalizarEnsino(ensino);
+
+    const valor =
+        Number(mf);
+
+
+    // =============================================
+    // MF INVÁLIDA
+    // =============================================
+
+    if (Number.isNaN(valor)) {
+
+        return {
+
+            resultado: "INDISPONÍVEL",
+
+            classificacao:
+                "Indisponível"
+
+        };
+
+    }
+
+
+    // =============================================
+    // ENSINO PRIMÁRIO
+    // =============================================
+
+    if (
+        ensinoNormalizado ===
+        "ensinoprimario"
+    ) {
+
+        return {
+
+            resultado:
+                valor >= 5
+                    ? "APTO"
+                    : "NÃO APTO",
+
+            classificacao:
+                obterClassificacaoPorMF(
+                    valor
+                )
+
+        };
+
+    }
+
+
+    // =============================================
+    // 1.º CICLO
+    // =============================================
+
+    if (
+        ensinoNormalizado ===
+        "primeirociclo"
+    ) {
+
+        return {
+
+            resultado:
+                valor >= 10
+                    ? "APTO"
+                    : "NÃO APTO",
+
+            classificacao:
+                obterClassificacaoPorMF(
+                    valor
+                )
+
+        };
+
+    }
+
+
+    // =============================================
+    // ENSINO NÃO IDENTIFICADO
+    // =============================================
+
+    return {
+
+        resultado:
+            "INDISPONÍVEL",
+
+        classificacao:
+            obterClassificacaoPorMF(
+                valor
+            )
+
+    };
+
+}
+
+
+// =====================================================
+// DISPONIBILIZAR GLOBALMENTE
+// =====================================================
+
+window.calcularResultadoPorEnsino =
+    calcularResultadoPorEnsino;
+
+window.obterClassificacaoPorMF =
+    obterClassificacaoPorMF;
+
+alert("CARREGADO");
+
+console.log(
+    "✅ Funções de avaliação disponíveis."
 );
