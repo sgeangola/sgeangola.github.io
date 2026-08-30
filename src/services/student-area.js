@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO — student-area.js carregado");
+alert("✅ BLOCO 1 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -5815,3 +5815,107 @@ document.addEventListener(
 console.log(
     "✅ BLOCO 4B — PRONTO"
 );
+
+// =====================================================
+// TESTE — ESTRUTURA REAL DAS NOTAS
+// =====================================================
+
+window.testarEstruturaNotas = async function () {
+
+    try {
+
+        const turmaId =
+            String(
+                aluno.turmaId || ""
+            ).trim();
+
+        const alunoId =
+            String(
+                aluno.id || ""
+            ).trim();
+
+
+        if (!turmaId || !alunoId) {
+
+            alert(
+                "❌ Não foi possível identificar turma/aluno."
+            );
+
+            return;
+
+        }
+
+
+        const notasRef =
+            collection(
+                db,
+                "turmas",
+                turmaId,
+                "alunos",
+                alunoId,
+                "notas"
+            );
+
+
+        const snapshot =
+            await getDocs(
+                notasRef
+            );
+
+
+        if (snapshot.empty) {
+
+            alert(
+                "⚠️ Nenhuma nota encontrada."
+            );
+
+            return;
+
+        }
+
+
+        const primeiraNota =
+            snapshot.docs[0].data();
+
+
+        console.log(
+            "================================"
+        );
+
+        console.log(
+            "📝 PRIMEIRA NOTA REAL"
+        );
+
+        console.log(
+            primeiraNota
+        );
+
+        console.log(
+            "================================"
+        );
+
+
+        alert(
+            "📝 DADOS REAIS DA NOTA\n\n" +
+            JSON.stringify(
+                primeiraNota,
+                null,
+                2
+            )
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            erro
+        );
+
+        alert(
+            "❌ ERRO:\n\n" +
+            erro.message
+        );
+
+    }
+
+};
