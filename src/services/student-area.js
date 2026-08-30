@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 1 — student-area.js carregado");
+alert("✅ BLOCO 9 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -4193,227 +4193,619 @@ console.log(
 
 // =====================================================
 // SGE ANGOLA — ÁREA DO ALUNO
-// BLOCO 4/4
+// BLOCO 4/4 — VER BOLETIM
 //
 // FUNÇÕES:
 // - Verificar situação financeira
-// - Bloquear/liberar Ver Notas
-// - Bloquear/liberar Ver Boletim
-// - Mostrar comunicado financeiro
+// - Encontrar anos letivos com boletim
+// - Selecionar ano letivo
+// - Abrir boletim do aluno
+// - Bloquear boletim se houver dívida
 // =====================================================
 
-console.log("💰 SGE — BLOCO 4 iniciado");
+console.log("📄 BLOCO 4 — VER BOLETIM carregado");
 
 
 // =====================================================
-// OBTER ID FINANCEIRO
+// VERIFICAR PAGAMENTO DO ALUNO
 // =====================================================
 
-function obterIdFinanceiroAluno() {
-
-    const escolaId =
-        String(
-            aluno.escolaId || ""
-        ).trim();
+async function verificarPagamentoBoletim(
+    anoLetivo
+) {
 
     const alunoId =
         String(
             aluno.id || ""
         ).trim();
 
-
-    if (
-        !escolaId ||
-        !alunoId
-    ) {
+    if (!alunoId) {
 
         throw new Error(
-            "Não foi possível identificar o aluno financeiramente."
+            "ID do aluno não encontrado."
         );
-
-    }
-
-
-    return `${escolaId}_${alunoId}`;
-
-}
-
-
-// =====================================================
-// OBTER SITUAÇÃO FINANCEIRA
-// =====================================================
-
-async function obterSituacaoFinanceira() {
-
-    try {
-
-        const financeiroId =
-            obterIdFinanceiroAluno();
-
-
-        const referencia =
-            doc(
-                db,
-                "financeiro",
-                financeiroId
-            );
-
-
-        const snapshot =
-            await getDoc(
-                referencia
-            );
-
-
-        /*
-        =============================================
-        SE NÃO EXISTIR DOCUMENTO FINANCEIRO
-        =============================================
-        */
-
-        if (
-            !snapshot.exists()
-        ) {
-
-            return {
-
-                existe: false,
-
-                regular: true,
-
-                comunicado: "",
-
-                dados: {}
-
-            };
-
-        }
-
-
-        const dados =
-            snapshot.data();
-
-
-        /*
-        =============================================
-        VERIFICAR TRIMESTRES
-        =============================================
-        */
-
-        const primeiro =
-            dados["1trimestre"]?.pago === true;
-
-        const segundo =
-            dados["2trimestre"]?.pago === true;
-
-        const terceiro =
-            dados["3trimestre"]?.pago === true;
-
-
-        /*
-        =============================================
-        SITUAÇÃO
-        =============================================
-
-        Se algum trimestre estiver Não Pago,
-        o aluno fica com acesso bloqueado.
-        */
-
-        const regular =
-            primeiro &&
-            segundo &&
-            terceiro;
-
-
-        return {
-
-            existe: true,
-
-            regular:
-
-                regular,
-
-            primeiro:
-
-                primeiro,
-
-            segundo:
-
-                segundo,
-
-            terceiro:
-
-                terceiro,
-
-            comunicado:
-
-                dados.comunicado || "",
-
-            dados:
-
-                dados
-
-        };
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ Erro ao verificar situação financeira:",
-            erro
-        );
-
-
-        /*
-        Em caso de erro não vamos
-        bloquear automaticamente o aluno.
-        */
-
-        return {
-
-            existe: false,
-
-            regular: true,
-
-            comunicado: "",
-
-            erro: true
-
-        };
-
-    }
-
-}
-
-
-// =====================================================
-// MOSTRAR AVISO FINANCEIRO
-// =====================================================
-
-function mostrarAvisoFinanceiro(
-    situacao
-) {
-
-    const antigo =
-        document.getElementById(
-            "avisoFinanceiroAluno"
-        );
-
-
-    if (antigo) {
-
-        antigo.remove();
 
     }
 
 
     /*
-    Se estiver regular,
-    não mostrar aviso.
+    O financeiro usa:
+
+    escolaId_alunoId
+    */
+
+    const financeiroId =
+        `${String(aluno.escolaId || "").trim()}_${alunoId}`;
+
+
+    if (!aluno.escolaId) {
+
+        /*
+        Se o aluno não tiver escolaId,
+        tentar obter através da turma.
+        */
+
+        const turmaSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "turmas",
+                    String(
+                        aluno.turmaId
+                    ).trim()
+                )
+            );
+
+
+        if (!turmaSnap.exists()) {
+
+            return false;
+
+        }
+
+    }
+
+
+    const referencia =
+        doc(
+            db,
+            "financeiro",
+            financeiroId
+        );
+
+
+    const snapshot =
+        await getDoc(
+            referencia
+        );
+
+
+    /*
+    Se ainda não existe documento financeiro,
+    considerar não pago.
+    */
+
+    if (!snapshot.exists()) {
+
+        return false;
+
+    }
+
+
+    const financeiro =
+        snapshot.data();
+
+
+    /*
+    Normalizar ano letivo.
+    */
+
+    const ano =
+        normalizarAnoLetivo(
+            anoLetivo
+        );
+
+
+    /*
+    =================================================
+    REGRA FINANCEIRA
+    =================================================
+
+    Para o boletim:
+
+    1.º trimestre → 1trimestre
+    2.º trimestre → 2trimestre
+    3.º trimestre → 3trimestre
+
+    O boletim só poderá ser aberto se
+    o trimestre correspondente estiver pago.
+    */
+
+
+    /*
+    Verificar os três trimestres.
+
+    O boletim anual só será liberado
+    quando os trimestres existentes
+    estiverem pagos.
+    */
+
+    const primeiro =
+        financeiro["1trimestre"]?.pago === true;
+
+    const segundo =
+        financeiro["2trimestre"]?.pago === true;
+
+    const terceiro =
+        financeiro["3trimestre"]?.pago === true;
+
+
+    /*
+    =================================================
+    IMPORTANTE
+    =================================================
+
+    Por enquanto consideramos que o boletim
+    anual precisa dos três trimestres pagos.
+    */
+
+    return (
+        primeiro &&
+        segundo &&
+        terceiro
+    );
+
+}
+
+
+// =====================================================
+// PROCURAR BOLETIM DO ALUNO
+// =====================================================
+
+async function procurarBoletim(
+    anoLetivo
+) {
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+    const turmaId =
+        String(
+            aluno.turmaId || ""
+        ).trim();
+
+
+    if (
+        !alunoId ||
+        !turmaId
+    ) {
+
+        throw new Error(
+            "Não foi possível identificar o aluno ou a turma."
+        );
+
+    }
+
+
+    /*
+    =================================================
+    PROCURAR NA COLEÇÃO boletins
+    =================================================
+    */
+
+    const boletinsRef =
+        collection(
+            db,
+            "boletins"
+        );
+
+
+    const snapshot =
+        await getDocs(
+            boletinsRef
+        );
+
+
+    let encontrado = null;
+
+
+    snapshot.forEach(
+        documento => {
+
+            if (encontrado) {
+
+                return;
+
+            }
+
+
+            const dados =
+                documento.data();
+
+
+            const idAluno =
+                String(
+                    dados.alunoId || ""
+                ).trim();
+
+
+            const idTurma =
+                String(
+                    dados.turmaId || ""
+                ).trim();
+
+
+            const ano =
+                normalizarAnoLetivo(
+                    obterAnoLetivo(
+                        dados
+                    )
+                );
+
+
+            if (
+
+                idAluno === alunoId &&
+
+                idTurma === turmaId &&
+
+                ano ===
+                normalizarAnoLetivo(
+                    anoLetivo
+                )
+
+            ) {
+
+                encontrado = {
+
+                    id:
+                        documento.id,
+
+                    dados:
+                        dados
+
+                };
+
+            }
+
+        }
+    );
+
+
+    return encontrado;
+
+}
+
+
+// =====================================================
+// ABRIR BOLETIM
+// =====================================================
+
+async function abrirBoletim(
+    anoLetivo
+) {
+
+    try {
+
+        /*
+        -------------------------------------------------
+        VERIFICAR FINANCEIRO
+        -------------------------------------------------
+        */
+
+        const pago =
+            await verificarPagamentoBoletim(
+                anoLetivo
+            );
+
+
+        if (!pago) {
+
+            alert(
+                "🔒 BOLETIM BLOQUEADO\n\n" +
+                "O seu boletim está bloqueado devido " +
+                "à situação financeira.\n\n" +
+                "Regularize os pagamentos para ter acesso."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        -------------------------------------------------
+        PROCURAR BOLETIM
+        -------------------------------------------------
+        */
+
+        const boletim =
+            await procurarBoletim(
+                anoLetivo
+            );
+
+
+        if (!boletim) {
+
+            alert(
+                "📄 Boletim ainda não disponível.\n\n" +
+                "O boletim do ano letivo " +
+                anoLetivo +
+                " ainda não foi publicado."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        -------------------------------------------------
+        VERIFICAR URL
+        -------------------------------------------------
+        */
+
+        const dados =
+            boletim.dados;
+
+
+        const url =
+            dados.url ||
+            dados.pdfUrl ||
+            dados.link ||
+            dados.boletimUrl ||
+            dados.arquivo ||
+            "";
+
+
+        if (!url) {
+
+            alert(
+                "⚠️ O boletim foi encontrado, " +
+                "mas não possui um endereço para abertura."
+            );
+
+            console.error(
+                "Boletim encontrado sem URL:",
+                boletim
+            );
+
+            return;
+
+        }
+
+
+        /*
+        -------------------------------------------------
+        ABRIR BOLETIM
+        -------------------------------------------------
+        */
+
+        window.open(
+            url,
+            "_blank"
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao abrir boletim:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível abrir o boletim.\n\n" +
+            erro.message
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// FUNÇÃO GLOBAL — VER BOLETIM
+// =====================================================
+
+window.verBoletim =
+async function () {
+
+    console.log(
+        "📄 Ver Boletim clicado"
+    );
+
+
+    /*
+    =================================================
+    PROCURAR ANOS LETIVOS
+    =================================================
+    */
+
+    let anos = [];
+
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "boletins"
+                )
+            );
+
+
+        snapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
+
+
+                const idAluno =
+                    String(
+                        dados.alunoId || ""
+                    ).trim();
+
+
+                const idTurma =
+                    String(
+                        dados.turmaId || ""
+                    ).trim();
+
+
+                if (
+                    idAluno !==
+                    String(
+                        aluno.id || ""
+                    ).trim()
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    idTurma !==
+                    String(
+                        aluno.turmaId || ""
+                    ).trim()
+                ) {
+
+                    return;
+
+                }
+
+
+                const ano =
+                    obterAnoLetivo(
+                        dados
+                    );
+
+
+                if (ano) {
+
+                    anos.push(
+                        String(
+                            ano
+                        ).trim()
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+        Remover duplicados.
+        */
+
+        anos =
+            [...new Set(anos)];
+
+
+        /*
+        Ordenar do mais recente
+        para o mais antigo.
+        */
+
+        anos.sort(
+            (a, b) =>
+                b.localeCompare(a)
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao procurar anos dos boletins:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível procurar os boletins.\n\n" +
+            erro.message
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =================================================
+    SE NÃO HOUVER BOLETIM
+    =================================================
     */
 
     if (
-        situacao.regular
+        anos.length === 0
+    ) {
+
+        alert(
+            "📄 Ainda não existem boletins disponíveis."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =================================================
+    UM ÚNICO ANO
+    =================================================
+    */
+
+    if (
+        anos.length === 1
+    ) {
+
+        await abrirBoletim(
+            anos[0]
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =================================================
+    VÁRIOS ANOS
+    =================================================
+    */
+
+    let mensagem =
+        "📄 BOLETINS DISPONÍVEIS\n\n";
+
+
+    anos.forEach(
+        (ano, indice) => {
+
+            mensagem +=
+                `${indice + 1}. ${ano}\n`;
+
+        }
+    );
+
+
+    const escolha =
+        prompt(
+            mensagem +
+            "\nDigite o número do ano:"
+        );
+
+
+    if (
+        escolha === null
     ) {
 
         return;
@@ -4421,384 +4813,34 @@ function mostrarAvisoFinanceiro(
     }
 
 
-    const pendencias = [];
+    const indice =
+        parseInt(
+            escolha,
+            10
+        ) - 1;
 
 
     if (
-        !situacao.primeiro
+        Number.isNaN(indice) ||
+        !anos[indice]
     ) {
-
-        pendencias.push(
-            "1.º Trimestre"
-        );
-
-    }
-
-
-    if (
-        !situacao.segundo
-    ) {
-
-        pendencias.push(
-            "2.º Trimestre"
-        );
-
-    }
-
-
-    if (
-        !situacao.terceiro
-    ) {
-
-        pendencias.push(
-            "3.º Trimestre"
-        );
-
-    }
-
-
-    const comunicado =
-        situacao.comunicado
-            ? `
-                <p style="
-                    margin:12px 0 0;
-                    font-size:14px;
-                ">
-                    <strong>Comunicado:</strong><br>
-                    ${escaparHTML(
-                        situacao.comunicado
-                    )}
-                </p>
-              `
-            : "";
-
-
-    const html = `
-
-        <div
-            id="avisoFinanceiroAluno"
-            style="
-                margin:20px 0;
-                padding:18px;
-                border-radius:14px;
-                background:#fff7ed;
-                border:2px solid #f97316;
-                color:#9a3412;
-                text-align:center;
-            "
-        >
-
-            <div style="
-                font-size:35px;
-                margin-bottom:8px;
-            ">
-                💰
-            </div>
-
-
-            <strong style="
-                font-size:18px;
-            ">
-                Situação financeira pendente
-            </strong>
-
-
-            <p style="
-                margin:10px 0;
-                line-height:1.6;
-            ">
-                Existem pagamentos pendentes.
-            </p>
-
-
-            <p style="
-                margin:8px 0;
-                font-size:14px;
-            ">
-                <strong>Trimestres pendentes:</strong><br>
-                ${pendencias.join(", ")}
-            </p>
-
-
-            ${comunicado}
-
-        </div>
-
-    `;
-
-
-    /*
-    Colocar o aviso antes do menu.
-    */
-
-    const menu =
-        document.querySelector(
-            ".menu"
-        );
-
-
-    if (menu) {
-
-        menu.insertAdjacentHTML(
-            "beforebegin",
-            html
-        );
-
-    }
-
-}
-
-
-// =====================================================
-// VERIFICAR FINANCEIRO ANTES DAS NOTAS
-// =====================================================
-
-window.verNotas =
-async function () {
-
-    console.log(
-        "📊 Ver Notas clicado."
-    );
-
-
-    try {
-
-        const situacao =
-            await obterSituacaoFinanceira();
-
-
-        /*
-        =============================================
-        ALUNO COM PAGAMENTOS PENDENTES
-        =============================================
-        */
-
-        if (
-            !situacao.regular
-        ) {
-
-            mostrarAvisoFinanceiro(
-                situacao
-            );
-
-
-            alert(
-                "🔒 Acesso às notas bloqueado.\n\n" +
-                "Regularize a situação financeira para consultar as notas."
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-        =============================================
-        FINANCEIRO REGULAR
-        =============================================
-        */
-
-        console.log(
-            "✅ Financeiro regular. Abrindo notas."
-        );
-
-
-        abrirNotasAluno();
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ Erro ao verificar financeiro:",
-            erro
-        );
-
 
         alert(
-            "Não foi possível verificar a situação financeira.\n\n" +
-            erro.message
+            "❌ Opção inválida."
         );
 
+        return;
+
     }
+
+
+    await abrirBoletim(
+        anos[indice]
+    );
 
 };
-
-
-// =====================================================
-// VERIFICAR FINANCEIRO ANTES DO BOLETIM
-// =====================================================
-
-window.verBoletim =
-async function () {
-
-    console.log(
-        "📄 Ver Boletim clicado."
-    );
-
-
-    try {
-
-        const situacao =
-            await obterSituacaoFinanceira();
-
-
-        /*
-        =============================================
-        BLOQUEADO
-        =============================================
-        */
-
-        if (
-            !situacao.regular
-        ) {
-
-            mostrarAvisoFinanceiro(
-                situacao
-            );
-
-
-            alert(
-                "🔒 Acesso ao boletim bloqueado.\n\n" +
-                "Regularize a situação financeira para consultar o boletim."
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-        =============================================
-        LIBERADO
-        =============================================
-        */
-
-        console.log(
-            "✅ Financeiro regular. Abrindo boletim."
-        );
-
-
-        abrirBoletimAluno();
-
-    }
-    catch (erro) {
-
-        console.error(
-            "❌ Erro ao verificar financeiro:",
-            erro
-        );
-
-
-        alert(
-            "Não foi possível verificar a situação financeira.\n\n" +
-            erro.message
-        );
-
-    }
-
-};
-
-
-// =====================================================
-// FUNÇÃO TEMPORÁRIA — NOTAS
-// =====================================================
-
-function abrirNotasAluno() {
-
-    alert(
-        "✅ Situação financeira regular.\n\n" +
-        "Acesso às notas autorizado."
-    );
-
-
-    /*
-    Nesta fase apenas testamos
-    o controle financeiro.
-
-    Depois ligaremos aqui
-    o sistema de notas.
-    */
-
-}
-
-
-// =====================================================
-// FUNÇÃO TEMPORÁRIA — BOLETIM
-// =====================================================
-
-function abrirBoletimAluno() {
-
-    alert(
-        "✅ Situação financeira regular.\n\n" +
-        "Acesso ao boletim autorizado."
-    );
-
-
-    /*
-    Nesta fase apenas testamos
-    o controle financeiro.
-
-    Depois ligaremos aqui
-    o sistema real de boletim.
-    */
-
-}
-
-
-// =====================================================
-// VERIFICAR FINANCEIRO AO ABRIR A ÁREA
-// =====================================================
-
-async function verificarFinanceiroInicial() {
-
-    try {
-
-        const situacao =
-            await obterSituacaoFinanceira();
-
-
-        console.log(
-            "💰 SITUAÇÃO FINANCEIRA DO ALUNO:",
-            situacao
-        );
-
-
-        if (
-            !situacao.regular
-        ) {
-
-            mostrarAvisoFinanceiro(
-                situacao
-            );
-
-        }
-
-    }
-    catch (erro) {
-
-        console.error(
-            "Erro na verificação financeira inicial:",
-            erro
-        );
-
-    }
-
-}
-
-
-// =====================================================
-// INICIAR BLOCO 4
-// =====================================================
-
-verificarFinanceiroInicial();
 
 
 console.log(
-    "✅ BLOCO 4/4 carregado."
-);
-
-alert(
-    "✅ BLOCO 4 — Controle financeiro carregado!"
+    "✅ BLOCO 4/4 — VER BOLETIM pronto."
 );
