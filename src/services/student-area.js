@@ -5338,3 +5338,441 @@ async function () {
 console.log(
     "✅ BLOCO 4 — BOLETIM PRONTO"
 );
+
+// =====================================================
+// MEUS DADOS — ÁREA DO ALUNO
+// =====================================================
+
+window.verDados = async function () {
+
+    try {
+
+        console.log("👤 ABRINDO MEUS DADOS");
+
+        // =============================================
+        // VERIFICAR SESSÃO
+        // =============================================
+
+        if (!aluno) {
+
+            alert(
+                "❌ Sessão do aluno não encontrada."
+            );
+
+            return;
+
+        }
+
+
+        // =============================================
+        // OBTER DADOS ATUALIZADOS DO FIRESTORE
+        // =============================================
+
+        let dados = aluno;
+
+        try {
+
+            const documento =
+                await obterDocumentoAluno();
+
+            dados = documento.dados;
+
+        }
+        catch (erro) {
+
+            console.warn(
+                "Não foi possível atualizar os dados. " +
+                "Serão utilizados os dados da sessão."
+            );
+
+        }
+
+
+        // =============================================
+        // MANTER DADOS DA SESSÃO
+        // =============================================
+
+        const nome =
+            dados.nome ||
+            aluno.nome ||
+            "—";
+
+        const codigo =
+            dados.codigoAluno ||
+            aluno.codigoAluno ||
+            dados.matricula ||
+            aluno.matricula ||
+            "—";
+
+        const matricula =
+            dados.matricula ||
+            aluno.matricula ||
+            "—";
+
+        const sexo =
+            dados.sexo ||
+            aluno.sexo ||
+            "—";
+
+        const idade =
+            dados.idade ||
+            aluno.idade ||
+            "—";
+
+        const numero =
+            dados.numero ||
+            aluno.numero ||
+            "—";
+
+        const turma =
+            dados.turmaNome ||
+            aluno.turmaNome ||
+            "—";
+
+        const turmaId =
+            aluno.turmaId ||
+            "—";
+
+        const estado =
+            dados.estado ||
+            aluno.estado ||
+            "Ativo";
+
+
+        // =============================================
+        // OBTER ESCOLA
+        // =============================================
+
+        const escola =
+            await obterDadosEscola();
+
+
+        // =============================================
+        // MOSTRAR PÁGINA
+        // =============================================
+
+        document.body.innerHTML = `
+
+            <header
+                style="
+                    background:#1e3a8a;
+                    color:white;
+                    padding:20px;
+                    text-align:center;
+                "
+            >
+
+                <h1>
+                    👤 Meus Dados
+                </h1>
+
+            </header>
+
+
+            <main
+                style="
+                    width:95%;
+                    max-width:700px;
+                    margin:30px auto;
+                "
+            >
+
+                <div
+                    style="
+                        background:white;
+                        padding:25px;
+                        border-radius:15px;
+                        box-shadow:
+                            0 4px 12px
+                            rgba(0,0,0,.12);
+                    "
+                >
+
+                    <!-- ESCOLA -->
+
+                    <div
+                        style="
+                            text-align:center;
+                            margin-bottom:25px;
+                        "
+                    >
+
+                        <h2
+                            style="
+                                color:#1e3a8a;
+                                margin:0 0 8px;
+                            "
+                        >
+
+                            ${escaparHTML(
+                                escola.nome
+                            )}
+
+                        </h2>
+
+
+                        <div
+                            style="
+                                color:#64748b;
+                                font-size:14px;
+                            "
+                        >
+
+                            Área do Aluno
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ALUNO -->
+
+                    <div
+                        style="
+                            text-align:center;
+                            margin-bottom:25px;
+                        "
+                    >
+
+                        <div
+                            style="
+                                font-size:60px;
+                            "
+                        >
+                            👨‍🎓
+                        </div>
+
+
+                        <h2
+                            style="
+                                margin:8px 0;
+                                color:#1e3a8a;
+                            "
+                        >
+
+                            ${escaparHTML(nome)}
+
+                        </h2>
+
+                    </div>
+
+
+                    <!-- DADOS -->
+
+                    <div
+                        style="
+                            display:grid;
+                            grid-template-columns:
+                                repeat(
+                                    auto-fit,
+                                    minmax(220px,1fr)
+                                );
+                            gap:12px;
+                        "
+                    >
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                            "
+                        >
+
+                            <strong>
+                                Código:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(codigo)}
+
+                        </div>
+
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                            "
+                        >
+
+                            <strong>
+                                Matrícula:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(matricula)}
+
+                        </div>
+
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                            "
+                        >
+
+                            <strong>
+                                Número:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(numero)}
+
+                        </div>
+
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                            "
+                        >
+
+                            <strong>
+                                Sexo:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(sexo)}
+
+                        </div>
+
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                            "
+                        >
+
+                            <strong>
+                                Idade:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(idade)}
+
+                        </div>
+
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                            "
+                        >
+
+                            <strong>
+                                Turma:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(turma)}
+
+                        </div>
+
+
+                        <div
+                            style="
+                                padding:15px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                                grid-column:
+                                1 / -1;
+                            "
+                        >
+
+                            <strong>
+                                Estado:
+                            </strong>
+
+                            <br>
+
+                            ${escaparHTML(estado)}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BOTÃO VOLTAR -->
+
+                    <div
+                        style="
+                            text-align:center;
+                            margin-top:25px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            onclick="
+                                window.location.href =
+                                'student-area.html'
+                            "
+                            style="
+                                padding:13px 30px;
+                                border:none;
+                                border-radius:8px;
+                                background:#1e3a8a;
+                                color:white;
+                                font-size:15px;
+                                cursor:pointer;
+                            "
+                        >
+
+                            ← Voltar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+        `;
+
+
+        console.log(
+            "✅ MEUS DADOS ABERTO"
+        );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao abrir Meus Dados:",
+            erro
+        );
+
+        alert(
+            "❌ Não foi possível abrir Meus Dados.\n\n" +
+            erro.message
+        );
+
+    }
+
+};
+
+
+// =====================================================
+// FIM — MEUS DADOS
+// =====================================================
+
+console.log(
+    "✅ Função verDados() carregada."
+);
