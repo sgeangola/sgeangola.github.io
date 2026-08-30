@@ -5817,7 +5817,7 @@ console.log(
 );
 
 // =====================================================
-// TESTE — ESTRUTURA REAL DAS NOTAS
+// TESTE — PROCURAR NOTAS NO LOCAL CORRETO
 // =====================================================
 
 window.testarEstruturaNotas = async function () {
@@ -5825,34 +5825,27 @@ window.testarEstruturaNotas = async function () {
     try {
 
         const turmaId =
-            String(
-                aluno.turmaId || ""
-            ).trim();
+            String(aluno.turmaId || "").trim();
 
         const alunoId =
-            String(
-                aluno.id || ""
-            ).trim();
+            String(aluno.id || "").trim();
+
+        const codigoAluno =
+            String(aluno.codigoAluno || "").trim();
 
 
-        if (!turmaId || !alunoId) {
+        console.log("TURMA:", turmaId);
+        console.log("ALUNO ID:", alunoId);
+        console.log("CÓDIGO:", codigoAluno);
 
-            alert(
-                "❌ Não foi possível identificar turma/aluno."
-            );
 
-            return;
-
-        }
-
+        // =================================================
+        // PROCURAR NA COLEÇÃO PRINCIPAL "notas"
+        // =================================================
 
         const notasRef =
             collection(
                 db,
-                "turmas",
-                turmaId,
-                "alunos",
-                alunoId,
                 "notas"
             );
 
@@ -5863,10 +5856,16 @@ window.testarEstruturaNotas = async function () {
             );
 
 
+        console.log(
+            "TOTAL DE DOCUMENTOS EM /notas:",
+            snapshot.size
+        );
+
+
         if (snapshot.empty) {
 
             alert(
-                "⚠️ Nenhuma nota encontrada."
+                "⚠️ A coleção /notas está vazia."
             );
 
             return;
@@ -5874,42 +5873,58 @@ window.testarEstruturaNotas = async function () {
         }
 
 
-        const primeiraNota =
-            snapshot.docs[0].data();
+        // =================================================
+        // MOSTRAR TODAS AS NOTAS ENCONTRADAS
+        // =================================================
+
+        let resultado = "";
 
 
-        console.log(
-            "================================"
-        );
+        snapshot.forEach(
+            documento => {
 
-        console.log(
-            "📝 PRIMEIRA NOTA REAL"
-        );
+                const dados =
+                    documento.data();
 
-        console.log(
-            primeiraNota
-        );
 
-        console.log(
-            "================================"
+                console.log(
+                    "NOTA:",
+                    documento.id,
+                    dados
+                );
+
+
+                resultado +=
+                    "\n\nID: " +
+                    documento.id +
+                    "\n" +
+                    JSON.stringify(
+                        dados,
+                        null,
+                        2
+                    );
+
+            }
         );
 
 
         alert(
-            "📝 DADOS REAIS DA NOTA\n\n" +
-            JSON.stringify(
-                primeiraNota,
-                null,
-                2
-            )
+            "📝 NOTAS ENCONTRADAS\n\n" +
+            "Total: " +
+            snapshot.size +
+            "\n\n" +
+            resultado
         );
+
 
     }
     catch (erro) {
 
         console.error(
+            "❌ ERRO AO TESTAR NOTAS:",
             erro
         );
+
 
         alert(
             "❌ ERRO:\n\n" +
