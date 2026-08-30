@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 2 — student-area.js carregado");
+alert("✅ BLOCO 1 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -4189,4 +4189,616 @@ console.log(
 
 console.log(
     "✅ BLOCO 3/4 carregado."
+);
+
+// =====================================================
+// SGE ANGOLA — ÁREA DO ALUNO
+// BLOCO 4/4
+//
+// FUNÇÕES:
+// - Verificar situação financeira
+// - Bloquear/liberar Ver Notas
+// - Bloquear/liberar Ver Boletim
+// - Mostrar comunicado financeiro
+// =====================================================
+
+console.log("💰 SGE — BLOCO 4 iniciado");
+
+
+// =====================================================
+// OBTER ID FINANCEIRO
+// =====================================================
+
+function obterIdFinanceiroAluno() {
+
+    const escolaId =
+        String(
+            aluno.escolaId || ""
+        ).trim();
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+
+    if (
+        !escolaId ||
+        !alunoId
+    ) {
+
+        throw new Error(
+            "Não foi possível identificar o aluno financeiramente."
+        );
+
+    }
+
+
+    return `${escolaId}_${alunoId}`;
+
+}
+
+
+// =====================================================
+// OBTER SITUAÇÃO FINANCEIRA
+// =====================================================
+
+async function obterSituacaoFinanceira() {
+
+    try {
+
+        const financeiroId =
+            obterIdFinanceiroAluno();
+
+
+        const referencia =
+            doc(
+                db,
+                "financeiro",
+                financeiroId
+            );
+
+
+        const snapshot =
+            await getDoc(
+                referencia
+            );
+
+
+        /*
+        =============================================
+        SE NÃO EXISTIR DOCUMENTO FINANCEIRO
+        =============================================
+        */
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            return {
+
+                existe: false,
+
+                regular: true,
+
+                comunicado: "",
+
+                dados: {}
+
+            };
+
+        }
+
+
+        const dados =
+            snapshot.data();
+
+
+        /*
+        =============================================
+        VERIFICAR TRIMESTRES
+        =============================================
+        */
+
+        const primeiro =
+            dados["1trimestre"]?.pago === true;
+
+        const segundo =
+            dados["2trimestre"]?.pago === true;
+
+        const terceiro =
+            dados["3trimestre"]?.pago === true;
+
+
+        /*
+        =============================================
+        SITUAÇÃO
+        =============================================
+
+        Se algum trimestre estiver Não Pago,
+        o aluno fica com acesso bloqueado.
+        */
+
+        const regular =
+            primeiro &&
+            segundo &&
+            terceiro;
+
+
+        return {
+
+            existe: true,
+
+            regular:
+
+                regular,
+
+            primeiro:
+
+                primeiro,
+
+            segundo:
+
+                segundo,
+
+            terceiro:
+
+                terceiro,
+
+            comunicado:
+
+                dados.comunicado || "",
+
+            dados:
+
+                dados
+
+        };
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao verificar situação financeira:",
+            erro
+        );
+
+
+        /*
+        Em caso de erro não vamos
+        bloquear automaticamente o aluno.
+        */
+
+        return {
+
+            existe: false,
+
+            regular: true,
+
+            comunicado: "",
+
+            erro: true
+
+        };
+
+    }
+
+}
+
+
+// =====================================================
+// MOSTRAR AVISO FINANCEIRO
+// =====================================================
+
+function mostrarAvisoFinanceiro(
+    situacao
+) {
+
+    const antigo =
+        document.getElementById(
+            "avisoFinanceiroAluno"
+        );
+
+
+    if (antigo) {
+
+        antigo.remove();
+
+    }
+
+
+    /*
+    Se estiver regular,
+    não mostrar aviso.
+    */
+
+    if (
+        situacao.regular
+    ) {
+
+        return;
+
+    }
+
+
+    const pendencias = [];
+
+
+    if (
+        !situacao.primeiro
+    ) {
+
+        pendencias.push(
+            "1.º Trimestre"
+        );
+
+    }
+
+
+    if (
+        !situacao.segundo
+    ) {
+
+        pendencias.push(
+            "2.º Trimestre"
+        );
+
+    }
+
+
+    if (
+        !situacao.terceiro
+    ) {
+
+        pendencias.push(
+            "3.º Trimestre"
+        );
+
+    }
+
+
+    const comunicado =
+        situacao.comunicado
+            ? `
+                <p style="
+                    margin:12px 0 0;
+                    font-size:14px;
+                ">
+                    <strong>Comunicado:</strong><br>
+                    ${escaparHTML(
+                        situacao.comunicado
+                    )}
+                </p>
+              `
+            : "";
+
+
+    const html = `
+
+        <div
+            id="avisoFinanceiroAluno"
+            style="
+                margin:20px 0;
+                padding:18px;
+                border-radius:14px;
+                background:#fff7ed;
+                border:2px solid #f97316;
+                color:#9a3412;
+                text-align:center;
+            "
+        >
+
+            <div style="
+                font-size:35px;
+                margin-bottom:8px;
+            ">
+                💰
+            </div>
+
+
+            <strong style="
+                font-size:18px;
+            ">
+                Situação financeira pendente
+            </strong>
+
+
+            <p style="
+                margin:10px 0;
+                line-height:1.6;
+            ">
+                Existem pagamentos pendentes.
+            </p>
+
+
+            <p style="
+                margin:8px 0;
+                font-size:14px;
+            ">
+                <strong>Trimestres pendentes:</strong><br>
+                ${pendencias.join(", ")}
+            </p>
+
+
+            ${comunicado}
+
+        </div>
+
+    `;
+
+
+    /*
+    Colocar o aviso antes do menu.
+    */
+
+    const menu =
+        document.querySelector(
+            ".menu"
+        );
+
+
+    if (menu) {
+
+        menu.insertAdjacentHTML(
+            "beforebegin",
+            html
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// VERIFICAR FINANCEIRO ANTES DAS NOTAS
+// =====================================================
+
+window.verNotas =
+async function () {
+
+    console.log(
+        "📊 Ver Notas clicado."
+    );
+
+
+    try {
+
+        const situacao =
+            await obterSituacaoFinanceira();
+
+
+        /*
+        =============================================
+        ALUNO COM PAGAMENTOS PENDENTES
+        =============================================
+        */
+
+        if (
+            !situacao.regular
+        ) {
+
+            mostrarAvisoFinanceiro(
+                situacao
+            );
+
+
+            alert(
+                "🔒 Acesso às notas bloqueado.\n\n" +
+                "Regularize a situação financeira para consultar as notas."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        =============================================
+        FINANCEIRO REGULAR
+        =============================================
+        */
+
+        console.log(
+            "✅ Financeiro regular. Abrindo notas."
+        );
+
+
+        abrirNotasAluno();
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao verificar financeiro:",
+            erro
+        );
+
+
+        alert(
+            "Não foi possível verificar a situação financeira.\n\n" +
+            erro.message
+        );
+
+    }
+
+};
+
+
+// =====================================================
+// VERIFICAR FINANCEIRO ANTES DO BOLETIM
+// =====================================================
+
+window.verBoletim =
+async function () {
+
+    console.log(
+        "📄 Ver Boletim clicado."
+    );
+
+
+    try {
+
+        const situacao =
+            await obterSituacaoFinanceira();
+
+
+        /*
+        =============================================
+        BLOQUEADO
+        =============================================
+        */
+
+        if (
+            !situacao.regular
+        ) {
+
+            mostrarAvisoFinanceiro(
+                situacao
+            );
+
+
+            alert(
+                "🔒 Acesso ao boletim bloqueado.\n\n" +
+                "Regularize a situação financeira para consultar o boletim."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        =============================================
+        LIBERADO
+        =============================================
+        */
+
+        console.log(
+            "✅ Financeiro regular. Abrindo boletim."
+        );
+
+
+        abrirBoletimAluno();
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao verificar financeiro:",
+            erro
+        );
+
+
+        alert(
+            "Não foi possível verificar a situação financeira.\n\n" +
+            erro.message
+        );
+
+    }
+
+};
+
+
+// =====================================================
+// FUNÇÃO TEMPORÁRIA — NOTAS
+// =====================================================
+
+function abrirNotasAluno() {
+
+    alert(
+        "✅ Situação financeira regular.\n\n" +
+        "Acesso às notas autorizado."
+    );
+
+
+    /*
+    Nesta fase apenas testamos
+    o controle financeiro.
+
+    Depois ligaremos aqui
+    o sistema de notas.
+    */
+
+}
+
+
+// =====================================================
+// FUNÇÃO TEMPORÁRIA — BOLETIM
+// =====================================================
+
+function abrirBoletimAluno() {
+
+    alert(
+        "✅ Situação financeira regular.\n\n" +
+        "Acesso ao boletim autorizado."
+    );
+
+
+    /*
+    Nesta fase apenas testamos
+    o controle financeiro.
+
+    Depois ligaremos aqui
+    o sistema real de boletim.
+    */
+
+}
+
+
+// =====================================================
+// VERIFICAR FINANCEIRO AO ABRIR A ÁREA
+// =====================================================
+
+async function verificarFinanceiroInicial() {
+
+    try {
+
+        const situacao =
+            await obterSituacaoFinanceira();
+
+
+        console.log(
+            "💰 SITUAÇÃO FINANCEIRA DO ALUNO:",
+            situacao
+        );
+
+
+        if (
+            !situacao.regular
+        ) {
+
+            mostrarAvisoFinanceiro(
+                situacao
+            );
+
+        }
+
+    }
+    catch (erro) {
+
+        console.error(
+            "Erro na verificação financeira inicial:",
+            erro
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// INICIAR BLOCO 4
+// =====================================================
+
+verificarFinanceiroInicial();
+
+
+console.log(
+    "✅ BLOCO 4/4 carregado."
+);
+
+alert(
+    "✅ BLOCO 4 — Controle financeiro carregado!"
 );
