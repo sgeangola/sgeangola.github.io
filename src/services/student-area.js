@@ -13,7 +13,7 @@
    - Utilidades
 ===================================================== */
 
-alert("✅ BLOCO 1 — student-area.js carregado");
+alert("✅ BLOCO 2 — student-area.js carregado");
 
 import { db } from "./firebase.js";
 
@@ -2427,4 +2427,1766 @@ async function processarSelecaoNotas(
 
 console.log(
     "✅ BLOCO 2/4 — VER NOTAS carregado."
+);
+
+/* =====================================================
+   SGE ANGOLA — ÁREA DO ALUNO
+   student-area.js
+   BLOCO 3/4
+
+   FUNÇÕES:
+   - Situação financeira do aluno
+   - Verificação de pagamento por trimestre
+   - Ver Notas
+   - Seleção de ano letivo
+   - Seleção de trimestre
+   - Preparação para boletim
+===================================================== */
+
+
+console.log("📚 SGE — BLOCO 3 iniciado");
+
+
+// =====================================================
+// CONFIGURAÇÃO FINANCEIRA
+// =====================================================
+
+let dadosFinanceiros = null;
+
+
+// =====================================================
+// OBTER ID FINANCEIRO
+//
+// A Área Financeira utiliza:
+//
+// financeiro/{escolaId}_{alunoId}
+//
+// =====================================================
+
+function obterIdFinanceiroAluno() {
+
+    const escolaId =
+        String(
+            aluno.escolaId || ""
+        ).trim();
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+
+    if (
+        !escolaId ||
+        !alunoId
+    ) {
+
+        console.error(
+            "❌ Não foi possível criar o ID financeiro."
+        );
+
+        console.log(
+            "Escola ID:",
+            escolaId
+        );
+
+        console.log(
+            "Aluno ID:",
+            alunoId
+        );
+
+        return "";
+
+    }
+
+
+    return `${escolaId}_${alunoId}`;
+
+}
+
+
+// =====================================================
+// CARREGAR SITUAÇÃO FINANCEIRA
+// =====================================================
+
+async function carregarSituacaoFinanceira() {
+
+    try {
+
+        const financeiroId =
+            obterIdFinanceiroAluno();
+
+
+        if (!financeiroId) {
+
+            console.warn(
+                "⚠️ ID financeiro não identificado."
+            );
+
+            dadosFinanceiros = {
+
+                "1trimestre": {
+                    pago: false
+                },
+
+                "2trimestre": {
+                    pago: false
+                },
+
+                "3trimestre": {
+                    pago: false
+                }
+
+            };
+
+            return dadosFinanceiros;
+
+        }
+
+
+        console.log(
+            "💰 ID FINANCEIRO:",
+            financeiroId
+        );
+
+
+        const referencia =
+            doc(
+                db,
+                "financeiro",
+                financeiroId
+            );
+
+
+        const snapshot =
+            await getDoc(
+                referencia
+            );
+
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            console.log(
+                "ℹ️ Ainda não existe documento financeiro para este aluno."
+            );
+
+
+            dadosFinanceiros = {
+
+                alunoId:
+                    aluno.id,
+
+                "1trimestre": {
+                    pago: false
+                },
+
+                "2trimestre": {
+                    pago: false
+                },
+
+                "3trimestre": {
+                    pago: false
+                },
+
+                comunicado:
+                    ""
+
+            };
+
+
+            return dadosFinanceiros;
+
+        }
+
+
+        dadosFinanceiros =
+            snapshot.data();
+
+
+        console.log(
+            "💰 DADOS FINANCEIROS:",
+            dadosFinanceiros
+        );
+
+
+        return dadosFinanceiros;
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao carregar situação financeira:",
+            erro
+        );
+
+
+        dadosFinanceiros = {
+
+            "1trimestre": {
+                pago: false
+            },
+
+            "2trimestre": {
+                pago: false
+            },
+
+            "3trimestre": {
+                pago: false
+            }
+
+        };
+
+
+        return dadosFinanceiros;
+
+    }
+
+}
+
+
+// =====================================================
+// VERIFICAR PAGAMENTO DO TRIMESTRE
+// =====================================================
+
+function trimestrePago(
+    trimestre
+) {
+
+    if (
+        !dadosFinanceiros
+    ) {
+
+        return false;
+
+    }
+
+
+    const numero =
+        normalizarTrimestre(
+            trimestre
+        );
+
+
+    const chave =
+        `${numero}trimestre`;
+
+
+    const dados =
+        dadosFinanceiros[
+            chave
+        ];
+
+
+    return (
+        dados?.pago === true
+    );
+
+}
+
+
+// =====================================================
+// TEXTO DA SITUAÇÃO FINANCEIRA
+// =====================================================
+
+function mensagemFinanceira(
+    trimestre
+) {
+
+    const numero =
+        normalizarTrimestre(
+            trimestre
+        );
+
+
+    const nome =
+        nomeTrimestre(
+            numero
+        );
+
+
+    return (
+        "🔒 O acesso às notas do " +
+        nome +
+        " está bloqueado.\n\n" +
+
+        "A situação financeira deste " +
+        "trimestre ainda não está regularizada.\n\n" +
+
+        "Entre em contacto com a secretaria da escola."
+    );
+
+}
+
+
+// =====================================================
+// VERIFICAR SE O ALUNO PODE VER O TRIMESTRE
+// =====================================================
+
+function podeVerTrimestre(
+    trimestre
+) {
+
+    return trimestrePago(
+        trimestre
+    );
+
+}
+
+
+// =====================================================
+// OBTER ANOS LETIVOS DAS NOTAS
+// =====================================================
+
+async function obterAnosLetivosNotas() {
+
+    try {
+
+        const turmaId =
+            String(
+                aluno.turmaId || ""
+            ).trim();
+
+
+        if (!turmaId) {
+
+            throw new Error(
+                "Turma do aluno não identificada."
+            );
+
+        }
+
+
+        console.log(
+            "📚 Procurando notas da turma:",
+            turmaId
+        );
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "notas"
+                )
+            );
+
+
+        const anos =
+            new Set();
+
+
+        snapshot.forEach(
+            documento => {
+
+                const dados =
+                    documento.data();
+
+
+                /*
+                Verificar turma.
+                */
+
+                const turmaNota =
+                    String(
+                        dados.turmaId || ""
+                    ).trim();
+
+
+                if (
+                    turmaNota &&
+                    turmaNota !== turmaId
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                Obter ano letivo.
+                */
+
+                const ano =
+                    obterAnoLetivo(
+                        dados
+                    );
+
+
+                if (ano) {
+
+                    anos.add(
+                        normalizarAnoLetivo(
+                            ano
+                        )
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+        Se não encontrou através
+        do campo turmaId, verificar
+        o ano da turma do aluno.
+        */
+
+        if (
+            anos.size === 0
+        ) {
+
+            try {
+
+                const turmaSnap =
+                    await getDoc(
+                        doc(
+                            db,
+                            "turmas",
+                            turmaId
+                        )
+                    );
+
+
+                if (
+                    turmaSnap.exists()
+                ) {
+
+                    const turma =
+                        turmaSnap.data();
+
+
+                    const anoTurma =
+                        obterAnoLetivo(
+                            turma
+                        );
+
+
+                    if (
+                        anoTurma
+                    ) {
+
+                        anos.add(
+                            normalizarAnoLetivo(
+                                anoTurma
+                            )
+                        );
+
+                    }
+
+                }
+
+            }
+            catch (erro) {
+
+                console.warn(
+                    "⚠️ Não foi possível obter ano pela turma:",
+                    erro
+                );
+
+            }
+
+        }
+
+
+        const resultado =
+            Array.from(
+                anos
+            )
+            .filter(
+                ano => ano !== ""
+            )
+            .sort(
+                (a, b) =>
+                    b.localeCompare(
+                        a
+                    )
+            );
+
+
+        console.log(
+            "📅 ANOS LETIVOS ENCONTRADOS:",
+            resultado
+        );
+
+
+        return resultado;
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao procurar anos letivos:",
+            erro
+        );
+
+
+        return [];
+
+    }
+
+}
+
+
+// =====================================================
+// PROCURAR NOTAS DO ALUNO
+// =====================================================
+
+async function procurarNotasAluno(
+    anoLetivo,
+    trimestre
+) {
+
+    const turmaId =
+        String(
+            aluno.turmaId || ""
+        ).trim();
+
+
+    const alunoId =
+        String(
+            aluno.id || ""
+        ).trim();
+
+
+    const trimestreNormalizado =
+        normalizarTrimestre(
+            trimestre
+        );
+
+
+    if (
+        !turmaId ||
+        !alunoId
+    ) {
+
+        throw new Error(
+            "Dados do aluno ou da turma não identificados."
+        );
+
+    }
+
+
+    console.log(
+        "🔎 PROCURAR NOTAS"
+    );
+
+    console.log(
+        "Turma:",
+        turmaId
+    );
+
+    console.log(
+        "Aluno:",
+        alunoId
+    );
+
+    console.log(
+        "Ano:",
+        anoLetivo
+    );
+
+    console.log(
+        "Trimestre:",
+        trimestreNormalizado
+    );
+
+
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "notas"
+            )
+        );
+
+
+    const resultados = [];
+
+
+    snapshot.forEach(
+        documento => {
+
+            const dados =
+                documento.data();
+
+
+            /*
+            Verificar turma.
+            */
+
+            if (
+                dados.turmaId &&
+                String(
+                    dados.turmaId
+                ).trim() !== turmaId
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            Verificar ano letivo,
+            quando existir.
+            */
+
+            const ano =
+                normalizarAnoLetivo(
+                    obterAnoLetivo(
+                        dados
+                    )
+                );
+
+
+            if (
+                ano &&
+                anoLetivo &&
+                ano !==
+                String(
+                    anoLetivo
+                ).trim()
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            Verificar trimestre.
+            */
+
+            const trimestreDados =
+                normalizarTrimestre(
+                    dados.trimestre ||
+                    dados.Trimestre ||
+                    dados.periodo ||
+                    dados.Periodo ||
+                    ""
+                );
+
+
+            if (
+                trimestreDados &&
+                trimestreDados !==
+                trimestreNormalizado
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            Procurar aluno dentro
+            do array de alunos.
+            */
+
+            if (
+                !Array.isArray(
+                    dados.alunos
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            dados.alunos.forEach(
+                notaAluno => {
+
+                    const id =
+                        String(
+                            notaAluno.id ||
+                            notaAluno.alunoId ||
+                            ""
+                        ).trim();
+
+
+                    if (
+                        id !== alunoId
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    resultados.push({
+
+                        documentoId:
+                            documento.id,
+
+                        dados:
+                            notaAluno,
+
+                        documento:
+                            dados
+
+                    });
+
+                }
+            );
+
+        }
+    );
+
+
+    console.log(
+        "📊 RESULTADOS DE NOTAS:",
+        resultados
+    );
+
+
+    return resultados;
+
+}
+
+
+// =====================================================
+// MOSTRAR JANELA DE NOTAS
+// =====================================================
+
+async function mostrarNotas(
+    anoLetivo,
+    trimestre
+) {
+
+    const antigo =
+        document.getElementById(
+            "janelaNotasAluno"
+        );
+
+
+    if (antigo) {
+
+        antigo.remove();
+
+    }
+
+
+    const numeroTrimestre =
+        normalizarTrimestre(
+            trimestre
+        );
+
+
+    /*
+    =============================================
+    VERIFICAR FINANCEIRO
+    =============================================
+    */
+
+    if (
+        !podeVerTrimestre(
+            numeroTrimestre
+        )
+    ) {
+
+        alert(
+            mensagemFinanceira(
+                numeroTrimestre
+            )
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =============================================
+    CARREGAR NOTAS
+    =============================================
+    */
+
+    let resultados = [];
+
+
+    try {
+
+        resultados =
+            await procurarNotasAluno(
+                anoLetivo,
+                numeroTrimestre
+            );
+
+    }
+    catch (erro) {
+
+        console.error(
+            "❌ Erro ao procurar notas:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível carregar as notas.\n\n" +
+            erro.message
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =============================================
+    CRIAR JANELA
+    =============================================
+    */
+
+    const html = `
+
+        <div
+            id="janelaNotasAluno"
+            style="
+                position:fixed;
+                inset:0;
+                z-index:99999;
+                background:#f1f5f9;
+                overflow-y:auto;
+                padding:20px;
+            "
+        >
+
+            <div
+                style="
+                    max-width:700px;
+                    margin:20px auto;
+                    background:white;
+                    border-radius:16px;
+                    padding:20px;
+                    box-shadow:0 4px 15px rgba(0,0,0,.15);
+                "
+            >
+
+                <div
+                    style="
+                        text-align:center;
+                        font-size:45px;
+                    "
+                >
+                    📊
+                </div>
+
+
+                <h2
+                    style="
+                        text-align:center;
+                        color:#1e3a8a;
+                    "
+                >
+                    Minhas Notas
+                </h2>
+
+
+                <p
+                    style="
+                        text-align:center;
+                        color:#64748b;
+                    "
+                >
+                    ${escaparHTML(
+                        nomeTrimestre(
+                            numeroTrimestre
+                        )
+                    )}
+                    <br>
+                    Ano letivo:
+                    ${escaparHTML(
+                        anoLetivo
+                    )}
+                </p>
+
+
+                ${
+                    resultados.length === 0
+
+                    ?
+
+                    `
+                    <div
+                        style="
+                            padding:20px;
+                            text-align:center;
+                            background:#f8fafc;
+                            border-radius:10px;
+                        "
+                    >
+                        📭 Ainda não existem notas
+                        lançadas para este período.
+                    </div>
+                    `
+
+                    :
+
+                    `
+                    <div
+                        style="
+                            overflow-x:auto;
+                        "
+                    >
+
+                        <table
+                            style="
+                                width:100%;
+                                border-collapse:collapse;
+                            "
+                        >
+
+                            <thead>
+
+                                <tr
+                                    style="
+                                        background:#1e3a8a;
+                                        color:white;
+                                    "
+                                >
+
+                                    <th
+                                        style="
+                                            padding:10px;
+                                        "
+                                    >
+                                        Disciplina
+                                    </th>
+
+                                    <th
+                                        style="
+                                            padding:10px;
+                                        "
+                                    >
+                                        MAC
+                                    </th>
+
+                                    <th
+                                        style="
+                                            padding:10px;
+                                        "
+                                    >
+                                        NPT
+                                    </th>
+
+                                    <th
+                                        style="
+                                            padding:10px;
+                                        "
+                                    >
+                                        MF
+                                    </th>
+
+                                    <th
+                                        style="
+                                            padding:10px;
+                                        "
+                                    >
+                                        Classificação
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                ${
+                                    resultados.map(
+                                        item => {
+
+                                            const dados =
+                                                item.dados;
+
+                                            const documento =
+                                                item.documento;
+
+
+                                            const disciplina =
+                                                dados.disciplina ||
+                                                dados.Disciplina ||
+                                                documento.disciplina ||
+                                                documento.Disciplina ||
+                                                "—";
+
+
+                                            const mac =
+                                                obterNota(
+                                                    dados,
+                                                    "mac"
+                                                );
+
+
+                                            const npt =
+                                                obterNota(
+                                                    dados,
+                                                    "npt"
+                                                );
+
+
+                                            const mf =
+                                                obterNota(
+                                                    dados,
+                                                    "mf"
+                                                );
+
+
+                                            const classificacao =
+                                                dados.classificacao ||
+                                                dados.Classificacao ||
+                                                "—";
+
+
+                                            return `
+
+                                                <tr>
+
+                                                    <td
+                                                        style="
+                                                            padding:10px;
+                                                            border-bottom:1px solid #e2e8f0;
+                                                        "
+                                                    >
+                                                        ${escaparHTML(
+                                                            disciplina
+                                                        )}
+                                                    </td>
+
+                                                    <td
+                                                        style="
+                                                            padding:10px;
+                                                            text-align:center;
+                                                            border-bottom:1px solid #e2e8f0;
+                                                        "
+                                                    >
+                                                        ${escaparHTML(
+                                                            mostrarNota(
+                                                                mac
+                                                            )
+                                                        )}
+                                                    </td>
+
+                                                    <td
+                                                        style="
+                                                            padding:10px;
+                                                            text-align:center;
+                                                            border-bottom:1px solid #e2e8f0;
+                                                        "
+                                                    >
+                                                        ${escaparHTML(
+                                                            mostrarNota(
+                                                                npt
+                                                            )
+                                                        )}
+                                                    </td>
+
+                                                    <td
+                                                        style="
+                                                            padding:10px;
+                                                            text-align:center;
+                                                            font-weight:bold;
+                                                            border-bottom:1px solid #e2e8f0;
+                                                        "
+                                                    >
+                                                        ${escaparHTML(
+                                                            mostrarNota(
+                                                                mf
+                                                            )
+                                                        )}
+                                                    </td>
+
+                                                    <td
+                                                        style="
+                                                            padding:10px;
+                                                            text-align:center;
+                                                            border-bottom:1px solid #e2e8f0;
+                                                        "
+                                                    >
+                                                        ${escaparHTML(
+                                                            classificacao
+                                                        )}
+                                                    </td>
+
+                                                </tr>
+
+                                            `;
+
+                                        }
+                                    ).join("")
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                    `
+                }
+
+
+                <button
+                    id="fecharNotasAluno"
+                    type="button"
+                    style="
+                        width:100%;
+                        padding:14px;
+                        margin-top:20px;
+                        border:none;
+                        border-radius:10px;
+                        background:#1e3a8a;
+                        color:white;
+                        font-size:16px;
+                    "
+                >
+                    ← Voltar
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        html
+    );
+
+
+    document
+        .getElementById(
+            "fecharNotasAluno"
+        )
+        ?.addEventListener(
+            "click",
+            function () {
+
+                document
+                    .getElementById(
+                        "janelaNotasAluno"
+                    )
+                    ?.remove();
+
+            }
+        );
+
+}
+
+
+// =====================================================
+// VER NOTAS
+// =====================================================
+
+window.verNotas =
+async function () {
+
+    console.log(
+        "📊 VER NOTAS CLICADO"
+    );
+
+
+    /*
+    Carregar financeiro primeiro.
+    */
+
+    await carregarSituacaoFinanceira();
+
+
+    /*
+    Procurar anos letivos.
+    */
+
+    const anos =
+        await obterAnosLetivosNotas();
+
+
+    /*
+    =============================================
+    SE NÃO EXISTIR ANO
+    =============================================
+    */
+
+    if (
+        anos.length === 0
+    ) {
+
+        alert(
+            "ℹ️ Ainda não existem anos letivos disponíveis para este aluno."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =============================================
+    SE EXISTIR APENAS UM ANO
+    =============================================
+    */
+
+    if (
+        anos.length === 1
+    ) {
+
+        abrirSelecaoTrimestre(
+            anos[0]
+        );
+
+        return;
+
+    }
+
+
+    /*
+    =============================================
+    VÁRIOS ANOS
+    =============================================
+    */
+
+    abrirSelecaoAno(
+        anos
+    );
+
+};
+
+
+// =====================================================
+// SELEÇÃO DE ANO
+// =====================================================
+
+function abrirSelecaoAno(
+    anos
+) {
+
+    const antigo =
+        document.getElementById(
+            "janelaSelecaoAnoNotas"
+        );
+
+
+    if (antigo) {
+
+        antigo.remove();
+
+    }
+
+
+    const html = `
+
+        <div
+            id="janelaSelecaoAnoNotas"
+            style="
+                position:fixed;
+                inset:0;
+                z-index:99999;
+                background:#f1f5f9;
+                overflow:auto;
+                padding:20px;
+            "
+        >
+
+            <div
+                style="
+                    max-width:500px;
+                    margin:40px auto;
+                    background:white;
+                    padding:25px;
+                    border-radius:16px;
+                    box-shadow:0 4px 15px rgba(0,0,0,.15);
+                "
+            >
+
+                <div
+                    style="
+                        text-align:center;
+                        font-size:50px;
+                    "
+                >
+                    📅
+                </div>
+
+
+                <h2
+                    style="
+                        text-align:center;
+                        color:#1e3a8a;
+                    "
+                >
+                    Selecionar Ano Letivo
+                </h2>
+
+
+                <div
+                    style="
+                        margin-top:20px;
+                    "
+                >
+
+                    ${
+                        anos.map(
+                            ano =>
+                                `
+                                <button
+                                    type="button"
+                                    class="botaoAnoNotas"
+                                    data-ano="${escaparHTML(ano)}"
+                                    style="
+                                        width:100%;
+                                        padding:14px;
+                                        margin-bottom:10px;
+                                        border:none;
+                                        border-radius:10px;
+                                        background:#1e3a8a;
+                                        color:white;
+                                        font-size:16px;
+                                    "
+                                >
+                                    📚 ${escaparHTML(ano)}
+                                </button>
+                                `
+                        ).join("")
+                    }
+
+                </div>
+
+
+                <button
+                    id="fecharSelecaoAnoNotas"
+                    type="button"
+                    style="
+                        width:100%;
+                        padding:13px;
+                        border:none;
+                        border-radius:10px;
+                        background:#64748b;
+                        color:white;
+                        font-size:15px;
+                    "
+                >
+                    ← Voltar
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        html
+    );
+
+
+    document
+        .querySelectorAll(
+            ".botaoAnoNotas"
+        )
+        .forEach(
+            botao => {
+
+                botao.addEventListener(
+                    "click",
+                    function () {
+
+                        const ano =
+                            this.dataset.ano;
+
+
+                        document
+                            .getElementById(
+                                "janelaSelecaoAnoNotas"
+                            )
+                            ?.remove();
+
+
+                        abrirSelecaoTrimestre(
+                            ano
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "fecharSelecaoAnoNotas"
+        )
+        ?.addEventListener(
+            "click",
+            function () {
+
+                document
+                    .getElementById(
+                        "janelaSelecaoAnoNotas"
+                    )
+                    ?.remove();
+
+            }
+        );
+
+}
+
+
+// =====================================================
+// SELEÇÃO DE TRIMESTRE
+// =====================================================
+
+function abrirSelecaoTrimestre(
+    anoLetivo
+) {
+
+    const antigo =
+        document.getElementById(
+            "janelaSelecaoTrimestreNotas"
+        );
+
+
+    if (antigo) {
+
+        antigo.remove();
+
+    }
+
+
+    const trimestres = [
+        "1",
+        "2",
+        "3"
+    ];
+
+
+    const html = `
+
+        <div
+            id="janelaSelecaoTrimestreNotas"
+            style="
+                position:fixed;
+                inset:0;
+                z-index:99999;
+                background:#f1f5f9;
+                overflow:auto;
+                padding:20px;
+            "
+        >
+
+            <div
+                style="
+                    max-width:500px;
+                    margin:40px auto;
+                    background:white;
+                    padding:25px;
+                    border-radius:16px;
+                    box-shadow:0 4px 15px rgba(0,0,0,.15);
+                "
+            >
+
+                <div
+                    style="
+                        text-align:center;
+                        font-size:50px;
+                    "
+                >
+                    📊
+                </div>
+
+
+                <h2
+                    style="
+                        text-align:center;
+                        color:#1e3a8a;
+                    "
+                >
+                    Ver Notas
+                </h2>
+
+
+                <p
+                    style="
+                        text-align:center;
+                        color:#64748b;
+                    "
+                >
+                    Ano letivo:
+                    <strong>
+                        ${escaparHTML(anoLetivo)}
+                    </strong>
+                </p>
+
+
+                <div>
+
+                    ${
+                        trimestres.map(
+                            trimestre => {
+
+                                const pago =
+                                    trimestrePago(
+                                        trimestre
+                                    );
+
+
+                                return `
+
+                                    <button
+                                        type="button"
+                                        class="botaoTrimestreNotas"
+                                        data-trimestre="${trimestre}"
+                                        style="
+                                            width:100%;
+                                            padding:15px;
+                                            margin-bottom:10px;
+                                            border:none;
+                                            border-radius:10px;
+                                            background:${
+                                                pago
+                                                    ? "#1e3a8a"
+                                                    : "#94a3b8"
+                                            };
+                                            color:white;
+                                            font-size:16px;
+                                            text-align:left;
+                                        "
+                                    >
+
+                                        ${
+                                            pago
+                                                ? "🟢"
+                                                : "🔒"
+                                        }
+
+                                        ${nomeTrimestre(
+                                            trimestre
+                                        )}
+
+                                        ${
+                                            pago
+                                                ? " — Disponível"
+                                                : " — Bloqueado"
+                                        }
+
+                                    </button>
+
+                                `;
+
+                            }
+                        ).join("")
+                    }
+
+                </div>
+
+
+                <button
+                    id="fecharSelecaoTrimestreNotas"
+                    type="button"
+                    style="
+                        width:100%;
+                        padding:13px;
+                        border:none;
+                        border-radius:10px;
+                        background:#64748b;
+                        color:white;
+                        font-size:15px;
+                    "
+                >
+                    ← Voltar
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        html
+    );
+
+
+    document
+        .querySelectorAll(
+            ".botaoTrimestreNotas"
+        )
+        .forEach(
+            botao => {
+
+                botao.addEventListener(
+                    "click",
+                    async function () {
+
+                        const trimestre =
+                            this.dataset.trimestre;
+
+
+                        /*
+                        Verificar novamente
+                        antes de abrir.
+                        */
+
+                        if (
+                            !podeVerTrimestre(
+                                trimestre
+                            )
+                        ) {
+
+                            alert(
+                                mensagemFinanceira(
+                                    trimestre
+                                )
+                            );
+
+                            return;
+
+                        }
+
+
+                        document
+                            .getElementById(
+                                "janelaSelecaoTrimestreNotas"
+                            )
+                            ?.remove();
+
+
+                        await mostrarNotas(
+                            anoLetivo,
+                            trimestre
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "fecharSelecaoTrimestreNotas"
+        )
+        ?.addEventListener(
+            "click",
+            function () {
+
+                document
+                    .getElementById(
+                        "janelaSelecaoTrimestreNotas"
+                    )
+                    ?.remove();
+
+            }
+        );
+
+}
+
+
+// =====================================================
+// VER BOLETIM
+// =====================================================
+
+window.verBoletim =
+async function () {
+
+    console.log(
+        "📄 VER BOLETIM CLICADO"
+    );
+
+
+    await carregarSituacaoFinanceira();
+
+
+    /*
+    Por enquanto o Bloco 3 apenas
+    confirma a situação financeira.
+    
+    A abertura do boletim será
+    completada no Bloco 4.
+    */
+
+
+    const primeiro =
+        trimestrePago(
+            "1"
+        );
+
+    const segundo =
+        trimestrePago(
+            "2"
+        );
+
+    const terceiro =
+        trimestrePago(
+            "3"
+        );
+
+
+    if (
+        !primeiro &&
+        !segundo &&
+        !terceiro
+    ) {
+
+        alert(
+            "🔒 O acesso ao boletim está bloqueado.\n\n" +
+            "Não existe nenhum trimestre regularizado."
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        "📄 Boletim\n\n" +
+        "A situação financeira permite continuar.\n\n" +
+        "A abertura do boletim será concluída no Bloco 4."
+    );
+
+};
+
+
+// =====================================================
+// INICIALIZAÇÃO DO BLOCO 3
+// =====================================================
+
+console.log(
+    "======================================"
+);
+
+console.log(
+    "💰 TESTE FINANCEIRO"
+);
+
+console.log(
+    "Escola:",
+    aluno.escolaId
+);
+
+console.log(
+    "Aluno:",
+    aluno.id
+);
+
+console.log(
+    "ID financeiro:",
+    obterIdFinanceiroAluno()
+);
+
+console.log(
+    "======================================"
+);
+
+console.log(
+    "✅ BLOCO 3/4 carregado."
 );
