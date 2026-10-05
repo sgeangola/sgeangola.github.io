@@ -25,7 +25,7 @@ import {
 // =====================================================
 
 const SUPER_ADMIN_UID =
-    "OSw3412BOxgBJ13pwhifIQOXf2h1";
+    "44UtoVZ3sqW5S6UlIDxzhwzlaPJ2";
 
 
 // =====================================================
